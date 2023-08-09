@@ -1,7 +1,6 @@
 import { ApiObject, ApiObjectMetadata, GroupVersionKind } from 'cdk8s';
 import { Construct } from 'constructs';
 import { NamedResource } from './common';
-import { PipelineSpec } from './pipelines';
 
 /**
  * A workspace used by a Task. See https://tekton.dev/docs/pipelines/workspaces/#using-workspaces-in-tasks for more information.
@@ -92,6 +91,7 @@ export class Task extends ApiObject {
   public static manifest(props: TaskProps = {}): any {
     return {
       ...Task.GVK,
+      ...props,
     };
   }
 

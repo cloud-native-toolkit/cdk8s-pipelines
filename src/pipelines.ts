@@ -21,7 +21,7 @@ export interface PipelineTask extends NamedResource {
 }
 
 
-export interface Workspace extends NamedResource {
+export interface PipelineWorkspace extends NamedResource {
   readonly workspace?: string;
 }
 
@@ -35,7 +35,7 @@ export interface PipelineTaskDef extends PipelineTask {
 export interface PipelineSpec {
   readonly params?: PipelineParam[];
   readonly tasks?: PipelineTask[];
-  readonly workspaces?: Workspace[];
+  readonly workspaces?: PipelineWorkspace[];
 }
 
 /**
