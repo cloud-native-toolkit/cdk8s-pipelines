@@ -5,6 +5,7 @@
     "url": "https://github.com/cloud-native-toolkit/cdk8s-pipelines.git"
   },
   "scripts": {
+    "prepare": "npx projen build",
     "build": "npx projen build",
     "bump": "npx projen bump",
     "clobber": "npx projen clobber",
