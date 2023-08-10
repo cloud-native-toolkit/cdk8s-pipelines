@@ -1,7 +1,7 @@
 import { ApiObject, ApiObjectMetadata, GroupVersionKind } from 'cdk8s';
 import { Construct } from 'constructs';
 import { NamedResource } from './common';
-import { TaskParam, TaskRef } from './tasks';
+import { TaskParam, TaskRef, TaskWorkspace, TaskWorkspaceRef } from './tasks';
 
 /**
  * A Pipeline parameter. See https://tekton.dev/docs/pipelines/pipelines/#specifying-parameters
@@ -18,11 +18,12 @@ export interface PipelineTask extends NamedResource {
   readonly taskRef?: TaskRef;
   readonly params?: TaskParam[];
   readonly runAfter?: string[];
+  readonly workspaces?: TaskWorkspaceRef[];
 }
 
 
 export interface PipelineWorkspace extends NamedResource {
-  readonly workspace?: string;
+  readonly description?: string;
 }
 
 /**
@@ -30,6 +31,7 @@ export interface PipelineWorkspace extends NamedResource {
  */
 export interface PipelineTaskDef extends PipelineTask {
   readonly refParams?: PipelineParam[];
+  readonly refWorkspaces?: TaskWorkspace[];
 }
 
 export interface PipelineSpec {
@@ -111,18 +113,32 @@ export class Pipeline extends ApiObject {
       });
     }
 
+    if (t.refWorkspaces != null && t.refWorkspaces.length > 0) {
+      t.refWorkspaces.forEach(i => {
+        let ws = this._spec?.workspaces?.find(w => w.name == i.name);
+        if (!ws) {
+          this._spec?.workspaces?.push({
+            name: i.name,
+            description: i.description,
+          });
+        }
+      });
+    }
+
     if (after != null && after.name != null && after.name?.length > 0) {
       this._spec?.tasks?.push({
         name: t.name,
         taskRef: t.taskRef,
         params: t.params,
         runAfter: [after.name],
+        workspaces: t.workspaces,
       });
     } else {
       this._spec?.tasks?.push({
         name: t.name,
         taskRef: t.taskRef,
         params: t.params,
+        workspaces: t.workspaces,
       });
     }
   }

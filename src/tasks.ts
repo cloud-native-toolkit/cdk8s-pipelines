@@ -26,13 +26,25 @@ export interface TaskWorkspace extends NamedResource{
   readonly mountPath?: string;
 }
 
+export interface TaskWorkspaceRef extends NamedResource{
+  readonly workspace?: string;
+}
+
 export class TaskRef {
   name?: string;
-  readonly kind?: string = 'Task';
+  workspaces?: TaskWorkspace[];
 
   constructor(name: string) {
     this.name = name;
-    this.kind = 'Task';
+    this.workspaces = new Array<TaskWorkspace>();
+  }
+
+  /**
+   * Adds a TaskWorkspace to the existing workspace
+   * @param w
+   */
+  public addWorkspace(w: TaskWorkspace): void {
+    this.workspaces?.push(w);
   }
 }
 
