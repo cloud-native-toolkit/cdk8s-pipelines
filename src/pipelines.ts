@@ -3,6 +3,10 @@ import { Construct } from 'constructs';
 import { NamedResource } from './common';
 import { TaskParam, TaskRef, TaskWorkspace, TaskWorkspaceRef } from './tasks';
 
+// The following interfaces and classes are strictly for generating the YAML or
+// JSON in the proper format for the Tekton pipelines. See the builders to use
+// classes and a fluid-style syntax that provides easier building and checking.
+
 /**
  * A Pipeline parameter. See https://tekton.dev/docs/pipelines/pipelines/#specifying-parameters
  */
@@ -18,9 +22,8 @@ export interface PipelineTask extends NamedResource {
   readonly taskRef?: TaskRef;
   readonly params?: TaskParam[];
   readonly runAfter?: string[];
-  readonly workspaces?: TaskWorkspaceRef[];
+  readonly workspaces?: TaskWorkspace[];
 }
-
 
 export interface PipelineWorkspace extends NamedResource {
   readonly description?: string;
@@ -31,7 +34,7 @@ export interface PipelineWorkspace extends NamedResource {
  */
 export interface PipelineTaskDef extends PipelineTask {
   readonly refParams?: PipelineParam[];
-  readonly refWorkspaces?: TaskWorkspace[];
+  readonly refWorkspaces?: TaskWorkspaceRef[];
 }
 
 export interface PipelineSpec {
@@ -94,6 +97,7 @@ export class Pipeline extends ApiObject {
     this._spec = {
       tasks: new Array<PipelineTask>(),
       params: new Array<PipelineParam>(),
+      workspaces: new Array<TaskWorkspace>(),
     };
   }
 
@@ -115,15 +119,22 @@ export class Pipeline extends ApiObject {
 
     if (t.refWorkspaces != null && t.refWorkspaces.length > 0) {
       t.refWorkspaces.forEach(i => {
-        let ws = this._spec?.workspaces?.find(w => w.name == i.name);
+        let ws = this._spec?.workspaces?.find(w => w.name == i.workspace);
         if (!ws) {
           this._spec?.workspaces?.push({
-            name: i.name,
+            name: i.workspace,
             description: i.description,
           });
         }
       });
     }
+
+    const workspaces : TaskWorkspace[] | undefined = t.refWorkspaces?.map<TaskWorkspace>((w): TaskWorkspace => {
+      return {
+        name: w.name,
+        workspace: w.workspace,
+      };
+    });
 
     if (after != null && after.name != null && after.name?.length > 0) {
       this._spec?.tasks?.push({
@@ -131,14 +142,14 @@ export class Pipeline extends ApiObject {
         taskRef: t.taskRef,
         params: t.params,
         runAfter: [after.name],
-        workspaces: t.workspaces,
+        workspaces: workspaces,
       });
     } else {
       this._spec?.tasks?.push({
         name: t.name,
         taskRef: t.taskRef,
         params: t.params,
-        workspaces: t.workspaces,
+        workspaces: workspaces,
       });
     }
   }

@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Placeholder Empty 1`] = `
+[
+  {
+    "apiVersion": "tekton.dev/v1beta1",
+    "kind": "Pipeline",
+    "metadata": {
+      "name": "my-pipleine",
+    },
+    "spec": {
+      "params": [
+        {
+          "default": "",
+          "name": "repo-url",
+          "type": "string",
+        },
+      ],
+      "tasks": [
+        {
+          "name": "fetch-source",
+          "params": [
+            {
+              "name": "url",
+              "value": "$(params.repo-url)",
+            },
+          ],
+          "taskRef": TaskRef {
+            "name": "git-clone",
+          },
+          "workspaces": [
+            {
+              "name": "output",
+              "workspace": "shared-files",
+            },
+          ],
+        },
+      ],
+      "workspaces": [
+        {
+          "description": "The files that are cloned by the task",
+          "name": "shared-files",
+        },
+      ],
+    },
+  },
+]
+`;
