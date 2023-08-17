@@ -56,6 +56,14 @@ export interface PipelineSpec {
    * The `tasks` are required on the Pipeline.
    */
   readonly tasks: PipelineTask[];
+  /**
+   * Pipeline workspaces.
+   * Workspaces allow you to specify one or more volumes that each Task in the
+   * Pipeline requires during execution. You specify one or more Workspaces in
+   * the workspaces field.
+   *
+   * @see https://tekton.dev/docs/pipelines/pipelines/#specifying-workspaces
+   */
   readonly workspaces?: PipelineWorkspace[];
 }
 
@@ -68,8 +76,10 @@ export interface PipelineProps {
 }
 
 /**
+ * The Pipeline allows you to specify Tasks that use Parameters and Workspaces
+ * to accomplish complex tasks on the cluster.
  *
- *
+ * @see https://tekton.dev/docs/pipelines/pipelines/#configuring-a-pipeline
  * @schema Pipeline
  */
 export class Pipeline extends ApiObject {
@@ -82,9 +92,6 @@ export class Pipeline extends ApiObject {
     kind: 'Pipeline',
   };
 
-  private readonly _metadata?: ApiObjectMetadata;
-  private readonly _spec?: PipelineSpec;
-
   /**
    * Renders a Kubernetes manifest for "Pipeline".
    *
@@ -92,12 +99,15 @@ export class Pipeline extends ApiObject {
    *
    * @param props initialization props
    */
-  // public static manifest(props: PipelineProps = {}): any {
-  //   return {
-  //     ...Pipeline.GVK,
-  //     ...
-  //   };
-  // }
+  public static manifest(props: PipelineProps = {}): any {
+    return {
+      ...Pipeline.GVK,
+      ...props,
+    };
+  }
+
+  private readonly _metadata?: ApiObjectMetadata;
+  private readonly _spec?: PipelineSpec;
 
   /**
    * Defines a "Pipeline" API object
