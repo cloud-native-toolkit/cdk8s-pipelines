@@ -38,6 +38,7 @@ export interface PipelineTaskDef extends PipelineTask {
 }
 
 export interface PipelineSpec {
+  readonly description?: string;
   readonly params?: PipelineParam[];
   readonly tasks?: PipelineTask[];
   readonly workspaces?: PipelineWorkspace[];
@@ -46,7 +47,9 @@ export interface PipelineSpec {
 /**
  * Properties used to create the Pipelines.
  */
-export interface PipelineProps extends NamedResource {
+export interface PipelineProps {
+  readonly metadata?: ApiObjectMetadata;
+  readonly spec?: PipelineSpec;
 }
 
 /**
@@ -91,76 +94,10 @@ export class Pipeline extends ApiObject {
     super(scope, id, {
       ...Pipeline.GVK,
     });
-    this._metadata = {
-      name: props.name,
-    };
-    this._spec = {
-      tasks: new Array<PipelineTask>(),
-      params: new Array<PipelineParam>(),
-      workspaces: new Array<TaskWorkspace>(),
-    };
+    this._metadata = props.metadata;
+    this._spec = props.spec;
   }
 
-  public addTask(t: PipelineTaskDef, after: PipelineTaskDef = {}): void {
-    // First, take a look, at the params in the params to see if there
-    // is any variable interpolation, and add the tasks if there is...
-    if (t.refParams != null && t.refParams.length > 0) {
-      t.refParams.forEach(ref => {
-        let p = this._spec?.params?.find(f => f.name == ref.name);
-        if (p == null) {
-          this._spec?.params?.push({
-            name: ref.name,
-            default: ref.default,
-            type: ref.type,
-          });
-        }
-      });
-    }
-
-    if (t.refWorkspaces != null && t.refWorkspaces.length > 0) {
-      t.refWorkspaces.forEach(i => {
-        let ws = this._spec?.workspaces?.find(w => w.name == i.workspace);
-        if (!ws) {
-          this._spec?.workspaces?.push({
-            name: i.workspace,
-            description: i.description,
-          });
-        }
-      });
-    }
-
-    const workspaces : TaskWorkspace[] | undefined = t.refWorkspaces?.map<TaskWorkspace>((w): TaskWorkspace => {
-      return {
-        name: w.name,
-        workspace: w.workspace,
-      };
-    });
-
-    if (after != null && after.name != null && after.name?.length > 0) {
-      this._spec?.tasks?.push({
-        name: t.name,
-        taskRef: t.taskRef,
-        params: t.params,
-        runAfter: [after.name],
-        workspaces: workspaces,
-      });
-    } else {
-      this._spec?.tasks?.push({
-        name: t.name,
-        taskRef: t.taskRef,
-        params: t.params,
-        workspaces: workspaces,
-      });
-    }
-  }
-
-  public addStringParam(name: string, defaultValue: string = ''): void {
-    this._spec?.params?.push({
-      name: name,
-      type: 'string',
-      default: defaultValue,
-    });
-  }
 
   /**
    * Renders the object to Kubernetes JSON.

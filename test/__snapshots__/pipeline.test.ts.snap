@@ -1,17 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Placeholder Empty 1`] = `
+exports[`SamplePipeline ClonePipeline 1`] = `
 [
   {
     "apiVersion": "tekton.dev/v1beta1",
     "kind": "Pipeline",
     "metadata": {
-      "name": "my-pipleine",
+      "name": "clone-build-push",
     },
     "spec": {
+      "description": "This pipeline closes a repository, builds a Docker image, etc.",
       "params": [
         {
-          "default": "",
           "name": "repo-url",
           "type": "string",
         },
@@ -25,21 +25,20 @@ exports[`Placeholder Empty 1`] = `
               "value": "$(params.repo-url)",
             },
           ],
-          "taskRef": TaskRef {
+          "taskRef": {
             "name": "git-clone",
           },
           "workspaces": [
             {
               "name": "output",
-              "workspace": "shared-files",
+              "workspace": "shared-data",
             },
           ],
         },
       ],
       "workspaces": [
         {
-          "description": "The files that are cloned by the task",
-          "name": "shared-files",
+          "name": "shared-data",
         },
       ],
     },
