@@ -27,11 +27,48 @@ Therefore, within this library there are objects that strictly define the
 structure of the construct itself and can be `synth()`'ed to create the 
 Kubernetes resources. You are free to use the constructs and define all the 
 cross-references yourself. For example, here is a `Pipeline` that defines all 
-resources:
+resources to create a Pipeline that closely matches the 
+[example here](https://tekton.dev/docs/how-to-guides/kaniko-build-push/):
 
 ```typescript
-new Pipeline(this, 'my-pipeline', {
-  
+new Pipeline(this, 'test-pipeline', {
+  metadata: {
+    name: 'clone-build-push',
+  },
+  spec: {
+    description: 'This pipeline closes a repository, builds a Docker image, etc.',
+    params: [
+      {
+        name: 'repo-url',
+        type: 'string',
+      },
+    ],
+    workspaces: [
+      {
+        name: 'shared-data',
+      },
+    ],
+    tasks: [
+      {
+        name: 'fetch-source',
+        taskRef: {
+          name: 'git-clone',
+        },
+        workspaces: [
+          {
+            name: 'output',
+            workspace: 'shared-data',
+          },
+        ],
+        params: [
+          {
+            name: 'url',
+            value: '$(params.repo-url)',
+          },
+        ],
+      },
+    ],
+  },
 });
 ```
 
@@ -41,15 +78,15 @@ made for you automatically. Here is the same construct, but defined using the
 `PipelineBuilder`.
 
 ```typescript
-PipelineBuilder.create(this)
-  .name('my-pipeline')
-  .withTask(PipelineTaskBuilder()
-          .name('fetch-source')   
-          .referencingTask('git-clone')
-          .usingWorkspace('output', 'shared-files', 'The files cloned by the task')
-          .withStringParam('foo', pipelineParam('foo'), 'defaultFooValue')
-  )
-  .build();
+    new PipelineBuilder(this, 'my-pipeline')
+        .withName('clone-build-push')
+        .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
+        .withTask(new PipelineTaskBuilder()
+                .withName('fetch-source')
+                .withTaskReference('git-clone')
+                .withWorkspace('output', 'shared-data', 'The files cloned by the task')
+                .withStringParam('url', 'repo-url', '$(params.repo-url)'))
+        .buildPipeline();
 ```
 
 The `build` method on the builders will validate the parameters and, if the 

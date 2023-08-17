@@ -25,22 +25,37 @@ export interface PipelineTask extends NamedResource {
   readonly workspaces?: TaskWorkspace[];
 }
 
+/**
+ * A workspace for a pipeline. See https://tekton.dev/docs/pipelines/pipelines/#specifying-workspaces
+ * and https://tekton.dev/docs/pipelines/workspaces/#using-workspaces-in-pipelines.
+ */
 export interface PipelineWorkspace extends NamedResource {
+  /**
+   * The description of the workspace.
+   */
   readonly description?: string;
 }
 
 /**
- * A
+ * A task definition at the pipeline level.
  */
 export interface PipelineTaskDef extends PipelineTask {
   readonly refParams?: PipelineParam[];
   readonly refWorkspaces?: TaskWorkspaceRef[];
 }
 
+/**
+ * The `spec` part of the Pipeline.
+ *
+ * @see https://tekton.dev/docs/pipelines/pipelines/
+ */
 export interface PipelineSpec {
   readonly description?: string;
   readonly params?: PipelineParam[];
-  readonly tasks?: PipelineTask[];
+  /**
+   * The `tasks` are required on the Pipeline.
+   */
+  readonly tasks: PipelineTask[];
   readonly workspaces?: PipelineWorkspace[];
 }
 

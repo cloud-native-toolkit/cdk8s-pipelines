@@ -11,7 +11,7 @@ import { TaskParam, TaskRef, TaskWorkspace } from './tasks';
  * The workspace record (WorkspaceRec) is used by the PipelineTaskBuilder
  * internally to hold information about the parameters.
  */
-interface WorkspaceRec {
+export interface WorkspaceRec {
   readonly name?: string;
   readonly refName?: string;
   readonly description?: string;
@@ -21,7 +21,7 @@ interface WorkspaceRec {
  * The parameter record (ParamRec) is used by the PipelineTaskBuilder builder
  * internally to hold values for the parameter reference.
  */
-interface ParamRec {
+export interface ParamRec {
   readonly name?: string;
   readonly defaultValue?: string;
   readonly refName?: string;
@@ -80,7 +80,7 @@ export class PipelineTaskBuilder {
   /**
    * Returns the task reference name for the task builder.
    */
-  public getTaskReference(): string {
+  public get taskReference(): string {
     return this._taskRefName!;
   }
 
@@ -153,7 +153,8 @@ export class PipelineTaskBuilder {
   /**
    * Builds the Pipeline
    */
-  public build(): PipelineTaskDef {
+
+  public buildPipelineTask(): PipelineTaskDef {
     // TODO: An important part of build here is to assert that the
     // object has been correctly made and throw very meaningful errors.
     const pt = {
@@ -238,7 +239,7 @@ export class PipelineBuilder {
    * Builds the actual [Pipeline]() from the settings configured using the
    * fluid syntax.
    */
-  public build(): void {
+  public buildPipeline(): void {
     // TODO: validate the object
     const pipelineParams: PipelineParam[] = new Array<PipelineParam>();
     const pipelineWorkspaces: PipelineWorkspace[] = new Array<PipelineWorkspace>();
@@ -276,7 +277,7 @@ export class PipelineBuilder {
       pipelineTasks.push({
         name: t.name,
         taskRef: {
-          name: t.getTaskReference(),
+          name: t.taskReference,
         },
         params: taskParams,
         workspaces: taskWorkspaces,
