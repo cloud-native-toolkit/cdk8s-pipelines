@@ -27,11 +27,48 @@ Therefore, within this library there are objects that strictly define the
 structure of the construct itself and can be `synth()`'ed to create the
 Kubernetes resources. You are free to use the constructs and define all the
 cross-references yourself. For example, here is a `Pipeline` that defines all
-resources:
+resources to create a Pipeline that closely matches the
+[example here](https://tekton.dev/docs/how-to-guides/kaniko-build-push/):
 
 ```typescript
-new Pipeline(this, 'my-pipeline', {
-
+new Pipeline(this, 'test-pipeline', {
+  metadata: {
+    name: 'clone-build-push',
+  },
+  spec: {
+    description: 'This pipeline closes a repository, builds a Docker image, etc.',
+    params: [
+      {
+        name: 'repo-url',
+        type: 'string',
+      },
+    ],
+    workspaces: [
+      {
+        name: 'shared-data',
+      },
+    ],
+    tasks: [
+      {
+        name: 'fetch-source',
+        taskRef: {
+          name: 'git-clone',
+        },
+        workspaces: [
+          {
+            name: 'output',
+            workspace: 'shared-data',
+          },
+        ],
+        params: [
+          {
+            name: 'url',
+            value: '$(params.repo-url)',
+          },
+        ],
+      },
+    ],
+  },
 });
 ```
 
@@ -41,15 +78,15 @@ made for you automatically. Here is the same construct, but defined using the
 `PipelineBuilder`.
 
 ```typescript
-PipelineBuilder.create(this)
-  .name('my-pipeline')
-  .withTask(PipelineTaskBuilder()
-          .name('fetch-source')
-          .referencingTask('git-clone')
-          .usingWorkspace('output', 'shared-files', 'The files cloned by the task')
-          .withStringParam('foo', pipelineParam('foo'), 'defaultFooValue')
-  )
-  .build();
+    new PipelineBuilder(this, 'my-pipeline')
+        .withName('clone-build-push')
+        .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
+        .withTask(new PipelineTaskBuilder()
+                .withName('fetch-source')
+                .withTaskReference('git-clone')
+                .withWorkspace('output', 'shared-data', 'The files cloned by the task')
+                .withStringParam('url', 'repo-url', '$(params.repo-url)'))
+        .buildPipeline();
 ```
 
 The `build` method on the builders will validate the parameters and, if the
@@ -73,6 +110,10 @@ are based on tasks available in [Tekton Hub](https://hub.tekton.dev/).
 ## Constructs <a name="Constructs" id="Constructs"></a>
 
 ### Pipeline <a name="Pipeline" id="cdk8s-pipelines.Pipeline"></a>
+
+The Pipeline allows you to specify Tasks that use Parameters and Workspaces to accomplish complex tasks on the cluster.
+
+> [https://tekton.dev/docs/pipelines/pipelines/#configuring-a-pipeline](https://tekton.dev/docs/pipelines/pipelines/#configuring-a-pipeline)
 
 #### Initializers <a name="Initializers" id="cdk8s-pipelines.Pipeline.Initializer"></a>
 
@@ -189,6 +230,7 @@ Renders the object to Kubernetes JSON.
 | <code><a href="#cdk8s-pipelines.Pipeline.isConstruct">isConstruct</a></code> | Checks if `x` is a construct. |
 | <code><a href="#cdk8s-pipelines.Pipeline.isApiObject">isApiObject</a></code> | Return whether the given object is an `ApiObject`. |
 | <code><a href="#cdk8s-pipelines.Pipeline.of">of</a></code> | Returns the `ApiObject` named `Resource` which is a child of the given construct. |
+| <code><a href="#cdk8s-pipelines.Pipeline.manifest">manifest</a></code> | Renders a Kubernetes manifest for "Pipeline". |
 
 ---
 
@@ -249,6 +291,26 @@ this child is not an `ApiObject`.
 - *Type:* constructs.IConstruct
 
 The higher-level construct.
+
+---
+
+##### `manifest` <a name="manifest" id="cdk8s-pipelines.Pipeline.manifest"></a>
+
+```typescript
+import { Pipeline } from 'cdk8s-pipelines'
+
+Pipeline.manifest(props?: PipelineProps)
+```
+
+Renders a Kubernetes manifest for "Pipeline".
+
+This can be used to inline resource manifests inside other objects (e.g. as templates).
+
+###### `props`<sup>Optional</sup> <a name="props" id="cdk8s-pipelines.Pipeline.manifest.parameter.props"></a>
+
+- *Type:* <a href="#cdk8s-pipelines.PipelineProps">PipelineProps</a>
+
+initialization props.
 
 ---
 
@@ -900,6 +962,10 @@ public readonly spec: PipelineSpec;
 
 ### PipelineSpec <a name="PipelineSpec" id="cdk8s-pipelines.PipelineSpec"></a>
 
+The `spec` part of the Pipeline.
+
+> [https://tekton.dev/docs/pipelines/pipelines/](https://tekton.dev/docs/pipelines/pipelines/)
+
 #### Initializer <a name="Initializer" id="cdk8s-pipelines.PipelineSpec.Initializer"></a>
 
 ```typescript
@@ -912,10 +978,22 @@ const pipelineSpec: PipelineSpec = { ... }
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.PipelineSpec.property.tasks">tasks</a></code> | <code><a href="#cdk8s-pipelines.PipelineTask">PipelineTask</a>[]</code> | The `tasks` are required on the Pipeline. |
 | <code><a href="#cdk8s-pipelines.PipelineSpec.property.description">description</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.PipelineSpec.property.params">params</a></code> | <code><a href="#cdk8s-pipelines.PipelineParam">PipelineParam</a>[]</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.PipelineSpec.property.tasks">tasks</a></code> | <code><a href="#cdk8s-pipelines.PipelineTask">PipelineTask</a>[]</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.PipelineSpec.property.workspaces">workspaces</a></code> | <code><a href="#cdk8s-pipelines.PipelineWorkspace">PipelineWorkspace</a>[]</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.PipelineSpec.property.workspaces">workspaces</a></code> | <code><a href="#cdk8s-pipelines.PipelineWorkspace">PipelineWorkspace</a>[]</code> | Pipeline workspaces. |
+
+---
+
+##### `tasks`<sup>Required</sup> <a name="tasks" id="cdk8s-pipelines.PipelineSpec.property.tasks"></a>
+
+```typescript
+public readonly tasks: PipelineTask[];
+```
+
+- *Type:* <a href="#cdk8s-pipelines.PipelineTask">PipelineTask</a>[]
+
+The `tasks` are required on the Pipeline.
 
 ---
 
@@ -939,16 +1017,6 @@ public readonly params: PipelineParam[];
 
 ---
 
-##### `tasks`<sup>Optional</sup> <a name="tasks" id="cdk8s-pipelines.PipelineSpec.property.tasks"></a>
-
-```typescript
-public readonly tasks: PipelineTask[];
-```
-
-- *Type:* <a href="#cdk8s-pipelines.PipelineTask">PipelineTask</a>[]
-
----
-
 ##### `workspaces`<sup>Optional</sup> <a name="workspaces" id="cdk8s-pipelines.PipelineSpec.property.workspaces"></a>
 
 ```typescript
@@ -956,6 +1024,14 @@ public readonly workspaces: PipelineWorkspace[];
 ```
 
 - *Type:* <a href="#cdk8s-pipelines.PipelineWorkspace">PipelineWorkspace</a>[]
+
+Pipeline workspaces.
+
+Workspaces allow you to specify one or more volumes that each Task in the
+Pipeline requires during execution. You specify one or more Workspaces in
+the workspaces field.
+
+> [https://tekton.dev/docs/pipelines/pipelines/#specifying-workspaces](https://tekton.dev/docs/pipelines/pipelines/#specifying-workspaces)
 
 ---
 
