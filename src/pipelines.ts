@@ -3,6 +3,10 @@ import { Construct } from 'constructs';
 import { NamedResource } from './common';
 import { TaskParam, TaskRef, TaskWorkspace, TaskWorkspaceRef } from './tasks';
 
+// The following interfaces and classes are strictly for generating the YAML or
+// JSON in the proper format for the Tekton pipelines. See the builders to use
+// classes and a fluid-style syntax that provides easier building and checking.
+
 /**
  * A Pipeline parameter. See https://tekton.dev/docs/pipelines/pipelines/#specifying-parameters
  */
@@ -18,37 +22,64 @@ export interface PipelineTask extends NamedResource {
   readonly taskRef?: TaskRef;
   readonly params?: TaskParam[];
   readonly runAfter?: string[];
-  readonly workspaces?: TaskWorkspaceRef[];
+  readonly workspaces?: TaskWorkspace[];
 }
 
-
+/**
+ * A workspace for a pipeline. See https://tekton.dev/docs/pipelines/pipelines/#specifying-workspaces
+ * and https://tekton.dev/docs/pipelines/workspaces/#using-workspaces-in-pipelines.
+ */
 export interface PipelineWorkspace extends NamedResource {
+  /**
+   * The description of the workspace.
+   */
   readonly description?: string;
 }
 
 /**
- * A
+ * A task definition at the pipeline level.
  */
 export interface PipelineTaskDef extends PipelineTask {
   readonly refParams?: PipelineParam[];
-  readonly refWorkspaces?: TaskWorkspace[];
+  readonly refWorkspaces?: TaskWorkspaceRef[];
 }
 
+/**
+ * The `spec` part of the Pipeline.
+ *
+ * @see https://tekton.dev/docs/pipelines/pipelines/
+ */
 export interface PipelineSpec {
+  readonly description?: string;
   readonly params?: PipelineParam[];
-  readonly tasks?: PipelineTask[];
+  /**
+   * The `tasks` are required on the Pipeline.
+   */
+  readonly tasks: PipelineTask[];
+  /**
+   * Pipeline workspaces.
+   * Workspaces allow you to specify one or more volumes that each Task in the
+   * Pipeline requires during execution. You specify one or more Workspaces in
+   * the workspaces field.
+   *
+   * @see https://tekton.dev/docs/pipelines/pipelines/#specifying-workspaces
+   */
   readonly workspaces?: PipelineWorkspace[];
 }
 
 /**
  * Properties used to create the Pipelines.
  */
-export interface PipelineProps extends NamedResource {
+export interface PipelineProps {
+  readonly metadata?: ApiObjectMetadata;
+  readonly spec?: PipelineSpec;
 }
 
 /**
+ * The Pipeline allows you to specify Tasks that use Parameters and Workspaces
+ * to accomplish complex tasks on the cluster.
  *
- *
+ * @see https://tekton.dev/docs/pipelines/pipelines/#configuring-a-pipeline
  * @schema Pipeline
  */
 export class Pipeline extends ApiObject {
@@ -61,9 +92,6 @@ export class Pipeline extends ApiObject {
     kind: 'Pipeline',
   };
 
-  private readonly _metadata?: ApiObjectMetadata;
-  private readonly _spec?: PipelineSpec;
-
   /**
    * Renders a Kubernetes manifest for "Pipeline".
    *
@@ -71,12 +99,15 @@ export class Pipeline extends ApiObject {
    *
    * @param props initialization props
    */
-  // public static manifest(props: PipelineProps = {}): any {
-  //   return {
-  //     ...Pipeline.GVK,
-  //     ...
-  //   };
-  // }
+  public static manifest(props: PipelineProps = {}): any {
+    return {
+      ...Pipeline.GVK,
+      ...props,
+    };
+  }
+
+  private readonly _metadata?: ApiObjectMetadata;
+  private readonly _spec?: PipelineSpec;
 
   /**
    * Defines a "Pipeline" API object
@@ -88,68 +119,10 @@ export class Pipeline extends ApiObject {
     super(scope, id, {
       ...Pipeline.GVK,
     });
-    this._metadata = {
-      name: props.name,
-    };
-    this._spec = {
-      tasks: new Array<PipelineTask>(),
-      params: new Array<PipelineParam>(),
-    };
+    this._metadata = props.metadata;
+    this._spec = props.spec;
   }
 
-  public addTask(t: PipelineTaskDef, after: PipelineTaskDef = {}): void {
-    // First, take a look, at the params in the params to see if there
-    // is any variable interpolation, and add the tasks if there is...
-    if (t.refParams != null && t.refParams.length > 0) {
-      t.refParams.forEach(ref => {
-        let p = this._spec?.params?.find(f => f.name == ref.name);
-        if (p == null) {
-          this._spec?.params?.push({
-            name: ref.name,
-            default: ref.default,
-            type: ref.type,
-          });
-        }
-      });
-    }
-
-    if (t.refWorkspaces != null && t.refWorkspaces.length > 0) {
-      t.refWorkspaces.forEach(i => {
-        let ws = this._spec?.workspaces?.find(w => w.name == i.name);
-        if (!ws) {
-          this._spec?.workspaces?.push({
-            name: i.name,
-            description: i.description,
-          });
-        }
-      });
-    }
-
-    if (after != null && after.name != null && after.name?.length > 0) {
-      this._spec?.tasks?.push({
-        name: t.name,
-        taskRef: t.taskRef,
-        params: t.params,
-        runAfter: [after.name],
-        workspaces: t.workspaces,
-      });
-    } else {
-      this._spec?.tasks?.push({
-        name: t.name,
-        taskRef: t.taskRef,
-        params: t.params,
-        workspaces: t.workspaces,
-      });
-    }
-  }
-
-  public addStringParam(name: string, defaultValue: string = ''): void {
-    this._spec?.params?.push({
-      name: name,
-      type: 'string',
-      default: defaultValue,
-    });
-  }
 
   /**
    * Renders the object to Kubernetes JSON.

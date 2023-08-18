@@ -6,45 +6,18 @@ import { NamedResource } from './common';
  * A workspace used by a Task. See https://tekton.dev/docs/pipelines/workspaces/#using-workspaces-in-tasks for more information.
  */
 export interface TaskWorkspace extends NamedResource{
-  /**
-   * An informative string describing the purpose of the Workspace
-   */
-  readonly description?: string;
-  /**
-   * A boolean declaring whether the Task will write to the Workspace. Defaults to false.
-    */
-  readonly readOnly?: boolean;
-  /**
-   * A boolean indicating whether a TaskRun can omit the Workspace. Defaults to false.
-   */
-  readonly optional?: boolean;
-  /**
-   * A path to a location on disk where the workspace will be available to Steps.
-   * If a mountPath is not provided the workspace will be placed by
-   * default at /workspace/<name> where <name> is the workspace’s unique name.
-   */
-  readonly mountPath?: string;
+  readonly workspace?: string;
 }
 
-export interface TaskWorkspaceRef extends NamedResource{
-  readonly workspace?: string;
+export interface TaskWorkspaceRef extends TaskWorkspace {
+  readonly description?: string;
 }
 
 export class TaskRef {
   name?: string;
-  workspaces?: TaskWorkspace[];
 
   constructor(name: string) {
     this.name = name;
-    this.workspaces = new Array<TaskWorkspace>();
-  }
-
-  /**
-   * Adds a TaskWorkspace to the existing workspace
-   * @param w
-   */
-  public addWorkspace(w: TaskWorkspace): void {
-    this.workspaces?.push(w);
   }
 }
 
