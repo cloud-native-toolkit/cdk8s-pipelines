@@ -251,10 +251,13 @@ export class PipelineBuilder {
       const taskWorkspaces: TaskWorkspace[] = new Array<TaskWorkspace>();
 
       t.parameters?.forEach(p => {
-        pipelineParams.push({
-          name: p.refName,
-          type: p.type,
-        });
+        const pp = pipelineParams.find((value, index, obj) => value.name == obj[index].name);
+        if (! pp) {
+          pipelineParams.push({
+            name: p.refName,
+            type: p.type,
+          });
+        }
 
         taskParams.push({
           name: p.name,
@@ -263,10 +266,15 @@ export class PipelineBuilder {
       });
 
       t.workspaces.forEach((w) => {
-        pipelineWorkspaces.push({
-          name: w.refName,
-          description: w.description,
-        });
+        // Only add the workspace on the pipeline level if it is not already
+        // there...
+        const ws = pipelineWorkspaces.find((value, index, obj) => value.name == obj[index].name);
+        if (!ws) {
+          pipelineWorkspaces.push({
+            name: w.refName,
+            description: w.description,
+          });
+        }
 
         taskWorkspaces.push({
           name: w.name,

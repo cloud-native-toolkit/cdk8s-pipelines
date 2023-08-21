@@ -22,10 +22,44 @@ class MyTestChart extends Chart {
   }
 }
 
+class MyTestChartWithDups extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const myTask = new PipelineTaskBuilder()
+      .withName('fetch-source')
+      .withTaskReference('git-clone')
+      .withWorkspace('output', 'shared-data', 'The files cloned by the task')
+      .withStringParam('url', 'repo-url', '$(params.repo-url)')
+      ;
+
+    const myTask2 = new PipelineTaskBuilder()
+      .withName('print-readme')
+      .withTaskReference('cat-readme')
+      .withWorkspace('output', 'shared-data', 'The files cloned by the task')
+      .withStringParam('url', 'repo-url', '$(params.repo-url)')
+    ;
+
+    new PipelineBuilder(this, 'my-pipeline')
+      .withName('clone-build-push')
+      .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
+      .withTask(myTask)
+      .withTask(myTask2)
+      .buildPipeline();
+  }
+}
+
 describe('PipelineBuilderTest', () => {
   test('PipelineBuilder', () => {
     const app = Testing.app();
     const chart = new MyTestChart(app, 'test-chart');
+    const results = Testing.synth(chart);
+    expect(results).toMatchSnapshot();
+  });
+
+  test('PipelineBuilderWithDuplicates', () => {
+    const app = Testing.app();
+    const chart = new MyTestChartWithDups(app, 'test-chart');
     const results = Testing.synth(chart);
     expect(results).toMatchSnapshot();
   });
