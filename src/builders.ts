@@ -3,9 +3,11 @@
  */
 
 
+import * as fs from 'fs';
+import { ApiObject } from 'cdk8s';
 import { Construct } from 'constructs';
 import { Pipeline, PipelineParam, PipelineTask, PipelineTaskDef, PipelineWorkspace } from './pipelines';
-import { TaskParam, TaskRef, TaskWorkspace } from './tasks';
+import { Task, TaskParam, TaskProps, TaskRef, TaskStep, TaskWorkspace } from './tasks';
 
 /**
  * The workspace record (WorkspaceRec) is used by the PipelineTaskBuilder
@@ -27,6 +29,118 @@ export interface ParamRec {
   readonly refName?: string;
   readonly type?: string;
   readonly value?: string;
+}
+
+export class TaskStepBuilder {
+  private _url?: string;
+  private _obj?: ApiObject;
+  private _name?: string;
+
+  /**
+   *
+   */
+  public constructor() {
+
+  }
+
+  /**
+   * The name of the `Step` of the `Task`.
+   */
+  public get name() : string | undefined {
+    return this._name;
+  }
+
+  public get scriptUrl() : string | undefined {
+    return this._url;
+  }
+
+  public get scriptObj(): ApiObject | undefined {
+    return this._obj;
+  }
+
+  public withName(name: string): TaskStepBuilder {
+    this._name = name;
+    return this;
+  }
+
+  public fromScriptUrl(url: string): TaskStepBuilder {
+    this._url = url;
+    return this;
+  }
+
+  public fromScriptObject(obj: ApiObject): TaskStepBuilder {
+    this._obj = obj;
+    return this;
+  }
+}
+
+/**
+ * This is the builder for creating Tekton `Task` objects that are independent
+ * of a `Pipeline`. They
+ *
+ * To use a builder for tasks that will be used in a Pipeline, use the
+ * `PipelineBuilder` instead.
+ */
+export class TaskBuilder {
+
+  private readonly _scope?: Construct;
+  private readonly _id?: string;
+  private steps?: TaskStepBuilder[];
+
+
+  /**
+   * Creates a new instance of the `TaskBuilder` using the given `scope` and
+   * `id`.
+   * @param scope
+   * @param id
+   */
+  public constructor(scope: Construct, id: string) {
+    this._scope = scope;
+    this._id = id;
+    // These are required, and it's better to just create it rather than
+    // check each time.
+    this.steps = new Array<TaskStepBuilder>();
+  }
+
+  /**
+   * Adds the given `step` (`TaskStepBuilder`) to the `Task`.
+   * @param step
+   */
+  public withStep(step: TaskStepBuilder) {
+    this.steps!.push(step);
+    return this;
+  }
+
+  /**
+   * Builds the `Task`.
+   */
+  public buildTask(): void {
+    const props: TaskProps = {};
+
+    const taskSteps = new Array<TaskStep>();
+
+    this.steps?.forEach((s) => {
+      if (s.scriptUrl) {
+        if (s.scriptObj) {
+          throw new Error('Cannot specify both a URL source and an object source for the script.');
+        }
+        // Load the script from the URL location and use it
+        const data = fs.readFileSync(s.scriptUrl, {
+          encoding: 'utf8',
+          flag: 'r',
+        });
+        if (data) {
+          taskSteps.push({
+            name: s.name,
+            script: data,
+          });
+        }
+      }
+    });
+
+    new Task(this._scope!, this._id!, props);
+
+  }
 }
 
 /**
@@ -252,7 +366,7 @@ export class PipelineBuilder {
 
       t.parameters?.forEach(p => {
         const pp = pipelineParams.find((value, index, obj) => value.name == obj[index].name);
-        if (! pp) {
+        if (!pp) {
           pipelineParams.push({
             name: p.refName,
             type: p.type,

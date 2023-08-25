@@ -78,15 +78,15 @@ made for you automatically. Here is the same construct, but defined using the
 `PipelineBuilder`.
 
 ```typescript
-    new PipelineBuilder(this, 'my-pipeline')
-        .withName('clone-build-push')
-        .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
-        .withTask(new PipelineTaskBuilder()
-                .withName('fetch-source')
-                .withTaskReference('git-clone')
-                .withWorkspace('output', 'shared-data', 'The files cloned by the task')
-                .withStringParam('url', 'repo-url', '$(params.repo-url)'))
-        .buildPipeline();
+new PipelineBuilder(this, 'my-pipeline')
+    .withName('clone-build-push')
+    .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
+    .withTask(new PipelineTaskBuilder()
+            .withName('fetch-source')
+            .withTaskReference('git-clone')
+            .withWorkspace('output', 'shared-data', 'The files cloned by the task')
+            .withStringParam('url', 'repo-url', '$(params.repo-url)'))
+    .buildPipeline();
 ```
 
 The `build` method on the builders will validate the parameters and, if the
@@ -101,9 +101,9 @@ This is the core project with the basic Pipeline constructs. There are other
 constructs that use this construct to develop richer pipelines and tasks that
 are based on tasks available in [Tekton Hub](https://hub.tekton.dev/).
 
-* [cdk8s-pipelines-cdk](TODO) - A construct that allows you to easily create
- Tekton pipelines that use [AWS CDK](https://aws.amazon.com/cdk/) projects from
- GitHub to deploy CDK resources to an AWS account.
+* [cdk8s-pipelines-lib](https://github.com/cloud-native-toolkit/cdk8s-pipelines-lib) - A library of
+constructs that allows you to easily create Tekton pipelines that use tasks from
+Tekton Hub and also provides some basic, reusable pipelines.
 
 # API Reference <a name="API Reference" id="api-reference"></a>
 
@@ -438,6 +438,15 @@ Returns the apiVersion and kind for "Pipeline".
 ---
 
 ### Task <a name="Task" id="cdk8s-pipelines.Task"></a>
+
+A Tekton Task, which is > a collection of Steps that you define and arrange in > a specific order of execution as part of your continuous integration flow.
+
+A
+> Task executes as a Pod on your Kubernetes cluster. A Task is available within a
+> specific namespace, while a ClusterTask is available across the entire
+> cluster.
+
+> [https://tekton.dev/docs/pipelines/tasks/](https://tekton.dev/docs/pipelines/tasks/)
 
 #### Initializers <a name="Initializers" id="cdk8s-pipelines.Task.Initializer"></a>
 
@@ -1255,7 +1264,7 @@ The description of the workspace.
 
 ### TaskParam <a name="TaskParam" id="cdk8s-pipelines.TaskParam"></a>
 
-A Task parameter.
+A Task parameter value.
 
 #### Initializer <a name="Initializer" id="cdk8s-pipelines.TaskParam.Initializer"></a>
 
@@ -1298,7 +1307,7 @@ The value of the task parameter.
 
 ### TaskProps <a name="TaskProps" id="cdk8s-pipelines.TaskProps"></a>
 
-Properties used to create the Pipelines.
+Properties used to create the Task.
 
 #### Initializer <a name="Initializer" id="cdk8s-pipelines.TaskProps.Initializer"></a>
 
@@ -1312,23 +1321,40 @@ const taskProps: TaskProps = { ... }
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#cdk8s-pipelines.TaskProps.property.name">name</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskProps.property.metadata">metadata</a></code> | <code>cdk8s.ApiObjectMetadata</code> | The object [metadata](https://kubernetes.io/docs/concepts/overview/working-with-objects/#required-fields) that conforms to standard Kubernetes metadata. |
+| <code><a href="#cdk8s-pipelines.TaskProps.property.spec">spec</a></code> | <code><a href="#cdk8s-pipelines.TaskSpec">TaskSpec</a></code> | The `spec` is the configuration of the `Task` object. |
 
 ---
 
-##### `name`<sup>Optional</sup> <a name="name" id="cdk8s-pipelines.TaskProps.property.name"></a>
+##### `metadata`<sup>Optional</sup> <a name="metadata" id="cdk8s-pipelines.TaskProps.property.metadata"></a>
 
 ```typescript
-public readonly name: string;
+public readonly metadata: ApiObjectMetadata;
 ```
 
-- *Type:* string
+- *Type:* cdk8s.ApiObjectMetadata
+
+The object [metadata](https://kubernetes.io/docs/concepts/overview/working-with-objects/#required-fields) that conforms to standard Kubernetes metadata.
+
+---
+
+##### `spec`<sup>Optional</sup> <a name="spec" id="cdk8s-pipelines.TaskProps.property.spec"></a>
+
+```typescript
+public readonly spec: TaskSpec;
+```
+
+- *Type:* <a href="#cdk8s-pipelines.TaskSpec">TaskSpec</a>
+
+The `spec` is the configuration of the `Task` object.
 
 ---
 
 ### TaskSpec <a name="TaskSpec" id="cdk8s-pipelines.TaskSpec"></a>
 
 The Task spec.
+
+> [https://tekton.dev/docs/pipelines/tasks/#configuring-a-task](https://tekton.dev/docs/pipelines/tasks/#configuring-a-task)
 
 #### Initializer <a name="Initializer" id="cdk8s-pipelines.TaskSpec.Initializer"></a>
 
@@ -1342,7 +1368,37 @@ const taskSpec: TaskSpec = { ... }
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#cdk8s-pipelines.TaskSpec.property.steps">steps</a></code> | <code><a href="#cdk8s-pipelines.TaskStep">TaskStep</a>[]</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskSpec.property.description">description</a></code> | <code>string</code> | The description of the `Task`. |
+| <code><a href="#cdk8s-pipelines.TaskSpec.property.params">params</a></code> | <code><a href="#cdk8s-pipelines.TaskSpecParam">TaskSpecParam</a>[]</code> | The `Task`'s parameters. |
+| <code><a href="#cdk8s-pipelines.TaskSpec.property.steps">steps</a></code> | <code><a href="#cdk8s-pipelines.TaskStep">TaskStep</a>[]</code> | The steps that will be executed as part of the Task. |
+
+---
+
+##### `description`<sup>Optional</sup> <a name="description" id="cdk8s-pipelines.TaskSpec.property.description"></a>
+
+```typescript
+public readonly description: string;
+```
+
+- *Type:* string
+
+The description of the `Task`.
+
+> [https://tekton.dev/docs/pipelines/tasks/#adding-a-description](https://tekton.dev/docs/pipelines/tasks/#adding-a-description)
+
+---
+
+##### `params`<sup>Optional</sup> <a name="params" id="cdk8s-pipelines.TaskSpec.property.params"></a>
+
+```typescript
+public readonly params: TaskSpecParam[];
+```
+
+- *Type:* <a href="#cdk8s-pipelines.TaskSpecParam">TaskSpecParam</a>[]
+
+The `Task`'s parameters.
+
+> [https://tekton.dev/docs/pipelines/tasks/#specifying-parameters](https://tekton.dev/docs/pipelines/tasks/#specifying-parameters)
 
 ---
 
@@ -1354,6 +1410,76 @@ public readonly steps: TaskStep[];
 
 - *Type:* <a href="#cdk8s-pipelines.TaskStep">TaskStep</a>[]
 
+The steps that will be executed as part of the Task.
+
+The `Step` should
+fit the (container contract)[https://tekton.dev/docs/pipelines/container-contract/]
+
+> [https://tekton.dev/docs/pipelines/tasks/#defining-steps](https://tekton.dev/docs/pipelines/tasks/#defining-steps)
+
+---
+
+### TaskSpecParam <a name="TaskSpecParam" id="cdk8s-pipelines.TaskSpecParam"></a>
+
+Specifies execution parameters for the Task.
+
+#### Initializer <a name="Initializer" id="cdk8s-pipelines.TaskSpecParam.Initializer"></a>
+
+```typescript
+import { TaskSpecParam } from 'cdk8s-pipelines'
+
+const taskSpecParam: TaskSpecParam = { ... }
+```
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.TaskSpecParam.property.name">name</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskSpecParam.property.default">default</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskSpecParam.property.description">description</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskSpecParam.property.type">type</a></code> | <code>string</code> | *No description.* |
+
+---
+
+##### `name`<sup>Optional</sup> <a name="name" id="cdk8s-pipelines.TaskSpecParam.property.name"></a>
+
+```typescript
+public readonly name: string;
+```
+
+- *Type:* string
+
+---
+
+##### `default`<sup>Optional</sup> <a name="default" id="cdk8s-pipelines.TaskSpecParam.property.default"></a>
+
+```typescript
+public readonly default: string;
+```
+
+- *Type:* string
+
+---
+
+##### `description`<sup>Optional</sup> <a name="description" id="cdk8s-pipelines.TaskSpecParam.property.description"></a>
+
+```typescript
+public readonly description: string;
+```
+
+- *Type:* string
+
+---
+
+##### `type`<sup>Optional</sup> <a name="type" id="cdk8s-pipelines.TaskSpecParam.property.type"></a>
+
+```typescript
+public readonly type: string;
+```
+
+- *Type:* string
+
 ---
 
 ### TaskStep <a name="TaskStep" id="cdk8s-pipelines.TaskStep"></a>
@@ -1361,6 +1487,8 @@ public readonly steps: TaskStep[];
 The step for a Task.
 
 See https://tekton.dev/docs/pipelines/tasks/#defining-steps
+
+> [https://tekton.dev/docs/pipelines/container-contract/](https://tekton.dev/docs/pipelines/container-contract/)
 
 #### Initializer <a name="Initializer" id="cdk8s-pipelines.TaskStep.Initializer"></a>
 
@@ -1375,8 +1503,11 @@ const taskStep: TaskStep = { ... }
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
 | <code><a href="#cdk8s-pipelines.TaskStep.property.name">name</a></code> | <code>string</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.TaskStep.property.image">image</a></code> | <code>string</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.TaskStep.property.script">script</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskStep.property.args">args</a></code> | <code>string[]</code> | Alternatively, you can supply `args` to the `command` value here. |
+| <code><a href="#cdk8s-pipelines.TaskStep.property.command">command</a></code> | <code>string</code> | The command and its arguments (provided in the form of an array) to execute on the container. |
+| <code><a href="#cdk8s-pipelines.TaskStep.property.image">image</a></code> | <code>string</code> | The name of the container image to use for the Step. |
+| <code><a href="#cdk8s-pipelines.TaskStep.property.script">script</a></code> | <code>string</code> | A script that will be executed on the image. |
+| <code><a href="#cdk8s-pipelines.TaskStep.property.volumeMounts">volumeMounts</a></code> | <code><a href="#cdk8s-pipelines.TaskVolumeMount">TaskVolumeMount</a>[]</code> | The volume mounts to use for the task. |
 
 ---
 
@@ -1390,6 +1521,33 @@ public readonly name: string;
 
 ---
 
+##### `args`<sup>Optional</sup> <a name="args" id="cdk8s-pipelines.TaskStep.property.args"></a>
+
+```typescript
+public readonly args: string[];
+```
+
+- *Type:* string[]
+
+Alternatively, you can supply `args` to the `command` value here.
+
+---
+
+##### `command`<sup>Optional</sup> <a name="command" id="cdk8s-pipelines.TaskStep.property.command"></a>
+
+```typescript
+public readonly command: string;
+```
+
+- *Type:* string
+
+The command and its arguments (provided in the form of an array) to execute on the container.
+
+If `command` is supplied, you should not supply
+`script`.
+
+---
+
 ##### `image`<sup>Optional</sup> <a name="image" id="cdk8s-pipelines.TaskStep.property.image"></a>
 
 ```typescript
@@ -1398,12 +1556,72 @@ public readonly image: string;
 
 - *Type:* string
 
+The name of the container image to use for the Step.
+
 ---
 
 ##### `script`<sup>Optional</sup> <a name="script" id="cdk8s-pipelines.TaskStep.property.script"></a>
 
 ```typescript
 public readonly script: string;
+```
+
+- *Type:* string
+
+A script that will be executed on the image.
+
+If `script` is specified,
+then the `command` value should not be specified.
+
+---
+
+##### `volumeMounts`<sup>Optional</sup> <a name="volumeMounts" id="cdk8s-pipelines.TaskStep.property.volumeMounts"></a>
+
+```typescript
+public readonly volumeMounts: TaskVolumeMount[];
+```
+
+- *Type:* <a href="#cdk8s-pipelines.TaskVolumeMount">TaskVolumeMount</a>[]
+
+The volume mounts to use for the task.
+
+---
+
+### TaskVolumeMount <a name="TaskVolumeMount" id="cdk8s-pipelines.TaskVolumeMount"></a>
+
+The volume mount for the task.
+
+#### Initializer <a name="Initializer" id="cdk8s-pipelines.TaskVolumeMount.Initializer"></a>
+
+```typescript
+import { TaskVolumeMount } from 'cdk8s-pipelines'
+
+const taskVolumeMount: TaskVolumeMount = { ... }
+```
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.TaskVolumeMount.property.name">name</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskVolumeMount.property.mountPath">mountPath</a></code> | <code>string</code> | *No description.* |
+
+---
+
+##### `name`<sup>Optional</sup> <a name="name" id="cdk8s-pipelines.TaskVolumeMount.property.name"></a>
+
+```typescript
+public readonly name: string;
+```
+
+- *Type:* string
+
+---
+
+##### `mountPath`<sup>Optional</sup> <a name="mountPath" id="cdk8s-pipelines.TaskVolumeMount.property.mountPath"></a>
+
+```typescript
+public readonly mountPath: string;
 ```
 
 - *Type:* string
@@ -1884,6 +2102,74 @@ Returns the workspace records for the task builder.
 ---
 
 
+### TaskBuilder <a name="TaskBuilder" id="cdk8s-pipelines.TaskBuilder"></a>
+
+This is the builder for creating Tekton `Task` objects that are independent of a `Pipeline`. They.
+
+To use a builder for tasks that will be used in a Pipeline, use the
+`PipelineBuilder` instead.
+
+#### Initializers <a name="Initializers" id="cdk8s-pipelines.TaskBuilder.Initializer"></a>
+
+```typescript
+import { TaskBuilder } from 'cdk8s-pipelines'
+
+new TaskBuilder(scope: Construct, id: string)
+```
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.Initializer.parameter.scope">scope</a></code> | <code>constructs.Construct</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.Initializer.parameter.id">id</a></code> | <code>string</code> | *No description.* |
+
+---
+
+##### `scope`<sup>Required</sup> <a name="scope" id="cdk8s-pipelines.TaskBuilder.Initializer.parameter.scope"></a>
+
+- *Type:* constructs.Construct
+
+---
+
+##### `id`<sup>Required</sup> <a name="id" id="cdk8s-pipelines.TaskBuilder.Initializer.parameter.id"></a>
+
+- *Type:* string
+
+---
+
+#### Methods <a name="Methods" id="Methods"></a>
+
+| **Name** | **Description** |
+| --- | --- |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.buildTask">buildTask</a></code> | Builds the `Task`. |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.withStep">withStep</a></code> | Adds the given `step` (`TaskStepBuilder`) to the `Task`. |
+
+---
+
+##### `buildTask` <a name="buildTask" id="cdk8s-pipelines.TaskBuilder.buildTask"></a>
+
+```typescript
+public buildTask(): void
+```
+
+Builds the `Task`.
+
+##### `withStep` <a name="withStep" id="cdk8s-pipelines.TaskBuilder.withStep"></a>
+
+```typescript
+public withStep(step: TaskStepBuilder): TaskBuilder
+```
+
+Adds the given `step` (`TaskStepBuilder`) to the `Task`.
+
+###### `step`<sup>Required</sup> <a name="step" id="cdk8s-pipelines.TaskBuilder.withStep.parameter.step"></a>
+
+- *Type:* <a href="#cdk8s-pipelines.TaskStepBuilder">TaskStepBuilder</a>
+
+---
+
+
+
+
 ### TaskRef <a name="TaskRef" id="cdk8s-pipelines.TaskRef"></a>
 
 #### Initializers <a name="Initializers" id="cdk8s-pipelines.TaskRef.Initializer"></a>
@@ -1920,6 +2206,111 @@ new TaskRef(name: string)
 
 ```typescript
 public readonly name: string;
+```
+
+- *Type:* string
+
+---
+
+
+### TaskStepBuilder <a name="TaskStepBuilder" id="cdk8s-pipelines.TaskStepBuilder"></a>
+
+#### Initializers <a name="Initializers" id="cdk8s-pipelines.TaskStepBuilder.Initializer"></a>
+
+```typescript
+import { TaskStepBuilder } from 'cdk8s-pipelines'
+
+new TaskStepBuilder()
+```
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+
+---
+
+#### Methods <a name="Methods" id="Methods"></a>
+
+| **Name** | **Description** |
+| --- | --- |
+| <code><a href="#cdk8s-pipelines.TaskStepBuilder.fromScriptObject">fromScriptObject</a></code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskStepBuilder.fromScriptUrl">fromScriptUrl</a></code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskStepBuilder.withName">withName</a></code> | *No description.* |
+
+---
+
+##### `fromScriptObject` <a name="fromScriptObject" id="cdk8s-pipelines.TaskStepBuilder.fromScriptObject"></a>
+
+```typescript
+public fromScriptObject(obj: ApiObject): TaskStepBuilder
+```
+
+###### `obj`<sup>Required</sup> <a name="obj" id="cdk8s-pipelines.TaskStepBuilder.fromScriptObject.parameter.obj"></a>
+
+- *Type:* cdk8s.ApiObject
+
+---
+
+##### `fromScriptUrl` <a name="fromScriptUrl" id="cdk8s-pipelines.TaskStepBuilder.fromScriptUrl"></a>
+
+```typescript
+public fromScriptUrl(url: string): TaskStepBuilder
+```
+
+###### `url`<sup>Required</sup> <a name="url" id="cdk8s-pipelines.TaskStepBuilder.fromScriptUrl.parameter.url"></a>
+
+- *Type:* string
+
+---
+
+##### `withName` <a name="withName" id="cdk8s-pipelines.TaskStepBuilder.withName"></a>
+
+```typescript
+public withName(name: string): TaskStepBuilder
+```
+
+###### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.TaskStepBuilder.withName.parameter.name"></a>
+
+- *Type:* string
+
+---
+
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.name">name</a></code> | <code>string</code> | The name of the `Step` of the `Task`. |
+| <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.scriptObj">scriptObj</a></code> | <code>cdk8s.ApiObject</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.scriptUrl">scriptUrl</a></code> | <code>string</code> | *No description.* |
+
+---
+
+##### `name`<sup>Optional</sup> <a name="name" id="cdk8s-pipelines.TaskStepBuilder.property.name"></a>
+
+```typescript
+public readonly name: string;
+```
+
+- *Type:* string
+
+The name of the `Step` of the `Task`.
+
+---
+
+##### `scriptObj`<sup>Optional</sup> <a name="scriptObj" id="cdk8s-pipelines.TaskStepBuilder.property.scriptObj"></a>
+
+```typescript
+public readonly scriptObj: ApiObject;
+```
+
+- *Type:* cdk8s.ApiObject
+
+---
+
+##### `scriptUrl`<sup>Optional</sup> <a name="scriptUrl" id="cdk8s-pipelines.TaskStepBuilder.property.scriptUrl"></a>
+
+```typescript
+public readonly scriptUrl: string;
 ```
 
 - *Type:* string

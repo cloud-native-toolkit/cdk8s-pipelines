@@ -78,15 +78,15 @@ made for you automatically. Here is the same construct, but defined using the
 `PipelineBuilder`.
 
 ```typescript
-    new PipelineBuilder(this, 'my-pipeline')
-        .withName('clone-build-push')
-        .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
-        .withTask(new PipelineTaskBuilder()
-                .withName('fetch-source')
-                .withTaskReference('git-clone')
-                .withWorkspace('output', 'shared-data', 'The files cloned by the task')
-                .withStringParam('url', 'repo-url', '$(params.repo-url)'))
-        .buildPipeline();
+new PipelineBuilder(this, 'my-pipeline')
+    .withName('clone-build-push')
+    .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
+    .withTask(new PipelineTaskBuilder()
+            .withName('fetch-source')
+            .withTaskReference('git-clone')
+            .withWorkspace('output', 'shared-data', 'The files cloned by the task')
+            .withStringParam('url', 'repo-url', '$(params.repo-url)'))
+    .buildPipeline();
 ```
 
 The `build` method on the builders will validate the parameters and, if the 
@@ -101,6 +101,6 @@ This is the core project with the basic Pipeline constructs. There are other
 constructs that use this construct to develop richer pipelines and tasks that
 are based on tasks available in [Tekton Hub](https://hub.tekton.dev/).
 
-* [cdk8s-pipelines-cdk](TODO) - A construct that allows you to easily create 
- Tekton pipelines that use [AWS CDK](https://aws.amazon.com/cdk/) projects from 
- GitHub to deploy CDK resources to an AWS account. 
+* [cdk8s-pipelines-lib](https://github.com/cloud-native-toolkit/cdk8s-pipelines-lib) - A library of 
+constructs that allows you to easily create Tekton pipelines that use tasks from
+Tekton Hub and also provides some basic, reusable pipelines.
