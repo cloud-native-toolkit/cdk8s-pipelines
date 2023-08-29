@@ -85,7 +85,7 @@ export interface TaskStep extends NamedResource {
    * execute on the container. If `command` is supplied, you should not supply
    * `script`.
    */
-  readonly command?: string;
+  readonly command?: string[];
   /**
    * Alternatively, you can supply `args` to the `command` value here.
    */
@@ -94,6 +94,10 @@ export interface TaskStep extends NamedResource {
    * The volume mounts to use for the task.
    */
   readonly volumeMounts?: TaskVolumeMount[];
+  /**
+   * The name of the working directory for the step
+   */
+  readonly workingDir?: string;
 }
 
 /**
@@ -182,6 +186,8 @@ export class Task extends ApiObject {
       ...Task.GVK,
       ...props,
     });
+    this._metadata = props.metadata;
+    this._spec = props.spec;
   }
 
   /**

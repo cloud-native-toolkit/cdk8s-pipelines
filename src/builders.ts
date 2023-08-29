@@ -35,6 +35,10 @@ export class TaskStepBuilder {
   private _url?: string;
   private _obj?: ApiObject;
   private _name?: string;
+  private _dir?: string;
+  private _image?: string;
+  private _cmd?: string[];
+  private _args?: string[];
 
   /**
    *
@@ -50,12 +54,45 @@ export class TaskStepBuilder {
     return this._name;
   }
 
+  /**
+   * The name of the container `image` used to execute the `Step` of the
+   * `Task`.
+   */
+  public get image() : string | undefined {
+    return this._image;
+  }
+
+  /**
+   * Gets the URL from which the script data should be loaded, if it is defined.
+   */
   public get scriptUrl() : string | undefined {
     return this._url;
   }
 
+  /**
+   * Gets the object that is used for the `script` value, if there is one
+   * defined.
+   */
   public get scriptObj(): ApiObject | undefined {
     return this._obj;
+  }
+
+  /**
+   * Gets the command-line arguments that will be supplied to the `command`.
+   */
+  public get args(): string[] | undefined {
+    return this._args;
+  }
+
+  /**
+   * Gets the command used for the `Step` on the `Task`.
+   */
+  public get command(): string[] | undefined {
+    return this._cmd;
+  }
+
+  public get workingDir(): string | undefined {
+    return this._dir;
   }
 
   public withName(name: string): TaskStepBuilder {
@@ -63,14 +100,100 @@ export class TaskStepBuilder {
     return this;
   }
 
+  /**
+   * The name of the image to use when executing the `Step` on the `Task`
+   * @param img
+   */
+  public withImage(img : string) : TaskStepBuilder {
+    this._image = img;
+    return this;
+  }
+
+  /**
+   * The name of the command to use when running the `Step` of the `Task`. If
+   * `command` is specified, do not specify `script`.
+   * @param cmd
+   */
+  public withCommand(cmd:string[]): TaskStepBuilder {
+    this._cmd = cmd;
+    return this;
+  }
+
+  /**
+   * The args to use with the `command`.
+   * @param args
+   */
+  public withArgs(args: string[]): TaskStepBuilder {
+    this._args = args;
+    return this;
+  }
+
+  /**
+   * If supplied, uses the content found at the given URL for the
+   * `script` value of the step. Use this as an alternative to "heredoc", which
+   * is embedding hard-coded shell or other scripts in the step.
+   *
+   * If you supply this, do not supply a value for `fromScriptObject`.
+   * @param url
+   */
   public fromScriptUrl(url: string): TaskStepBuilder {
     this._url = url;
     return this;
   }
 
+  /**
+   * If supplied, uses the cdk8s `ApiObject` supplied as the body of the
+   * `script` for the `Task`. This is most useful when used with `oc apply` or
+   * other tasks in which you want to apply the object during the step in the
+   * pipeline.
+   *
+   * If you supply this, do not supply a value for `fromScriptUrl`.
+   * @param obj
+   */
   public fromScriptObject(obj: ApiObject): TaskStepBuilder {
     this._obj = obj;
     return this;
+  }
+
+  /**
+   * The `workingDir` of the `Task`.
+   * @param dir
+   */
+  public withWorkingDir(dir: string): TaskStepBuilder {
+    this._dir = dir;
+    return this;
+  }
+
+  public buildTaskStep(): TaskStep | undefined {
+    if (this.scriptUrl) {
+      if (this.scriptObj) {
+        throw new Error('Cannot specify both a URL source and an object source for the script.');
+      }
+      // Load the script from the URL location and use it
+      const data = fs.readFileSync(this.scriptUrl, {
+        encoding: 'utf8',
+        flag: 'r',
+      });
+
+      const lines = data.replace(/\n/g, '\\n');
+      if (data) {
+        return {
+          name: this.name,
+          image: this.image,
+          script: lines,
+          workingDir: this.workingDir,
+        };
+      }
+    } else {
+      return {
+        name: this.name,
+        image: this.image,
+        command: this.command,
+        args: this.args,
+        workingDir: this.workingDir,
+      };
+    }
+    return undefined;
   }
 }
 
@@ -85,7 +208,8 @@ export class TaskBuilder {
 
   private readonly _scope?: Construct;
   private readonly _id?: string;
-  private steps?: TaskStepBuilder[];
+  private _steps?: TaskStepBuilder[];
+  private _name?: string;
 
 
   /**
@@ -99,7 +223,23 @@ export class TaskBuilder {
     this._id = id;
     // These are required, and it's better to just create it rather than
     // check each time.
-    this.steps = new Array<TaskStepBuilder>();
+    this._steps = new Array<TaskStepBuilder>();
+  }
+
+  /**
+   * Gets the name of the `Task` built by the `TaskBuilder`.
+   */
+  public get name() : string | undefined {
+    return this._name;
+  }
+
+  /**
+   * Sets the name of the `Task` being built.
+   * @param name
+   */
+  public withName(name: string): TaskBuilder {
+    this._name = name;
+    return this;
   }
 
   /**
@@ -107,7 +247,7 @@ export class TaskBuilder {
    * @param step
    */
   public withStep(step: TaskStepBuilder) {
-    this.steps!.push(step);
+    this._steps!.push(step);
     return this;
   }
 
@@ -115,28 +255,24 @@ export class TaskBuilder {
    * Builds the `Task`.
    */
   public buildTask(): void {
-    const props: TaskProps = {};
 
     const taskSteps = new Array<TaskStep>();
 
-    this.steps?.forEach((s) => {
-      if (s.scriptUrl) {
-        if (s.scriptObj) {
-          throw new Error('Cannot specify both a URL source and an object source for the script.');
-        }
-        // Load the script from the URL location and use it
-        const data = fs.readFileSync(s.scriptUrl, {
-          encoding: 'utf8',
-          flag: 'r',
-        });
-        if (data) {
-          taskSteps.push({
-            name: s.name,
-            script: data,
-          });
-        }
+    this._steps?.forEach((s) => {
+      const step = s.buildTaskStep();
+      if (step) {
+        taskSteps.push(step);
       }
     });
+
+    const props: TaskProps = {
+      metadata: {
+        name: this.name,
+      },
+      spec: {
+        steps: taskSteps,
+      },
+    };
 
     new Task(this._scope!, this._id!, props);
 

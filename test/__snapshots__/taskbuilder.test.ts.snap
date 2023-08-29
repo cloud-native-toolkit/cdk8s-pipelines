@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TaskBuilderTest TaskBuilder 1`] = `
+[
+  {
+    "apiVersion": "tekton.dev/v1beta1",
+    "kind": "Task",
+    "metadata": {
+      "name": "ansible-runner",
+    },
+    "spec": {
+      "steps": [
+        {
+          "image": "$(params.image)",
+          "name": "requirements",
+          "script": "#!/bin/bash\\nset -e\\n\\nif [ -f requirements.txt ];\\nthen\\n  pip3 install --user \\\\n  -r requirements.txt\\nfi\\n\\nif [ -f  requirements.yml ];\\nthen\\n  ansible-galaxy role install -vv \\\\n    -r requirements.yml\\n  ansible-galaxy collection install -vv \\\\n    -r requirements.yml\\nfi\\n",
+          "workingDir": "$(workspaces.runner-dir.path)/$(params.project-dir)",
+        },
+        {
+          "args": [
+            "ansible-runner",
+            "run",
+            "$(params.args)",
+            "$(params.project-dir)",
+          ],
+          "command": [
+            "entrypoint",
+          ],
+          "image": "$(params.image)",
+          "name": "run-playbook",
+          "workingDir": "$(workspaces.runner-dir.path)",
+        },
+      ],
+    },
+  },
+]
+`;

@@ -1504,10 +1504,11 @@ const taskStep: TaskStep = { ... }
 | --- | --- | --- |
 | <code><a href="#cdk8s-pipelines.TaskStep.property.name">name</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.TaskStep.property.args">args</a></code> | <code>string[]</code> | Alternatively, you can supply `args` to the `command` value here. |
-| <code><a href="#cdk8s-pipelines.TaskStep.property.command">command</a></code> | <code>string</code> | The command and its arguments (provided in the form of an array) to execute on the container. |
+| <code><a href="#cdk8s-pipelines.TaskStep.property.command">command</a></code> | <code>string[]</code> | The command and its arguments (provided in the form of an array) to execute on the container. |
 | <code><a href="#cdk8s-pipelines.TaskStep.property.image">image</a></code> | <code>string</code> | The name of the container image to use for the Step. |
 | <code><a href="#cdk8s-pipelines.TaskStep.property.script">script</a></code> | <code>string</code> | A script that will be executed on the image. |
 | <code><a href="#cdk8s-pipelines.TaskStep.property.volumeMounts">volumeMounts</a></code> | <code><a href="#cdk8s-pipelines.TaskVolumeMount">TaskVolumeMount</a>[]</code> | The volume mounts to use for the task. |
+| <code><a href="#cdk8s-pipelines.TaskStep.property.workingDir">workingDir</a></code> | <code>string</code> | The name of the working directory for the step. |
 
 ---
 
@@ -1536,10 +1537,10 @@ Alternatively, you can supply `args` to the `command` value here.
 ##### `command`<sup>Optional</sup> <a name="command" id="cdk8s-pipelines.TaskStep.property.command"></a>
 
 ```typescript
-public readonly command: string;
+public readonly command: string[];
 ```
 
-- *Type:* string
+- *Type:* string[]
 
 The command and its arguments (provided in the form of an array) to execute on the container.
 
@@ -1584,6 +1585,18 @@ public readonly volumeMounts: TaskVolumeMount[];
 - *Type:* <a href="#cdk8s-pipelines.TaskVolumeMount">TaskVolumeMount</a>[]
 
 The volume mounts to use for the task.
+
+---
+
+##### `workingDir`<sup>Optional</sup> <a name="workingDir" id="cdk8s-pipelines.TaskStep.property.workingDir"></a>
+
+```typescript
+public readonly workingDir: string;
+```
+
+- *Type:* string
+
+The name of the working directory for the step.
 
 ---
 
@@ -2141,6 +2154,7 @@ new TaskBuilder(scope: Construct, id: string)
 | **Name** | **Description** |
 | --- | --- |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.buildTask">buildTask</a></code> | Builds the `Task`. |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.withName">withName</a></code> | Sets the name of the `Task` being built. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.withStep">withStep</a></code> | Adds the given `step` (`TaskStepBuilder`) to the `Task`. |
 
 ---
@@ -2152,6 +2166,20 @@ public buildTask(): void
 ```
 
 Builds the `Task`.
+
+##### `withName` <a name="withName" id="cdk8s-pipelines.TaskBuilder.withName"></a>
+
+```typescript
+public withName(name: string): TaskBuilder
+```
+
+Sets the name of the `Task` being built.
+
+###### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.TaskBuilder.withName.parameter.name"></a>
+
+- *Type:* string
+
+---
 
 ##### `withStep` <a name="withStep" id="cdk8s-pipelines.TaskBuilder.withStep"></a>
 
@@ -2168,6 +2196,25 @@ Adds the given `step` (`TaskStepBuilder`) to the `Task`.
 ---
 
 
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.property.name">name</a></code> | <code>string</code> | Gets the name of the `Task` built by the `TaskBuilder`. |
+
+---
+
+##### `name`<sup>Optional</sup> <a name="name" id="cdk8s-pipelines.TaskBuilder.property.name"></a>
+
+```typescript
+public readonly name: string;
+```
+
+- *Type:* string
+
+Gets the name of the `Task` built by the `TaskBuilder`.
+
+---
 
 
 ### TaskRef <a name="TaskRef" id="cdk8s-pipelines.TaskRef"></a>
@@ -2232,17 +2279,36 @@ new TaskStepBuilder()
 
 | **Name** | **Description** |
 | --- | --- |
-| <code><a href="#cdk8s-pipelines.TaskStepBuilder.fromScriptObject">fromScriptObject</a></code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.TaskStepBuilder.fromScriptUrl">fromScriptUrl</a></code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskStepBuilder.buildTaskStep">buildTaskStep</a></code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskStepBuilder.fromScriptObject">fromScriptObject</a></code> | If supplied, uses the cdk8s `ApiObject` supplied as the body of the `script` for the `Task`. |
+| <code><a href="#cdk8s-pipelines.TaskStepBuilder.fromScriptUrl">fromScriptUrl</a></code> | If supplied, uses the content found at the given URL for the `script` value of the step. |
+| <code><a href="#cdk8s-pipelines.TaskStepBuilder.withArgs">withArgs</a></code> | The args to use with the `command`. |
+| <code><a href="#cdk8s-pipelines.TaskStepBuilder.withCommand">withCommand</a></code> | The name of the command to use when running the `Step` of the `Task`. |
+| <code><a href="#cdk8s-pipelines.TaskStepBuilder.withImage">withImage</a></code> | The name of the image to use when executing the `Step` on the `Task`. |
 | <code><a href="#cdk8s-pipelines.TaskStepBuilder.withName">withName</a></code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskStepBuilder.withWorkingDir">withWorkingDir</a></code> | The `workingDir` of the `Task`. |
 
 ---
+
+##### `buildTaskStep` <a name="buildTaskStep" id="cdk8s-pipelines.TaskStepBuilder.buildTaskStep"></a>
+
+```typescript
+public buildTaskStep(): TaskStep
+```
 
 ##### `fromScriptObject` <a name="fromScriptObject" id="cdk8s-pipelines.TaskStepBuilder.fromScriptObject"></a>
 
 ```typescript
 public fromScriptObject(obj: ApiObject): TaskStepBuilder
 ```
+
+If supplied, uses the cdk8s `ApiObject` supplied as the body of the `script` for the `Task`.
+
+This is most useful when used with `oc apply` or
+other tasks in which you want to apply the object during the step in the
+pipeline.
+
+If you supply this, do not supply a value for `fromScriptUrl`.
 
 ###### `obj`<sup>Required</sup> <a name="obj" id="cdk8s-pipelines.TaskStepBuilder.fromScriptObject.parameter.obj"></a>
 
@@ -2256,7 +2322,59 @@ public fromScriptObject(obj: ApiObject): TaskStepBuilder
 public fromScriptUrl(url: string): TaskStepBuilder
 ```
 
+If supplied, uses the content found at the given URL for the `script` value of the step.
+
+Use this as an alternative to "heredoc", which
+is embedding hard-coded shell or other scripts in the step.
+
+If you supply this, do not supply a value for `fromScriptObject`.
+
 ###### `url`<sup>Required</sup> <a name="url" id="cdk8s-pipelines.TaskStepBuilder.fromScriptUrl.parameter.url"></a>
+
+- *Type:* string
+
+---
+
+##### `withArgs` <a name="withArgs" id="cdk8s-pipelines.TaskStepBuilder.withArgs"></a>
+
+```typescript
+public withArgs(args: string[]): TaskStepBuilder
+```
+
+The args to use with the `command`.
+
+###### `args`<sup>Required</sup> <a name="args" id="cdk8s-pipelines.TaskStepBuilder.withArgs.parameter.args"></a>
+
+- *Type:* string[]
+
+---
+
+##### `withCommand` <a name="withCommand" id="cdk8s-pipelines.TaskStepBuilder.withCommand"></a>
+
+```typescript
+public withCommand(cmd: string[]): TaskStepBuilder
+```
+
+The name of the command to use when running the `Step` of the `Task`.
+
+If
+`command` is specified, do not specify `script`.
+
+###### `cmd`<sup>Required</sup> <a name="cmd" id="cdk8s-pipelines.TaskStepBuilder.withCommand.parameter.cmd"></a>
+
+- *Type:* string[]
+
+---
+
+##### `withImage` <a name="withImage" id="cdk8s-pipelines.TaskStepBuilder.withImage"></a>
+
+```typescript
+public withImage(img: string): TaskStepBuilder
+```
+
+The name of the image to use when executing the `Step` on the `Task`.
+
+###### `img`<sup>Required</sup> <a name="img" id="cdk8s-pipelines.TaskStepBuilder.withImage.parameter.img"></a>
 
 - *Type:* string
 
@@ -2274,14 +2392,68 @@ public withName(name: string): TaskStepBuilder
 
 ---
 
+##### `withWorkingDir` <a name="withWorkingDir" id="cdk8s-pipelines.TaskStepBuilder.withWorkingDir"></a>
+
+```typescript
+public withWorkingDir(dir: string): TaskStepBuilder
+```
+
+The `workingDir` of the `Task`.
+
+###### `dir`<sup>Required</sup> <a name="dir" id="cdk8s-pipelines.TaskStepBuilder.withWorkingDir.parameter.dir"></a>
+
+- *Type:* string
+
+---
+
 
 #### Properties <a name="Properties" id="Properties"></a>
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.args">args</a></code> | <code>string[]</code> | Gets the command-line arguments that will be supplied to the `command`. |
+| <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.command">command</a></code> | <code>string[]</code> | Gets the command used for the `Step` on the `Task`. |
+| <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.image">image</a></code> | <code>string</code> | The name of the container `image` used to execute the `Step` of the `Task`. |
 | <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.name">name</a></code> | <code>string</code> | The name of the `Step` of the `Task`. |
-| <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.scriptObj">scriptObj</a></code> | <code>cdk8s.ApiObject</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.scriptUrl">scriptUrl</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.scriptObj">scriptObj</a></code> | <code>cdk8s.ApiObject</code> | Gets the object that is used for the `script` value, if there is one defined. |
+| <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.scriptUrl">scriptUrl</a></code> | <code>string</code> | Gets the URL from which the script data should be loaded, if it is defined. |
+| <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.workingDir">workingDir</a></code> | <code>string</code> | *No description.* |
+
+---
+
+##### `args`<sup>Optional</sup> <a name="args" id="cdk8s-pipelines.TaskStepBuilder.property.args"></a>
+
+```typescript
+public readonly args: string[];
+```
+
+- *Type:* string[]
+
+Gets the command-line arguments that will be supplied to the `command`.
+
+---
+
+##### `command`<sup>Optional</sup> <a name="command" id="cdk8s-pipelines.TaskStepBuilder.property.command"></a>
+
+```typescript
+public readonly command: string[];
+```
+
+- *Type:* string[]
+
+Gets the command used for the `Step` on the `Task`.
+
+---
+
+##### `image`<sup>Optional</sup> <a name="image" id="cdk8s-pipelines.TaskStepBuilder.property.image"></a>
+
+```typescript
+public readonly image: string;
+```
+
+- *Type:* string
+
+The name of the container `image` used to execute the `Step` of the `Task`.
 
 ---
 
@@ -2305,12 +2477,26 @@ public readonly scriptObj: ApiObject;
 
 - *Type:* cdk8s.ApiObject
 
+Gets the object that is used for the `script` value, if there is one defined.
+
 ---
 
 ##### `scriptUrl`<sup>Optional</sup> <a name="scriptUrl" id="cdk8s-pipelines.TaskStepBuilder.property.scriptUrl"></a>
 
 ```typescript
 public readonly scriptUrl: string;
+```
+
+- *Type:* string
+
+Gets the URL from which the script data should be loaded, if it is defined.
+
+---
+
+##### `workingDir`<sup>Optional</sup> <a name="workingDir" id="cdk8s-pipelines.TaskStepBuilder.property.workingDir"></a>
+
+```typescript
+public readonly workingDir: string;
 ```
 
 - *Type:* string
