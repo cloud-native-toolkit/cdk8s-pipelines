@@ -29,7 +29,4 @@ const project = new cdk8s.ConstructLibraryCdk8s({
   // devDeps: [],             /* Build dependencies for this module. */
   // packageName: undefined,  /* The "name" in package.json. */
 });
-project.addTask('prepare', {
-  exec: 'npx projen compile',
-});
 project.synth();
