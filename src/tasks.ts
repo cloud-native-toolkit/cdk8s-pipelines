@@ -2,7 +2,7 @@
  * This file includes the basic objects for creating Tasks and dependencies.
  * While cdk8s supports generating this file from the CRD, the Tekton CRD at
  * the moment does not have the fields specified. See https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml,
- * specfically here:
+ * specifically here:
  *       schema:
  *         openAPIV3Schema:
  *           type: object
@@ -19,19 +19,46 @@
  */
 import { ApiObject, ApiObjectMetadata, GroupVersionKind } from 'cdk8s';
 import { Construct } from 'constructs';
-import { NamedResource } from './common';
+import { NamedResource, NameKeyPair } from './common';
+
+
+/**
+ * The source for a `env` `valueFrom`.
+ */
+export interface TaskEnvValueSource {
+  readonly secretKeyRef: NameKeyPair;
+}
+
+/**
+ * Creates an `env` source that can be used in the `env`'s `valueFrom`.
+ * @param nk The name and key pair.
+ */
+export function valueFrom(nk: NameKeyPair): TaskEnvValueSource {
+  return {
+    secretKeyRef: nk,
+  };
+}
+
+/**
+ * An `env` for a `Step` on a `Task`.
+ */
+export interface TaskStepEnv extends NamedResource{
+  readonly valueFrom?: TaskEnvValueSource;
+}
 
 /**
  * A workspace used by a Task. See https://tekton.dev/docs/pipelines/workspaces/#using-workspaces-in-tasks for more information.
  */
 export interface TaskWorkspace extends NamedResource {
-  readonly workspace?: string;
-}
-
-export interface TaskWorkspaceRef extends TaskWorkspace {
+  /**
+   * The description of the workspace.
+   */
   readonly description?: string;
 }
 
+/**
+ * A `Task` reference. Will be generated as a `taskRef`.
+ */
 export class TaskRef {
   name?: string;
 
@@ -54,8 +81,17 @@ export interface TaskParam extends NamedResource {
  * Specifies execution parameters for the Task.
  */
 export interface TaskSpecParam extends NamedResource {
+  /**
+   * The parameter's type.
+   */
   readonly type?: string;
+  /**
+   * The parameter's description.
+   */
   readonly description?: string;
+  /**
+   * The default value for a parameter.
+   */
   readonly default?: string;
 }
 
@@ -98,7 +134,13 @@ export interface TaskStep extends NamedResource {
    * The name of the working directory for the step
    */
   readonly workingDir?: string;
+
+  /**
+   * Environment variables for the `Step` on the `Task`.
+   */
+  readonly env?: TaskStepEnv[];
 }
+
 
 /**
  * The Task spec.
@@ -116,12 +158,15 @@ export interface TaskSpec {
    * @see https://tekton.dev/docs/pipelines/tasks/#specifying-parameters
    */
   readonly params?: TaskSpecParam[];
+
+  readonly workspaces?: TaskWorkspace[];
   /**
    * The steps that will be executed as part of the Task. The `Step` should
    * fit the (container contract)[https://tekton.dev/docs/pipelines/container-contract/]
    * @see https://tekton.dev/docs/pipelines/tasks/#defining-steps
    */
   readonly steps?: TaskStep[];
+
 }
 
 /**

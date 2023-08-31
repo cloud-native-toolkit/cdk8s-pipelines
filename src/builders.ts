@@ -6,8 +6,8 @@
 import * as fs from 'fs';
 import { ApiObject } from 'cdk8s';
 import { Construct } from 'constructs';
-import { Pipeline, PipelineParam, PipelineTask, PipelineTaskDef, PipelineWorkspace } from './pipelines';
-import { Task, TaskParam, TaskProps, TaskRef, TaskStep, TaskWorkspace } from './tasks';
+import { Pipeline, PipelineParam, PipelineTask, PipelineTaskDef, PipelineTaskWorkspace, PipelineWorkspace } from './pipelines';
+import { Task, TaskEnvValueSource, TaskParam, TaskProps, TaskRef, TaskSpecParam, TaskStep, TaskStepEnv, TaskWorkspace } from './tasks';
 
 /**
  * The workspace record (WorkspaceRec) is used by the PipelineTaskBuilder
@@ -25,11 +25,13 @@ export interface WorkspaceRec {
  */
 export interface ParamRec {
   readonly name?: string;
+  readonly description?: string;
   readonly defaultValue?: string;
   readonly refName?: string;
   readonly type?: string;
   readonly value?: string;
 }
+
 
 export class TaskStepBuilder {
   private _url?: string;
@@ -39,6 +41,7 @@ export class TaskStepBuilder {
   private _image?: string;
   private _cmd?: string[];
   private _args?: string[];
+  private _env?: TaskStepEnv[];
 
   /**
    *
@@ -50,7 +53,7 @@ export class TaskStepBuilder {
   /**
    * The name of the `Step` of the `Task`.
    */
-  public get name() : string | undefined {
+  public get name(): string | undefined {
     return this._name;
   }
 
@@ -58,14 +61,14 @@ export class TaskStepBuilder {
    * The name of the container `image` used to execute the `Step` of the
    * `Task`.
    */
-  public get image() : string | undefined {
+  public get image(): string | undefined {
     return this._image;
   }
 
   /**
    * Gets the URL from which the script data should be loaded, if it is defined.
    */
-  public get scriptUrl() : string | undefined {
+  public get scriptUrl(): string | undefined {
     return this._url;
   }
 
@@ -104,7 +107,7 @@ export class TaskStepBuilder {
    * The name of the image to use when executing the `Step` on the `Task`
    * @param img
    */
-  public withImage(img : string) : TaskStepBuilder {
+  public withImage(img: string): TaskStepBuilder {
     this._image = img;
     return this;
   }
@@ -114,7 +117,7 @@ export class TaskStepBuilder {
    * `command` is specified, do not specify `script`.
    * @param cmd
    */
-  public withCommand(cmd:string[]): TaskStepBuilder {
+  public withCommand(cmd: string[]): TaskStepBuilder {
     this._cmd = cmd;
     return this;
   }
@@ -164,6 +167,17 @@ export class TaskStepBuilder {
     return this;
   }
 
+  withEnv(name: string, valueFrom: TaskEnvValueSource): TaskStepBuilder {
+    if (!this._env) {
+      this._env = new Array<TaskStepEnv>();
+    }
+    this._env.push({
+      name: name,
+      valueFrom: valueFrom,
+    });
+    return this;
+  }
+
   public buildTaskStep(): TaskStep | undefined {
     if (this.scriptUrl) {
       if (this.scriptObj) {
@@ -182,6 +196,7 @@ export class TaskStepBuilder {
           image: this.image,
           script: lines,
           workingDir: this.workingDir,
+          env: this._env,
         };
       }
     } else {
@@ -191,10 +206,13 @@ export class TaskStepBuilder {
         command: this.command,
         args: this.args,
         workingDir: this.workingDir,
+        env: this._env,
       };
     }
     return undefined;
   }
+
+
 }
 
 /**
@@ -210,7 +228,9 @@ export class TaskBuilder {
   private readonly _id?: string;
   private _steps?: TaskStepBuilder[];
   private _name?: string;
-
+  private _description?: string;
+  private _workspaces?: TaskWorkspace[];
+  private _params?: TaskSpecParam[];
 
   /**
    * Creates a new instance of the `TaskBuilder` using the given `scope` and
@@ -229,7 +249,7 @@ export class TaskBuilder {
   /**
    * Gets the name of the `Task` built by the `TaskBuilder`.
    */
-  public get name() : string | undefined {
+  public get name(): string | undefined {
     return this._name;
   }
 
@@ -243,10 +263,54 @@ export class TaskBuilder {
   }
 
   /**
+   * Sets the `description` of the `Task` being built.
+   * @param description
+   */
+  public withDescription(description: string): TaskBuilder {
+    this._description = description;
+    return this;
+  }
+
+  /**
+   * Gets the `description` of the `Task`.
+   */
+  public get description(): string | undefined {
+    return this._description;
+  }
+
+  /**
+   * Adds the specified workspace to the `Task`.
+   * @param name
+   * @param description
+   */
+  public withWorkspace(name: string, description: string = ''): TaskBuilder {
+    if (! this._workspaces) {
+      this._workspaces = new Array<TaskWorkspace>();
+    }
+    this._workspaces.push({
+      name: name,
+      description: description,
+    });
+    return this;
+  }
+
+  public withStringParam(name: string, description: string = '', defaultValue: string = '') : TaskBuilder {
+    if (! this._params) {
+      this._params = new Array<TaskParam>();
+    }
+    this._params.push({
+      name: name,
+      description: description,
+      default: defaultValue,
+    });
+    return this;
+  }
+
+  /**
    * Adds the given `step` (`TaskStepBuilder`) to the `Task`.
    * @param step
    */
-  public withStep(step: TaskStepBuilder) {
+  public withStep(step: TaskStepBuilder): TaskBuilder {
     this._steps!.push(step);
     return this;
   }
@@ -270,6 +334,9 @@ export class TaskBuilder {
         name: this.name,
       },
       spec: {
+        description: this.description,
+        workspaces: this._workspaces,
+        params: this._params,
         steps: taskSteps,
       },
     };
@@ -284,6 +351,19 @@ export class TaskBuilder {
  * intelligently add a task and its properties to a Pipeline.
  */
 export class PipelineTaskBuilder {
+
+  /**
+   * Creates an instance of this builder with the provided `TaskBuilder` as
+   * a source.
+   * @param task
+   */
+  public static createFromTask(task: TaskBuilder) {
+    const created = new PipelineTaskBuilder();
+    created.withName(task.name!);
+
+    return created;
+  }
+
   private _name?: string;
   private _taskRefName?: string;
   private _workspaces?: WorkspaceRec[];
@@ -384,9 +464,10 @@ export class PipelineTaskBuilder {
    * @param name The name of the param on the task.
    * @param refName The name of the param at the pipeline level.
    * @param value The value of the parameter on the task.
+   * @param description The default value for the param at the pipeline level
    * @param defaultValue The default value for the param at the pipeline level
    */
-  public withStringParam(name: string, refName: string, value: string, defaultValue: string = ''): PipelineTaskBuilder {
+  public withStringParam(name: string, refName: string, value: string, description: string = '', defaultValue: string = ''): PipelineTaskBuilder {
     if (!this._parameters) {
       this._parameters = new Array<ParamRec>();
     }
@@ -396,6 +477,7 @@ export class PipelineTaskBuilder {
       refName: refName,
       type: 'string',
       defaultValue: defaultValue,
+      description: description,
     });
     return this;
   }
@@ -498,7 +580,7 @@ export class PipelineBuilder {
     this._tasks?.forEach(t => {
 
       const taskParams: TaskParam[] = new Array<TaskParam>();
-      const taskWorkspaces: TaskWorkspace[] = new Array<TaskWorkspace>();
+      const taskWorkspaces: PipelineTaskWorkspace[] = new Array<TaskWorkspace>();
 
       t.parameters?.forEach(p => {
         const pp = pipelineParams.find((value, index, obj) => value.name == obj[index].name);

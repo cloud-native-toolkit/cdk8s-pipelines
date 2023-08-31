@@ -12,6 +12,17 @@ export interface NamedResource {
   readonly name?: string;
 }
 
+export interface NameKeyPair extends NamedResource {
+  readonly key?: string;
+}
+
+export function secretKeyRef(name: string, key: string): NameKeyPair {
+  return {
+    name: name,
+    key: key,
+  };
+}
+
 /**
  * Convenience method for formatting the value of a working directory.
  * @param workspace
@@ -24,7 +35,7 @@ export function buildWorkingDir(workspace: string): string {
  * Builds the correct string for referencing the parameter specified by `name`
  * that can be used when building tasks and others.
  *
- * For example, if the parameter is `foo`, the result will be
+ * For example, if the parameter is `foo`, the result will be `$(params.foo)`.
  * @param name The name of the parameter.
  */
 export function buildParam(name: string): string {
