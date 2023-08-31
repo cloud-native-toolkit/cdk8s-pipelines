@@ -1353,6 +1353,8 @@ The description of the workspace.
 
 ### TaskEnvValueSource <a name="TaskEnvValueSource" id="cdk8s-pipelines.TaskEnvValueSource"></a>
 
+The source for a `env` `valueFrom`.
+
 #### Initializer <a name="Initializer" id="cdk8s-pipelines.TaskEnvValueSource.Initializer"></a>
 
 ```typescript
@@ -1564,9 +1566,9 @@ const taskSpecParam: TaskSpecParam = { ... }
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
 | <code><a href="#cdk8s-pipelines.TaskSpecParam.property.name">name</a></code> | <code>string</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.TaskSpecParam.property.default">default</a></code> | <code>string</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.TaskSpecParam.property.description">description</a></code> | <code>string</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.TaskSpecParam.property.type">type</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskSpecParam.property.default">default</a></code> | <code>string</code> | The default value for a parameter. |
+| <code><a href="#cdk8s-pipelines.TaskSpecParam.property.description">description</a></code> | <code>string</code> | The parameter's description. |
+| <code><a href="#cdk8s-pipelines.TaskSpecParam.property.type">type</a></code> | <code>string</code> | The parameter's type. |
 
 ---
 
@@ -1588,6 +1590,8 @@ public readonly default: string;
 
 - *Type:* string
 
+The default value for a parameter.
+
 ---
 
 ##### `description`<sup>Optional</sup> <a name="description" id="cdk8s-pipelines.TaskSpecParam.property.description"></a>
@@ -1598,6 +1602,8 @@ public readonly description: string;
 
 - *Type:* string
 
+The parameter's description.
+
 ---
 
 ##### `type`<sup>Optional</sup> <a name="type" id="cdk8s-pipelines.TaskSpecParam.property.type"></a>
@@ -1607,6 +1613,8 @@ public readonly type: string;
 ```
 
 - *Type:* string
+
+The parameter's type.
 
 ---
 
@@ -1743,6 +1751,8 @@ The name of the working directory for the step.
 
 ### TaskStepEnv <a name="TaskStepEnv" id="cdk8s-pipelines.TaskStepEnv"></a>
 
+An `env` for a `Step` on a `Task`.
+
 #### Initializer <a name="Initializer" id="cdk8s-pipelines.TaskStepEnv.Initializer"></a>
 
 ```typescript
@@ -1840,7 +1850,7 @@ const taskWorkspace: TaskWorkspace = { ... }
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
 | <code><a href="#cdk8s-pipelines.TaskWorkspace.property.name">name</a></code> | <code>string</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.TaskWorkspace.property.description">description</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskWorkspace.property.description">description</a></code> | <code>string</code> | The description of the workspace. |
 
 ---
 
@@ -1861,6 +1871,8 @@ public readonly description: string;
 ```
 
 - *Type:* string
+
+The description of the workspace.
 
 ---
 
@@ -2453,6 +2465,10 @@ Gets the name of the `Task` built by the `TaskBuilder`.
 
 
 ### TaskRef <a name="TaskRef" id="cdk8s-pipelines.TaskRef"></a>
+
+A `Task` reference.
+
+Will be generated as a `taskRef`.
 
 #### Initializers <a name="Initializers" id="cdk8s-pipelines.TaskRef.Initializer"></a>
 
