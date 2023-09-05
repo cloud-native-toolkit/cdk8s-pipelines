@@ -1,0 +1,141 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TaskBuilderTest PullRequestTaskBuilder 1`] = `
+[
+  {
+    "apiVersion": "tekton.dev/v1beta1",
+    "kind": "Task",
+    "metadata": {
+      "name": "pull-request",
+    },
+    "spec": {
+      "description": "This Task allows a user to interact with an SCM (source control management)
+system through an abstracted interface
+
+This Task works with both public SCM instances and self-hosted/enterprise GitHub/GitLab
+instances. In download mode, this Task will look at the state of an existing pull
+request and populate the pr workspace with the state of the pull request, including the
+.MANIFEST file. In upload mode, this Task will look at the contents of the pr workspace
+ and compare it to the .MANIFEST file (if it exists).",
+      "params": [
+        {
+          "default": "",
+          "description": "If "download", the state of the pull request at \`url\` will be fetched. If "upload" then the pull request at \`url\` will be updated.",
+          "name": "mode",
+        },
+        {
+          "default": "",
+          "description": "The URL of the Pull Reuqest, e.g. \`https://github.com/bobcatfish/catservice/pull/16\`",
+          "name": "url",
+        },
+        {
+          "default": "",
+          "description": "The type of SCM system, currently \`github\` or \`gitlab\`",
+          "name": "provider",
+        },
+        {
+          "default": "",
+          "description": "The name of an opaque secret containing a key called "token" with a base64 encoded SCM token",
+          "name": "secret-key-ref",
+        },
+        {
+          "default": "false",
+          "description": "If "true", certificate validation will be disabled",
+          "name": "insecure-skip-tls-verify",
+        },
+      ],
+      "steps": [
+        {
+          "args": [
+            "-url",
+            "$(params.url)",
+            "-path",
+            "$(workspaces.pr.path)",
+            "-mode",
+            "$(params.mode)",
+            "-provider",
+            "$(params.provider)",
+            "-insecure-skip-tls-verify",
+            "$(params.insecure-skip-tls-verify)",
+          ],
+          "command": [
+            "/ko-app/pullrequest-init",
+          ],
+          "env": [
+            {
+              "name": "AUTH_TOKEN",
+              "valueFrom": {
+                "secretKeyRef": {
+                  "key": "token",
+                  "name": "$(params.secret-key-ref)",
+                },
+              },
+            },
+          ],
+          "image": "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/pullrequest-init@sha256:69633ecd0e948f6462c61bb9e008b940a05b143ef51c67e6e4093278a23dac53",
+          "name": "pullrequest-init",
+          "workingDir": undefined,
+        },
+      ],
+      "workspaces": [
+        {
+          "description": "",
+          "name": "pr",
+        },
+      ],
+    },
+  },
+]
+`;
+
+exports[`TaskBuilderTest TaskBuilderBasic 1`] = `
+[
+  {
+    "apiVersion": "tekton.dev/v1beta1",
+    "kind": "Task",
+    "metadata": {
+      "name": "ansible-runner",
+    },
+    "spec": {
+      "description": "Task to run Ansible playbooks using Ansible Runner",
+      "params": [
+        {
+          "default": "",
+          "description": "",
+          "name": "project-dir",
+        },
+      ],
+      "steps": [
+        {
+          "env": undefined,
+          "image": "$(params.image)",
+          "name": "requirements",
+          "script": "#!/bin/bash\\nset -e\\n\\nif [ -f requirements.txt ];\\nthen\\n  pip3 install --user \\\\n  -r requirements.txt\\nfi\\n\\nif [ -f  requirements.yml ];\\nthen\\n  ansible-galaxy role install -vv \\\\n    -r requirements.yml\\n  ansible-galaxy collection install -vv \\\\n    -r requirements.yml\\nfi\\n",
+          "workingDir": "$(workspaces.runner-dir.path)/$(params.project-dir)",
+        },
+        {
+          "args": [
+            "ansible-runner",
+            "run",
+            "$(params.args)",
+            "$(params.project-dir)",
+          ],
+          "command": [
+            "entrypoint",
+          ],
+          "env": undefined,
+          "image": "$(params.image)",
+          "name": "run-playbook",
+          "workingDir": "$(workspaces.runner-dir.path)",
+        },
+      ],
+      "workspaces": [
+        {
+          "description": "The Ansibler runner directory",
+          "name": "runner-dir",
+        },
+      ],
+    },
+  },
+]
+`;
