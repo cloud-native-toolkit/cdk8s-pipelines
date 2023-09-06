@@ -14,6 +14,7 @@ const project = new cdk8s.ConstructLibraryCdk8s({
   ],
   devDeps: [
     '@cdk8s/projen-common',
+    'cdk8s-plus-27',
   ],
   keywords: [
     'cdk8s',
