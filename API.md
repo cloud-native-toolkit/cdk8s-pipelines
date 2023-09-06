@@ -2551,7 +2551,7 @@ public buildTaskStep(): TaskStep
 ##### `fromScriptObject` <a name="fromScriptObject" id="cdk8s-pipelines.TaskStepBuilder.fromScriptObject"></a>
 
 ```typescript
-public fromScriptObject(obj: ApiObject): TaskStepBuilder
+public fromScriptObject(obj: any): TaskStepBuilder
 ```
 
 If supplied, uses the cdk8s `ApiObject` supplied as the body of the `script` for the `Task`.
@@ -2564,7 +2564,7 @@ If you supply this, do not supply a value for `fromScriptUrl`.
 
 ###### `obj`<sup>Required</sup> <a name="obj" id="cdk8s-pipelines.TaskStepBuilder.fromScriptObject.parameter.obj"></a>
 
-- *Type:* cdk8s.ApiObject
+- *Type:* any
 
 ---
 

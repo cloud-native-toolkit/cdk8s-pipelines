@@ -34,6 +34,58 @@ class TestBasicTaskBuild extends Chart {
   }
 }
 
+class TestBasicTaskBuildFromObject extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const imageName = '$(params.image)';
+
+    // TODO: There is a Namespace object in the core library but it does not extend from ApiObject.
+    const myNamespace = {
+      apiVersion: 'v1',
+      kind: 'Namespace',
+      metadata: {
+        name: 'MyNamespace',
+      },
+    };
+
+    const myCatalogSource = {
+      apiVersion: 'operators.coreos.com/v1alpha1',
+      kind: 'CatalogSource',
+      metadata: {
+        name: 'ibm-operator-catalog',
+        namespace: 'openshift-marketplace',
+      },
+      spec: {
+        displayName: 'IBM Operator Catalog',
+        publisher: 'IBM',
+        sourceType: 'grpc',
+        image: 'icr.io/cpopen/ibm-operator-catalog',
+        updateStrategy: {
+          registryPoll: {
+            interval: '45m',
+          },
+        },
+      },
+    };
+
+    new TaskBuilder(this, 'my-task')
+      .withName('ansible-runner')
+      .withDescription('Task to run Ansible playbooks using Ansible Runner')
+      .withWorkspace('runner-dir', 'The Ansibler runner directory')
+      .withStringParam('project-dir' )
+      .withStep(new TaskStepBuilder()
+        .withName('requirements')
+        .withImage(imageName)
+        .fromScriptObject(myNamespace))
+      .withStep(new TaskStepBuilder()
+        .withName('run-playbook')
+        .withImage(imageName)
+        .fromScriptObject(myCatalogSource))
+      .buildTask();
+  }
+}
+
 class TestPullRequestTaskBuild extends Chart {
   constructor(scope: Construct, id: string, props?: ChartProps) {
     super(scope, id, props);
@@ -83,6 +135,12 @@ describe('TaskBuilderTest', () => {
   test('PullRequestTaskBuilder', () => {
     const app = Testing.app();
     const chart = new TestPullRequestTaskBuild(app, 'pull-request');
+    const results = Testing.synth(chart);
+    expect(results).toMatchSnapshot();
+  });
+  test('ObjectTaskBuilder', () => {
+    const app = Testing.app();
+    const chart = new TestBasicTaskBuildFromObject(app, 'apply-object');
     const results = Testing.synth(chart);
     expect(results).toMatchSnapshot();
   });

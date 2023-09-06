@@ -1,5 +1,66 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`TaskBuilderTest ObjectTaskBuilder 1`] = `
+[
+  {
+    "apiVersion": "tekton.dev/v1beta1",
+    "kind": "Task",
+    "metadata": {
+      "name": "ansible-runner",
+    },
+    "spec": {
+      "description": "Task to run Ansible playbooks using Ansible Runner",
+      "params": [
+        {
+          "default": "",
+          "description": "",
+          "name": "project-dir",
+        },
+      ],
+      "steps": [
+        {
+          "env": undefined,
+          "image": "$(params.image)",
+          "name": "requirements",
+          "script": "apiVersion: v1
+kind: Namespace
+metadata:
+  name: MyNamespace
+",
+          "workingDir": undefined,
+        },
+        {
+          "env": undefined,
+          "image": "$(params.image)",
+          "name": "run-playbook",
+          "script": "apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: ibm-operator-catalog
+  namespace: openshift-marketplace
+spec:
+  displayName: IBM Operator Catalog
+  publisher: IBM
+  sourceType: grpc
+  image: icr.io/cpopen/ibm-operator-catalog
+  updateStrategy:
+    registryPoll:
+      interval: 45m
+",
+          "workingDir": undefined,
+        },
+      ],
+      "workspaces": [
+        {
+          "description": "The Ansibler runner directory",
+          "name": "runner-dir",
+        },
+      ],
+    },
+  },
+]
+`;
+
 exports[`TaskBuilderTest PullRequestTaskBuilder 1`] = `
 [
   {

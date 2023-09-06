@@ -24,6 +24,10 @@
       "type": "build"
     },
     {
+      "name": "cdk8s-plus-27",
+      "type": "build"
+    },
+    {
       "name": "cdk8s",
       "version": "2.30.0",
       "type": "build"
