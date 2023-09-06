@@ -1,18 +1,64 @@
+/**
+ * This file includes the basic objects for creating Tasks and dependencies.
+ * While cdk8s supports generating this file from the CRD, the Tekton CRD at
+ * the moment does not have the fields specified. See https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml,
+ * specifically here:
+ *       schema:
+ *         openAPIV3Schema:
+ *           type: object
+ *           # OpenAPIV3 schema allows Kubernetes to perform validation on the schema fields
+ *           # and use the schema in tooling such as `kubectl explain`.
+ *           # Using "x-kubernetes-preserve-unknown-fields: true"
+ *           # at the root of the schema (or within it) allows arbitrary fields.
+ *           # We currently perform our own validation separately.
+ *           # See https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#specifying-a-structural-schema
+ *           # for more info.
+ *           x-kubernetes-preserve-unknown-fields: true
+ * For the time being, these objects are created manually using the latest
+ * Tekton documentation as a reference.
+ */
 import { ApiObject, ApiObjectMetadata, GroupVersionKind } from 'cdk8s';
 import { Construct } from 'constructs';
-import { NamedResource } from './common';
+import { NamedResource, NameKeyPair } from './common';
+
+
+/**
+ * The source for a `env` `valueFrom`.
+ */
+export interface TaskEnvValueSource {
+  readonly secretKeyRef: NameKeyPair;
+}
+
+/**
+ * Creates an `env` source that can be used in the `env`'s `valueFrom`.
+ * @param nk The name and key pair.
+ */
+export function valueFrom(nk: NameKeyPair): TaskEnvValueSource {
+  return {
+    secretKeyRef: nk,
+  };
+}
+
+/**
+ * An `env` for a `Step` on a `Task`.
+ */
+export interface TaskStepEnv extends NamedResource{
+  readonly valueFrom?: TaskEnvValueSource;
+}
 
 /**
  * A workspace used by a Task. See https://tekton.dev/docs/pipelines/workspaces/#using-workspaces-in-tasks for more information.
  */
-export interface TaskWorkspace extends NamedResource{
-  readonly workspace?: string;
-}
-
-export interface TaskWorkspaceRef extends TaskWorkspace {
+export interface TaskWorkspace extends NamedResource {
+  /**
+   * The description of the workspace.
+   */
   readonly description?: string;
 }
 
+/**
+ * A `Task` reference. Will be generated as a `taskRef`.
+ */
 export class TaskRef {
   name?: string;
 
@@ -22,7 +68,7 @@ export class TaskRef {
 }
 
 /**
- * A Task parameter.
+ * A Task parameter value.
  */
 export interface TaskParam extends NamedResource {
   /**
@@ -32,30 +78,121 @@ export interface TaskParam extends NamedResource {
 }
 
 /**
- * Properties used to create the Pipelines.
+ * Specifies execution parameters for the Task.
  */
-export interface TaskProps extends NamedResource {
+export interface TaskSpecParam extends NamedResource {
+  /**
+   * The parameter's type.
+   */
+  readonly type?: string;
+  /**
+   * The parameter's description.
+   */
+  readonly description?: string;
+  /**
+   * The default value for a parameter.
+   */
+  readonly default?: string;
+}
+
+/**
+ * The volume mount for the task.
+ */
+export interface TaskVolumeMount extends NamedResource {
+  readonly mountPath?: string;
 }
 
 /**
  * The step for a Task. See https://tekton.dev/docs/pipelines/tasks/#defining-steps
+ * @see https://tekton.dev/docs/pipelines/container-contract/
  */
 export interface TaskStep extends NamedResource {
+  /**
+   * The name of the container image to use for the Step.
+   */
   readonly image?: string;
+  /**
+   * A script that will be executed on the image. If `script` is specified,
+   * then the `command` value should not be specified.
+   */
   readonly script?: string;
+  /**
+   * The command and its arguments (provided in the form of an array) to
+   * execute on the container. If `command` is supplied, you should not supply
+   * `script`.
+   */
+  readonly command?: string[];
+  /**
+   * Alternatively, you can supply `args` to the `command` value here.
+   */
+  readonly args?: string[];
+  /**
+   * The volume mounts to use for the task.
+   */
+  readonly volumeMounts?: TaskVolumeMount[];
+  /**
+   * The name of the working directory for the step
+   */
+  readonly workingDir?: string;
+
+  /**
+   * Environment variables for the `Step` on the `Task`.
+   */
+  readonly env?: TaskStepEnv[];
 }
+
 
 /**
  * The Task spec.
+ *
+ * @see https://tekton.dev/docs/pipelines/tasks/#configuring-a-task
  */
 export interface TaskSpec {
+  /**
+   * The description of the `Task`.
+   * @see https://tekton.dev/docs/pipelines/tasks/#adding-a-description
+   */
+  readonly description?: string;
+  /**
+   * The `Task`'s parameters.
+   * @see https://tekton.dev/docs/pipelines/tasks/#specifying-parameters
+   */
+  readonly params?: TaskSpecParam[];
+
+  readonly workspaces?: TaskWorkspace[];
+  /**
+   * The steps that will be executed as part of the Task. The `Step` should
+   * fit the (container contract)[https://tekton.dev/docs/pipelines/container-contract/]
+   * @see https://tekton.dev/docs/pipelines/tasks/#defining-steps
+   */
   readonly steps?: TaskStep[];
+
 }
 
 /**
+ * Properties used to create the Task.
+ */
+export interface TaskProps {
+  /**
+   * The object [metadata](https://kubernetes.io/docs/concepts/overview/working-with-objects/#required-fields)
+   * that conforms to standard Kubernetes metadata.
+   */
+  readonly metadata?: ApiObjectMetadata;
+  /**
+   * The `spec` is the configuration of the `Task` object.
+   */
+  readonly spec?: TaskSpec;
+}
+
+/**
+ * A Tekton Task, which is
+ * > a collection of Steps that you define and arrange in
+ * > a specific order of execution as part of your continuous integration flow. A
+ * > Task executes as a Pod on your Kubernetes cluster. A Task is available within a
+ * > specific namespace, while a ClusterTask is available across the entire
+ * > cluster.
  *
- *
- * @schema Task
+ * @see https://tekton.dev/docs/pipelines/tasks/
  */
 export class Task extends ApiObject {
   /**
@@ -94,6 +231,8 @@ export class Task extends ApiObject {
       ...Task.GVK,
       ...props,
     });
+    this._metadata = props.metadata;
+    this._spec = props.spec;
   }
 
   /**
