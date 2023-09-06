@@ -4,7 +4,7 @@
 
 
 import * as fs from 'fs';
-import { ApiObject } from 'cdk8s';
+import { ApiObject, Yaml } from 'cdk8s';
 import { Construct } from 'constructs';
 import { Pipeline, PipelineParam, PipelineTask, PipelineTaskDef, PipelineTaskWorkspace, PipelineWorkspace } from './pipelines';
 import { Task, TaskEnvValueSource, TaskParam, TaskProps, TaskRef, TaskSpecParam, TaskStep, TaskStepEnv, TaskWorkspace } from './tasks';
@@ -35,7 +35,7 @@ export interface ParamRec {
 
 export class TaskStepBuilder {
   private _url?: string;
-  private _obj?: ApiObject;
+  private _obj?: any;
   private _name?: string;
   private _dir?: string;
   private _image?: string;
@@ -153,7 +153,7 @@ export class TaskStepBuilder {
    * If you supply this, do not supply a value for `fromScriptUrl`.
    * @param obj
    */
-  public fromScriptObject(obj: ApiObject): TaskStepBuilder {
+  public fromScriptObject(obj: any): TaskStepBuilder {
     this._obj = obj;
     return this;
   }
@@ -195,6 +195,20 @@ export class TaskStepBuilder {
           name: this.name,
           image: this.image,
           script: lines,
+          workingDir: this.workingDir,
+          env: this._env,
+        };
+      }
+    } else if (this.scriptObj) {
+      if (this.scriptUrl) {
+        throw new Error('Cannot specify both an object source and a URL source for the script');
+      }
+      const yamlData = Yaml.stringify(this.scriptObj);
+      if (yamlData) {
+        return {
+          name: this.name,
+          image: this.image,
+          script: yamlData,
           workingDir: this.workingDir,
           env: this._env,
         };
