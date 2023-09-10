@@ -23,6 +23,34 @@ class MyTestChart extends Chart {
   }
 }
 
+class MySecondTestChart extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const myTask = new TaskBuilder(this, 'git-clone')
+      .withName('fetch-source')
+      .withWorkspace(new WorkspaceBuilder('output')
+        .withName('shared-data')
+        .withDescription('The files cloned by the task'))
+      .withWorkspace(new WorkspaceBuilder('ssh-credentials')
+        .withName('ssh-creds')
+        .withDescription('The SSH files for credentials'))
+      .withWorkspace(new WorkspaceBuilder('config')
+        .withName('config-data')
+        .withDescription('The files for configuration for stuff'))
+      .withStringParam(new ParameterBuilder('url').withPiplineParameter('repo-url', ''))
+      .withStringParam(new ParameterBuilder('name').withPiplineParameter('your-name', ''))
+      .withStringParam(new ParameterBuilder('color').withPiplineParameter('your-color', ''))
+      .withStringParam(new ParameterBuilder('quest').withPiplineParameter('your-quest', ''));
+
+    new PipelineBuilder(this, 'my-test-pipeline-2')
+      .withName('clone-build-push')
+      .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
+      .withTask(myTask)
+      .buildPipeline();
+  }
+}
+
 class MyTestChartWithDups extends Chart {
   constructor(scope: Construct, id: string, props?: ChartProps) {
     super(scope, id, props);
@@ -59,6 +87,13 @@ describe('PipelineBuilderTest', () => {
   test('PipelineBuilder', () => {
     const app = Testing.app();
     const chart = new MyTestChart(app, 'test-chart');
+    const results = Testing.synth(chart);
+    expect(results).toMatchSnapshot();
+  });
+
+  test('PipelineBuilderWithComplexTasks', () => {
+    const app = Testing.app();
+    const chart = new MySecondTestChart(app, 'my-second-test-chart');
     const results = Testing.synth(chart);
     expect(results).toMatchSnapshot();
   });
