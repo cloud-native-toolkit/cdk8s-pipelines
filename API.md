@@ -772,6 +772,34 @@ Returns the apiVersion and kind for "Task".
 
 ## Structs <a name="Structs" id="Structs"></a>
 
+### BuilderOptions <a name="BuilderOptions" id="cdk8s-pipelines.BuilderOptions"></a>
+
+#### Initializer <a name="Initializer" id="cdk8s-pipelines.BuilderOptions.Initializer"></a>
+
+```typescript
+import { BuilderOptions } from 'cdk8s-pipelines'
+
+const builderOptions: BuilderOptions = { ... }
+```
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.BuilderOptions.property.buildDependencies">buildDependencies</a></code> | <code>boolean</code> | *No description.* |
+
+---
+
+##### `buildDependencies`<sup>Required</sup> <a name="buildDependencies" id="cdk8s-pipelines.BuilderOptions.property.buildDependencies"></a>
+
+```typescript
+public readonly buildDependencies: boolean;
+```
+
+- *Type:* boolean
+
+---
+
 ### NamedResource <a name="NamedResource" id="cdk8s-pipelines.NamedResource"></a>
 
 #### Initializer <a name="Initializer" id="cdk8s-pipelines.NamedResource.Initializer"></a>
@@ -1935,6 +1963,7 @@ Sets the value for the parameter.
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
 | <code><a href="#cdk8s-pipelines.ParameterBuilder.property.description">description</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.ParameterBuilder.property.requiresPipelineParameter">requiresPipelineParameter</a></code> | <code>boolean</code> | Returns true if this parameter expects input at the pipeline level. |
 | <code><a href="#cdk8s-pipelines.ParameterBuilder.property.defaultValue">defaultValue</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.ParameterBuilder.property.logicalID">logicalID</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.ParameterBuilder.property.name">name</a></code> | <code>string</code> | *No description.* |
@@ -1950,6 +1979,18 @@ public readonly description: string;
 ```
 
 - *Type:* string
+
+---
+
+##### `requiresPipelineParameter`<sup>Required</sup> <a name="requiresPipelineParameter" id="cdk8s-pipelines.ParameterBuilder.property.requiresPipelineParameter"></a>
+
+```typescript
+public readonly requiresPipelineParameter: boolean;
+```
+
+- *Type:* boolean
+
+Returns true if this parameter expects input at the pipeline level.
 
 ---
 
@@ -2051,10 +2092,16 @@ new PipelineBuilder(scope: Construct, id: string)
 ##### `buildPipeline` <a name="buildPipeline" id="cdk8s-pipelines.PipelineBuilder.buildPipeline"></a>
 
 ```typescript
-public buildPipeline(): void
+public buildPipeline(opts?: BuilderOptions): void
 ```
 
 Builds the actual [Pipeline]() from the settings configured using the fluid syntax.
+
+###### `opts`<sup>Optional</sup> <a name="opts" id="cdk8s-pipelines.PipelineBuilder.buildPipeline.parameter.opts"></a>
+
+- *Type:* <a href="#cdk8s-pipelines.BuilderOptions">BuilderOptions</a>
+
+---
 
 ##### `withDescription` <a name="withDescription" id="cdk8s-pipelines.PipelineBuilder.withDescription"></a>
 
