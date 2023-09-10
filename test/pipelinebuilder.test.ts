@@ -8,8 +8,8 @@ class MyTestChart extends Chart {
   constructor(scope: Construct, id: string, props?: ChartProps) {
     super(scope, id, props);
 
-    const myTask = new TaskBuilder(this, 'git-clone')
-      .withName('fetch-source')
+    const myTask = new TaskBuilder(this, 'fetch-source')
+      .withName('git-clone')
       .withWorkspace(new WorkspaceBuilder('output')
         .withName('shared-data')
         .withDescription('The files cloned by the task'))
@@ -19,7 +19,7 @@ class MyTestChart extends Chart {
       .withName('clone-build-push')
       .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
       .withTask(myTask)
-      .buildPipeline();
+      .buildPipeline({ buildDependencies: true });
   }
 }
 
@@ -83,6 +83,30 @@ class MyTestChartWithDups extends Chart {
   }
 }
 
+class MyTestChartWithStaticOverride extends Chart {
+
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const urlParam = new ParameterBuilder('url')
+      .withPiplineParameter('repo-url', '');
+
+    const myTask2 = new TaskBuilder(this, 'cat-readme')
+      .withName('print-readme')
+      .withStringParam(urlParam)
+    ;
+
+    // This should override the parameter with a static value.
+    myTask2.withStringParam(new ParameterBuilder('url').withValue('https://api.example.io'));
+
+    new PipelineBuilder(this, 'my-pipeline')
+      .withName('clone-build-push')
+      .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
+      .withTask(myTask2)
+      .buildPipeline();
+  }
+}
+
 describe('PipelineBuilderTest', () => {
   test('PipelineBuilder', () => {
     const app = Testing.app();
@@ -101,6 +125,13 @@ describe('PipelineBuilderTest', () => {
   test('PipelineBuilderWithDuplicates', () => {
     const app = Testing.app();
     const chart = new MyTestChartWithDups(app, 'test-chart');
+    const results = Testing.synth(chart);
+    expect(results).toMatchSnapshot();
+  });
+
+  test('PipelineBuilderWithStaticOverride', () => {
+    const app = Testing.app();
+    const chart = new MyTestChartWithStaticOverride(app, 'test-chart');
     const results = Testing.synth(chart);
     expect(results).toMatchSnapshot();
   });
