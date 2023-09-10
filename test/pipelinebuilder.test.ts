@@ -2,17 +2,18 @@ import { Chart, Testing } from 'cdk8s';
 import { ChartProps } from 'cdk8s/lib/chart';
 import { Construct } from 'constructs';
 // @ts-ignore
-import { Pipeline, PipelineBuilder, PipelineTaskBuilder, PipelineTaskDef, TaskRef } from '../src';
+import { Pipeline, PipelineBuilder, PipelineTaskBuilder, PipelineTaskDef, TaskRef, TaskBuilder, WorkspaceBuilder, ParameterBuilder } from '../src';
 
 class MyTestChart extends Chart {
   constructor(scope: Construct, id: string, props?: ChartProps) {
     super(scope, id, props);
 
-    const myTask = new PipelineTaskBuilder()
+    const myTask = new TaskBuilder(this, 'git-clone')
       .withName('fetch-source')
-      .withTaskReference('git-clone')
-      .withWorkspace('output', 'shared-data', 'The files cloned by the task')
-      .withStringParam('url', 'repo-url', '$(params.repo-url)');
+      .withWorkspace(new WorkspaceBuilder('output')
+        .withName('shared-data')
+        .withDescription('The files cloned by the task'))
+      .withStringParam(new ParameterBuilder('url').withPiplineParameter('repo-url', ''));
 
     new PipelineBuilder(this, 'my-pipeline')
       .withName('clone-build-push')
@@ -26,18 +27,23 @@ class MyTestChartWithDups extends Chart {
   constructor(scope: Construct, id: string, props?: ChartProps) {
     super(scope, id, props);
 
-    const myTask = new PipelineTaskBuilder()
-      .withName('fetch-source')
-      .withTaskReference('git-clone')
-      .withWorkspace('output', 'shared-data', 'The files cloned by the task')
-      .withStringParam('url', 'repo-url', '$(params.repo-url)')
-      ;
+    const myWorkspace = new WorkspaceBuilder('output')
+      .withDescription('The files cloned by the task')
+      .withName('shared-data');
 
-    const myTask2 = new PipelineTaskBuilder()
+    const urlParam = new ParameterBuilder('url')
+      .withPiplineParameter('repo-url', '');
+
+    const myTask = new TaskBuilder(this, 'git-clone')
+      .withName('fetch-source')
+      .withWorkspace(myWorkspace)
+      .withStringParam(urlParam)
+    ;
+
+    const myTask2 = new TaskBuilder(this, 'cat-readme')
       .withName('print-readme')
-      .withTaskReference('cat-readme')
-      .withWorkspace('output', 'shared-data', 'The files cloned by the task')
-      .withStringParam('url', 'repo-url', '$(params.repo-url)')
+      .withWorkspace(myWorkspace)
+      .withStringParam(urlParam)
     ;
 
     new PipelineBuilder(this, 'my-pipeline')

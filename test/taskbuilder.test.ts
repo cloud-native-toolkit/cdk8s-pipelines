@@ -2,7 +2,7 @@ import * as path from 'path';
 import { Chart, Testing } from 'cdk8s';
 import { ChartProps } from 'cdk8s/lib/chart';
 import { Construct } from 'constructs';
-import { buildParam, buildWorkingDir, secretKeyRef, TaskBuilder, TaskStepBuilder, valueFrom } from '../src';
+import { buildParam, buildWorkingDir, secretKeyRef, TaskBuilder, TaskStepBuilder, valueFrom, WorkspaceBuilder, ParameterBuilder } from '../src';
 
 /**
  * Using "ansible-runner" as the reference task that I want this test builder to
@@ -14,11 +14,18 @@ class TestBasicTaskBuild extends Chart {
 
     const imageName = '$(params.image)';
 
+    const runnerDir = new WorkspaceBuilder('runner-dir')
+      .withDescription('The Ansibler runner directory');
+
+    const projectDirName = new ParameterBuilder('project-dir')
+      .ofType('string')
+      .withPiplineParameter('project-dir');
+
     new TaskBuilder(this, 'my-task')
       .withName('ansible-runner')
       .withDescription('Task to run Ansible playbooks using Ansible Runner')
-      .withWorkspace('runner-dir', 'The Ansibler runner directory')
-      .withStringParam('project-dir' )
+      .withWorkspace(runnerDir)
+      .withStringParam(projectDirName)
       .withStep(new TaskStepBuilder()
         .withName('requirements')
         .withImage(imageName)
@@ -69,11 +76,18 @@ class TestBasicTaskBuildFromObject extends Chart {
       },
     };
 
+    const runnerDir = new WorkspaceBuilder('runner-dir')
+      .withDescription('The Ansibler runner directory');
+
+    const projectDirName = new ParameterBuilder('project-dir')
+      .ofType('string')
+      .withPiplineParameter('project-dir');
+
     new TaskBuilder(this, 'my-task')
       .withName('ansible-runner')
       .withDescription('Task to run Ansible playbooks using Ansible Runner')
-      .withWorkspace('runner-dir', 'The Ansibler runner directory')
-      .withStringParam('project-dir' )
+      .withWorkspace(runnerDir)
+      .withStringParam(projectDirName)
       .withStep(new TaskStepBuilder()
         .withName('requirements')
         .withImage(imageName)
@@ -97,12 +111,22 @@ class TestPullRequestTaskBuild extends Chart {
     new TaskBuilder(this, 'pull-request')
       .withName('pull-request')
       .withDescription('This Task allows a user to interact with an SCM (source control management)\nsystem through an abstracted interface\n\nThis Task works with both public SCM instances and self-hosted/enterprise GitHub/GitLab\ninstances. In download mode, this Task will look at the state of an existing pull\nrequest and populate the pr workspace with the state of the pull request, including the\n.MANIFEST file. In upload mode, this Task will look at the contents of the pr workspace\n and compare it to the .MANIFEST file (if it exists).')
-      .withStringParam('mode', 'If "download", the state of the pull request at `url` will be fetched. If "upload" then the pull request at `url` will be updated.')
-      .withStringParam('url', 'The URL of the Pull Reuqest, e.g. `https://github.com/bobcatfish/catservice/pull/16`')
-      .withStringParam('provider', 'The type of SCM system, currently `github` or `gitlab`')
-      .withStringParam('secret-key-ref', 'The name of an opaque secret containing a key called "token" with a base64 encoded SCM token')
-      .withStringParam('insecure-skip-tls-verify', 'If "true", certificate validation will be disabled', 'false')
-      .withWorkspace('pr')
+      .withStringParam(new ParameterBuilder('mode')
+        .withPiplineParameter('mode')
+        .withDescription('If "download", the state of the pull request at `url` will be fetched. If "upload" then the pull request at `url` will be updated.'))
+      .withStringParam(new ParameterBuilder('url')
+        .withPiplineParameter('repo-url')
+        .withDescription('The URL of the Pull Reuqest, e.g. `https://github.com/bobcatfish/catservice/pull/16`'))
+      .withStringParam(new ParameterBuilder('provider')
+        .withPiplineParameter('provider')
+        .withDescription('The type of SCM system, currently `github` or `gitlab`'))
+      .withStringParam(new ParameterBuilder('secret-key-ref')
+        .withPiplineParameter('secret-key-ref')
+        .withDescription('The name of an opaque secret containing a key called "token" with a base64 encoded SCM token'))
+      .withStringParam(new ParameterBuilder('insecure-skip-tls-verify')
+        .withDefaultValue('false')
+        .withDescription('If "true", certificate validation will be disabled'))
+      .withWorkspace(new WorkspaceBuilder('pr'))
       .withStep(new TaskStepBuilder()
         .withName('pullrequest-init')
         .withImage('gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/pullrequest-init@sha256:69633ecd0e948f6462c61bb9e008b940a05b143ef51c67e6e4093278a23dac53')
