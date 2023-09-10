@@ -4,6 +4,30 @@ exports[`PipelineBuilderTest PipelineBuilder 1`] = `
 [
   {
     "apiVersion": "tekton.dev/v1beta1",
+    "kind": "Task",
+    "metadata": {
+      "name": "git-clone",
+    },
+    "spec": {
+      "description": undefined,
+      "params": [
+        {
+          "default": "",
+          "description": "",
+          "name": "url",
+        },
+      ],
+      "steps": [],
+      "workspaces": [
+        {
+          "description": "The files cloned by the task",
+          "name": "output",
+        },
+      ],
+    },
+  },
+  {
+    "apiVersion": "tekton.dev/v1beta1",
     "kind": "Pipeline",
     "metadata": {
       "name": "clone-build-push",
@@ -77,7 +101,7 @@ exports[`PipelineBuilderTest PipelineBuilderWithComplexTasks 1`] = `
       ],
       "tasks": [
         {
-          "name": "fetch-source",
+          "name": "git-clone",
           "params": [
             {
               "name": "url",
@@ -97,7 +121,7 @@ exports[`PipelineBuilderTest PipelineBuilderWithComplexTasks 1`] = `
             },
           ],
           "taskRef": {
-            "name": "git-clone",
+            "name": "fetch-source",
           },
           "workspaces": [
             {
@@ -152,7 +176,7 @@ exports[`PipelineBuilderTest PipelineBuilderWithDuplicates 1`] = `
       ],
       "tasks": [
         {
-          "name": "fetch-source",
+          "name": "git-clone",
           "params": [
             {
               "name": "url",
@@ -160,7 +184,7 @@ exports[`PipelineBuilderTest PipelineBuilderWithDuplicates 1`] = `
             },
           ],
           "taskRef": {
-            "name": "git-clone",
+            "name": "fetch-source",
           },
           "workspaces": [
             {
@@ -170,7 +194,7 @@ exports[`PipelineBuilderTest PipelineBuilderWithDuplicates 1`] = `
           ],
         },
         {
-          "name": "print-readme",
+          "name": "cat-readme",
           "params": [
             {
               "name": "url",
@@ -178,7 +202,7 @@ exports[`PipelineBuilderTest PipelineBuilderWithDuplicates 1`] = `
             },
           ],
           "taskRef": {
-            "name": "cat-readme",
+            "name": "print-readme",
           },
           "workspaces": [
             {
@@ -212,7 +236,7 @@ exports[`PipelineBuilderTest PipelineBuilderWithStaticOverride 1`] = `
       "params": [],
       "tasks": [
         {
-          "name": "print-readme",
+          "name": "cat-readme",
           "params": [
             {
               "name": "url",
@@ -220,7 +244,7 @@ exports[`PipelineBuilderTest PipelineBuilderWithStaticOverride 1`] = `
             },
           ],
           "taskRef": {
-            "name": "cat-readme",
+            "name": "print-readme",
           },
           "workspaces": [],
         },

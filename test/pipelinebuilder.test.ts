@@ -8,8 +8,8 @@ class MyTestChart extends Chart {
   constructor(scope: Construct, id: string, props?: ChartProps) {
     super(scope, id, props);
 
-    const myTask = new TaskBuilder(this, 'git-clone')
-      .withName('fetch-source')
+    const myTask = new TaskBuilder(this, 'fetch-source')
+      .withName('git-clone')
       .withWorkspace(new WorkspaceBuilder('output')
         .withName('shared-data')
         .withDescription('The files cloned by the task'))
@@ -19,7 +19,7 @@ class MyTestChart extends Chart {
       .withName('clone-build-push')
       .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
       .withTask(myTask)
-      .buildPipeline();
+      .buildPipeline({ buildDependencies: true });
   }
 }
 

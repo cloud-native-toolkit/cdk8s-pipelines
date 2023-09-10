@@ -10,6 +10,10 @@ import { buildParam } from './common';
 import { Pipeline, PipelineParam, PipelineTask, PipelineTaskWorkspace, PipelineWorkspace } from './pipelines';
 import { Task, TaskEnvValueSource, TaskParam, TaskProps, TaskSpecParam, TaskStep, TaskStepEnv, TaskWorkspace } from './tasks';
 
+export interface BuilderOptions {
+  readonly buildDependencies: boolean;
+}
+
 export class WorkspaceBuilder {
   private _logicalID: string;
   private _name?: string;
@@ -553,7 +557,7 @@ export class PipelineBuilder {
    * Builds the actual [Pipeline]() from the settings configured using the
    * fluid syntax.
    */
-  public buildPipeline(): void {
+  public buildPipeline(opts: BuilderOptions = { buildDependencies: false }): void {
     // TODO: validate the object
 
     const pipelineParams = new Map<string, PipelineParam>();
@@ -601,13 +605,19 @@ export class PipelineBuilder {
       });
 
       pipelineTasks.push({
-        name: t.name,
+        name: t.logicalID,
         taskRef: {
-          name: t.logicalID,
+          name: t.name,
         },
         params: taskParams,
         workspaces: taskWorkspaces,
       });
+
+      if (opts.buildDependencies) {
+        // Build the task if the user has asked for the dependencies to be
+        // built along with the pipeline.
+        t.buildTask();
+      }
     });
 
     new Pipeline(this._scope!, this._id!, {
