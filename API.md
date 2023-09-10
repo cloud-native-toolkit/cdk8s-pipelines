@@ -1935,6 +1935,7 @@ Sets the value for the parameter.
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
 | <code><a href="#cdk8s-pipelines.ParameterBuilder.property.description">description</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.ParameterBuilder.property.requiresPipelineParameter">requiresPipelineParameter</a></code> | <code>boolean</code> | Returns true if this parameter expects input at the pipeline level. |
 | <code><a href="#cdk8s-pipelines.ParameterBuilder.property.defaultValue">defaultValue</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.ParameterBuilder.property.logicalID">logicalID</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.ParameterBuilder.property.name">name</a></code> | <code>string</code> | *No description.* |
@@ -1950,6 +1951,18 @@ public readonly description: string;
 ```
 
 - *Type:* string
+
+---
+
+##### `requiresPipelineParameter`<sup>Required</sup> <a name="requiresPipelineParameter" id="cdk8s-pipelines.ParameterBuilder.property.requiresPipelineParameter"></a>
+
+```typescript
+public readonly requiresPipelineParameter: boolean;
+```
+
+- *Type:* boolean
+
+Returns true if this parameter expects input at the pipeline level.
 
 ---
 

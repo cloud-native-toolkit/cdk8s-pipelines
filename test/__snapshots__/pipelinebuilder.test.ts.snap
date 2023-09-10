@@ -198,3 +198,35 @@ exports[`PipelineBuilderTest PipelineBuilderWithDuplicates 1`] = `
   },
 ]
 `;
+
+exports[`PipelineBuilderTest PipelineBuilderWithStaticOverride 1`] = `
+[
+  {
+    "apiVersion": "tekton.dev/v1beta1",
+    "kind": "Pipeline",
+    "metadata": {
+      "name": "clone-build-push",
+    },
+    "spec": {
+      "description": "This pipeline closes a repository, builds a Docker image, etc.",
+      "params": [],
+      "tasks": [
+        {
+          "name": "print-readme",
+          "params": [
+            {
+              "name": "url",
+              "value": "https://api.example.io",
+            },
+          ],
+          "taskRef": {
+            "name": "cat-readme",
+          },
+          "workspaces": [],
+        },
+      ],
+      "workspaces": [],
+    },
+  },
+]
+`;

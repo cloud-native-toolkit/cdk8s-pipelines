@@ -50,9 +50,11 @@ export class ParameterBuilder {
   private _type?: string;
   private _value?: string;
   private _defaultValue?: string;
+  private _requiresPipelineParam: boolean;
 
   constructor(id: string) {
     this._logicalID = id;
+    this._requiresPipelineParam = false;
   }
 
   public get logicalID(): string | undefined {
@@ -106,6 +108,9 @@ export class ParameterBuilder {
    * @param val
    */
   public withValue(val: string): ParameterBuilder {
+    // If you are giving it a value here, then you do not
+    // need the Pipeline parameter for this parameter.
+    this._requiresPipelineParam = false;
     this._value = val;
     return this;
   }
@@ -136,10 +141,18 @@ export class ParameterBuilder {
    * @param defaultValue
    */
   public withPiplineParameter(pipelineParamName: string, defaultValue: string = ''): ParameterBuilder {
+    this._requiresPipelineParam = true;
     this._name = pipelineParamName;
     this._defaultValue = defaultValue;
     this._value = buildParam(pipelineParamName);
     return this;
+  }
+
+  /**
+   * Returns true if this parameter expects input at the pipeline level.
+   */
+  public get requiresPipelineParameter() : boolean {
+    return this._requiresPipelineParam;
   }
 }
 
@@ -353,8 +366,10 @@ export class TaskBuilder {
   private _steps?: TaskStepBuilder[];
   private _name?: string;
   private _description?: string;
-  private _workspaces?: WorkspaceBuilder[];
-  private _params?: ParameterBuilder[];
+  // These were initially arrays, but converted them to maps so that if
+  // multiple values are added that the last one will win.
+  private _workspaces = new Map<string, WorkspaceBuilder>;
+  private _params = new Map<string, ParameterBuilder>;
 
   /**
    * Creates a new instance of the `TaskBuilder` using the given `scope` and
@@ -411,27 +426,21 @@ export class TaskBuilder {
    * @param workspace
    */
   public withWorkspace(workspace: WorkspaceBuilder): TaskBuilder {
-    if (!this._workspaces) {
-      this._workspaces = new Array<WorkspaceBuilder>();
-    }
-    this._workspaces.push(workspace);
+    this._workspaces.set(workspace.logicalID!, workspace);
     return this;
   }
 
   public get workspaces(): WorkspaceBuilder[] | undefined {
-    return this._workspaces;
+    return Array.from(this._workspaces?.values());
   }
 
   public withStringParam(param: ParameterBuilder): TaskBuilder {
-    if (!this._params) {
-      this._params = new Array<ParameterBuilder>();
-    }
-    this._params.push(param.ofType('string'));
+    this._params.set(param.logicalID!, param.ofType('string'));
     return this;
   }
 
   public get parameters(): ParameterBuilder[] | undefined {
-    return this._params;
+    return Array.from(this._params?.values());
   }
 
   /**
@@ -559,10 +568,13 @@ export class PipelineBuilder {
       t.parameters?.forEach(p => {
         const pp = pipelineParams.get(p.name!);
         if (!pp) {
-          pipelineParams.set(p.name!, {
-            name: p.name,
-            type: p.type,
-          });
+          // Do not add it to the pipeline if there is no need to add it...
+          if (p.requiresPipelineParameter) {
+            pipelineParams.set(p.name!, {
+              name: p.name,
+              type: p.type,
+            });
+          }
         }
 
         taskParams.push({
