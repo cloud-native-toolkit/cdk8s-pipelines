@@ -50,6 +50,7 @@ export interface TaskStepEnv extends NamedResource{
  * A workspace used by a Task. See https://tekton.dev/docs/pipelines/workspaces/#using-workspaces-in-tasks for more information.
  */
 export interface TaskWorkspace extends NamedResource {
+  readonly logicalID?: string;
   /**
    * The description of the workspace.
    */

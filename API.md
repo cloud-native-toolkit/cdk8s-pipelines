@@ -839,91 +839,6 @@ public readonly key: string;
 
 ---
 
-### ParamRec <a name="ParamRec" id="cdk8s-pipelines.ParamRec"></a>
-
-The parameter record (ParamRec) is used by the PipelineTaskBuilder builder internally to hold values for the parameter reference.
-
-#### Initializer <a name="Initializer" id="cdk8s-pipelines.ParamRec.Initializer"></a>
-
-```typescript
-import { ParamRec } from 'cdk8s-pipelines'
-
-const paramRec: ParamRec = { ... }
-```
-
-#### Properties <a name="Properties" id="Properties"></a>
-
-| **Name** | **Type** | **Description** |
-| --- | --- | --- |
-| <code><a href="#cdk8s-pipelines.ParamRec.property.defaultValue">defaultValue</a></code> | <code>string</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.ParamRec.property.description">description</a></code> | <code>string</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.ParamRec.property.name">name</a></code> | <code>string</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.ParamRec.property.refName">refName</a></code> | <code>string</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.ParamRec.property.type">type</a></code> | <code>string</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.ParamRec.property.value">value</a></code> | <code>string</code> | *No description.* |
-
----
-
-##### `defaultValue`<sup>Optional</sup> <a name="defaultValue" id="cdk8s-pipelines.ParamRec.property.defaultValue"></a>
-
-```typescript
-public readonly defaultValue: string;
-```
-
-- *Type:* string
-
----
-
-##### `description`<sup>Optional</sup> <a name="description" id="cdk8s-pipelines.ParamRec.property.description"></a>
-
-```typescript
-public readonly description: string;
-```
-
-- *Type:* string
-
----
-
-##### `name`<sup>Optional</sup> <a name="name" id="cdk8s-pipelines.ParamRec.property.name"></a>
-
-```typescript
-public readonly name: string;
-```
-
-- *Type:* string
-
----
-
-##### `refName`<sup>Optional</sup> <a name="refName" id="cdk8s-pipelines.ParamRec.property.refName"></a>
-
-```typescript
-public readonly refName: string;
-```
-
-- *Type:* string
-
----
-
-##### `type`<sup>Optional</sup> <a name="type" id="cdk8s-pipelines.ParamRec.property.type"></a>
-
-```typescript
-public readonly type: string;
-```
-
-- *Type:* string
-
----
-
-##### `value`<sup>Optional</sup> <a name="value" id="cdk8s-pipelines.ParamRec.property.value"></a>
-
-```typescript
-public readonly value: string;
-```
-
-- *Type:* string
-
----
-
 ### PipelineParam <a name="PipelineParam" id="cdk8s-pipelines.PipelineParam"></a>
 
 A Pipeline parameter.
@@ -1851,6 +1766,7 @@ const taskWorkspace: TaskWorkspace = { ... }
 | --- | --- | --- |
 | <code><a href="#cdk8s-pipelines.TaskWorkspace.property.name">name</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.TaskWorkspace.property.description">description</a></code> | <code>string</code> | The description of the workspace. |
+| <code><a href="#cdk8s-pipelines.TaskWorkspace.property.logicalID">logicalID</a></code> | <code>string</code> | *No description.* |
 
 ---
 
@@ -1876,29 +1792,158 @@ The description of the workspace.
 
 ---
 
-### WorkspaceRec <a name="WorkspaceRec" id="cdk8s-pipelines.WorkspaceRec"></a>
-
-The workspace record (WorkspaceRec) is used by the PipelineTaskBuilder internally to hold information about the parameters.
-
-#### Initializer <a name="Initializer" id="cdk8s-pipelines.WorkspaceRec.Initializer"></a>
+##### `logicalID`<sup>Optional</sup> <a name="logicalID" id="cdk8s-pipelines.TaskWorkspace.property.logicalID"></a>
 
 ```typescript
-import { WorkspaceRec } from 'cdk8s-pipelines'
-
-const workspaceRec: WorkspaceRec = { ... }
+public readonly logicalID: string;
 ```
+
+- *Type:* string
+
+---
+
+## Classes <a name="Classes" id="Classes"></a>
+
+### ParameterBuilder <a name="ParameterBuilder" id="cdk8s-pipelines.ParameterBuilder"></a>
+
+#### Initializers <a name="Initializers" id="cdk8s-pipelines.ParameterBuilder.Initializer"></a>
+
+```typescript
+import { ParameterBuilder } from 'cdk8s-pipelines'
+
+new ParameterBuilder(id: string)
+```
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.ParameterBuilder.Initializer.parameter.id">id</a></code> | <code>string</code> | *No description.* |
+
+---
+
+##### `id`<sup>Required</sup> <a name="id" id="cdk8s-pipelines.ParameterBuilder.Initializer.parameter.id"></a>
+
+- *Type:* string
+
+---
+
+#### Methods <a name="Methods" id="Methods"></a>
+
+| **Name** | **Description** |
+| --- | --- |
+| <code><a href="#cdk8s-pipelines.ParameterBuilder.ofType">ofType</a></code> | Sets the type of the parameter. |
+| <code><a href="#cdk8s-pipelines.ParameterBuilder.withDefaultValue">withDefaultValue</a></code> | Sets the default value for the parameter. |
+| <code><a href="#cdk8s-pipelines.ParameterBuilder.withDescription">withDescription</a></code> | Sets the description of the parameter. |
+| <code><a href="#cdk8s-pipelines.ParameterBuilder.withName">withName</a></code> | Sets the name of the parameter. |
+| <code><a href="#cdk8s-pipelines.ParameterBuilder.withPiplineParameter">withPiplineParameter</a></code> | Sets the default value for the parameter. |
+| <code><a href="#cdk8s-pipelines.ParameterBuilder.withValue">withValue</a></code> | Sets the value for the parameter. |
+
+---
+
+##### `ofType` <a name="ofType" id="cdk8s-pipelines.ParameterBuilder.ofType"></a>
+
+```typescript
+public ofType(type: string): ParameterBuilder
+```
+
+Sets the type of the parameter.
+
+###### `type`<sup>Required</sup> <a name="type" id="cdk8s-pipelines.ParameterBuilder.ofType.parameter.type"></a>
+
+- *Type:* string
+
+---
+
+##### `withDefaultValue` <a name="withDefaultValue" id="cdk8s-pipelines.ParameterBuilder.withDefaultValue"></a>
+
+```typescript
+public withDefaultValue(val: string): ParameterBuilder
+```
+
+Sets the default value for the parameter.
+
+###### `val`<sup>Required</sup> <a name="val" id="cdk8s-pipelines.ParameterBuilder.withDefaultValue.parameter.val"></a>
+
+- *Type:* string
+
+---
+
+##### `withDescription` <a name="withDescription" id="cdk8s-pipelines.ParameterBuilder.withDescription"></a>
+
+```typescript
+public withDescription(desc: string): ParameterBuilder
+```
+
+Sets the description of the parameter.
+
+###### `desc`<sup>Required</sup> <a name="desc" id="cdk8s-pipelines.ParameterBuilder.withDescription.parameter.desc"></a>
+
+- *Type:* string
+
+---
+
+##### `withName` <a name="withName" id="cdk8s-pipelines.ParameterBuilder.withName"></a>
+
+```typescript
+public withName(name: string): ParameterBuilder
+```
+
+Sets the name of the parameter.
+
+###### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.ParameterBuilder.withName.parameter.name"></a>
+
+- *Type:* string
+
+---
+
+##### `withPiplineParameter` <a name="withPiplineParameter" id="cdk8s-pipelines.ParameterBuilder.withPiplineParameter"></a>
+
+```typescript
+public withPiplineParameter(pipelineParamName: string, defaultValue?: string): ParameterBuilder
+```
+
+Sets the default value for the parameter.
+
+###### `pipelineParamName`<sup>Required</sup> <a name="pipelineParamName" id="cdk8s-pipelines.ParameterBuilder.withPiplineParameter.parameter.pipelineParamName"></a>
+
+- *Type:* string
+
+---
+
+###### `defaultValue`<sup>Optional</sup> <a name="defaultValue" id="cdk8s-pipelines.ParameterBuilder.withPiplineParameter.parameter.defaultValue"></a>
+
+- *Type:* string
+
+---
+
+##### `withValue` <a name="withValue" id="cdk8s-pipelines.ParameterBuilder.withValue"></a>
+
+```typescript
+public withValue(val: string): ParameterBuilder
+```
+
+Sets the value for the parameter.
+
+###### `val`<sup>Required</sup> <a name="val" id="cdk8s-pipelines.ParameterBuilder.withValue.parameter.val"></a>
+
+- *Type:* string
+
+---
+
 
 #### Properties <a name="Properties" id="Properties"></a>
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#cdk8s-pipelines.WorkspaceRec.property.description">description</a></code> | <code>string</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.WorkspaceRec.property.name">name</a></code> | <code>string</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.WorkspaceRec.property.refName">refName</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.ParameterBuilder.property.description">description</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.ParameterBuilder.property.defaultValue">defaultValue</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.ParameterBuilder.property.logicalID">logicalID</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.ParameterBuilder.property.name">name</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.ParameterBuilder.property.type">type</a></code> | <code>string</code> | Gets the type of the parameter. |
+| <code><a href="#cdk8s-pipelines.ParameterBuilder.property.value">value</a></code> | <code>string</code> | Gets the value of the parameter. |
 
 ---
 
-##### `description`<sup>Optional</sup> <a name="description" id="cdk8s-pipelines.WorkspaceRec.property.description"></a>
+##### `description`<sup>Required</sup> <a name="description" id="cdk8s-pipelines.ParameterBuilder.property.description"></a>
 
 ```typescript
 public readonly description: string;
@@ -1908,7 +1953,27 @@ public readonly description: string;
 
 ---
 
-##### `name`<sup>Optional</sup> <a name="name" id="cdk8s-pipelines.WorkspaceRec.property.name"></a>
+##### `defaultValue`<sup>Optional</sup> <a name="defaultValue" id="cdk8s-pipelines.ParameterBuilder.property.defaultValue"></a>
+
+```typescript
+public readonly defaultValue: string;
+```
+
+- *Type:* string
+
+---
+
+##### `logicalID`<sup>Optional</sup> <a name="logicalID" id="cdk8s-pipelines.ParameterBuilder.property.logicalID"></a>
+
+```typescript
+public readonly logicalID: string;
+```
+
+- *Type:* string
+
+---
+
+##### `name`<sup>Optional</sup> <a name="name" id="cdk8s-pipelines.ParameterBuilder.property.name"></a>
 
 ```typescript
 public readonly name: string;
@@ -1918,17 +1983,30 @@ public readonly name: string;
 
 ---
 
-##### `refName`<sup>Optional</sup> <a name="refName" id="cdk8s-pipelines.WorkspaceRec.property.refName"></a>
+##### `type`<sup>Optional</sup> <a name="type" id="cdk8s-pipelines.ParameterBuilder.property.type"></a>
 
 ```typescript
-public readonly refName: string;
+public readonly type: string;
 ```
 
 - *Type:* string
 
+Gets the type of the parameter.
+
 ---
 
-## Classes <a name="Classes" id="Classes"></a>
+##### `value`<sup>Optional</sup> <a name="value" id="cdk8s-pipelines.ParameterBuilder.property.value"></a>
+
+```typescript
+public readonly value: string;
+```
+
+- *Type:* string
+
+Gets the value of the parameter.
+
+---
+
 
 ### PipelineBuilder <a name="PipelineBuilder" id="cdk8s-pipelines.PipelineBuilder"></a>
 
@@ -2009,12 +2087,12 @@ Provides the name for the pipeline task and will be rendered as the `name` prope
 ##### `withTask` <a name="withTask" id="cdk8s-pipelines.PipelineBuilder.withTask"></a>
 
 ```typescript
-public withTask(taskB: PipelineTaskBuilder): PipelineBuilder
+public withTask(taskB: TaskBuilder): PipelineBuilder
 ```
 
 ###### `taskB`<sup>Required</sup> <a name="taskB" id="cdk8s-pipelines.PipelineBuilder.withTask.parameter.taskB"></a>
 
-- *Type:* <a href="#cdk8s-pipelines.PipelineTaskBuilder">PipelineTaskBuilder</a>
+- *Type:* <a href="#cdk8s-pipelines.TaskBuilder">TaskBuilder</a>
 
 ---
 
@@ -2036,254 +2114,6 @@ public readonly name: string;
 - *Type:* string
 
 Gets the name of the pipeline.
-
----
-
-
-### PipelineTaskBuilder <a name="PipelineTaskBuilder" id="cdk8s-pipelines.PipelineTaskBuilder"></a>
-
-The PipelineTaskBuilder creates a PipelineTaskDef, which is used to intelligently add a task and its properties to a Pipeline.
-
-#### Initializers <a name="Initializers" id="cdk8s-pipelines.PipelineTaskBuilder.Initializer"></a>
-
-```typescript
-import { PipelineTaskBuilder } from 'cdk8s-pipelines'
-
-new PipelineTaskBuilder()
-```
-
-| **Name** | **Type** | **Description** |
-| --- | --- | --- |
-
----
-
-#### Methods <a name="Methods" id="Methods"></a>
-
-| **Name** | **Description** |
-| --- | --- |
-| <code><a href="#cdk8s-pipelines.PipelineTaskBuilder.buildPipelineTask">buildPipelineTask</a></code> | Builds the Pipeline. |
-| <code><a href="#cdk8s-pipelines.PipelineTaskBuilder.doAfter">doAfter</a></code> | Allows you to specify that this task should be completed after another task. |
-| <code><a href="#cdk8s-pipelines.PipelineTaskBuilder.withName">withName</a></code> | Provides the name for the pipeline task and will be rendered as the `name` property. |
-| <code><a href="#cdk8s-pipelines.PipelineTaskBuilder.withStringParam">withStringParam</a></code> | Adds a parameter of type string to both the task and the pipeline itself. |
-| <code><a href="#cdk8s-pipelines.PipelineTaskBuilder.withTaskReference">withTaskReference</a></code> | Creates and adds a [task reference](https://tekton.dev/docs/pipelines/tasks/#configuring-a-task) to the task, using the value supplied as the name of the reference. It returns a reference to the builder. |
-| <code><a href="#cdk8s-pipelines.PipelineTaskBuilder.withWorkspace">withWorkspace</a></code> | Adds workspace information to the pipeline task and returns a reference to the builder. |
-
----
-
-##### `buildPipelineTask` <a name="buildPipelineTask" id="cdk8s-pipelines.PipelineTaskBuilder.buildPipelineTask"></a>
-
-```typescript
-public buildPipelineTask(): PipelineTaskDef
-```
-
-Builds the Pipeline.
-
-##### `doAfter` <a name="doAfter" id="cdk8s-pipelines.PipelineTaskBuilder.doAfter"></a>
-
-```typescript
-public doAfter(otherTaskB: PipelineTaskBuilder): PipelineTaskBuilder
-```
-
-Allows you to specify that this task should be completed after another task.
-
-Can be called multiple times to add multiple tasks.
-
-###### `otherTaskB`<sup>Required</sup> <a name="otherTaskB" id="cdk8s-pipelines.PipelineTaskBuilder.doAfter.parameter.otherTaskB"></a>
-
-- *Type:* <a href="#cdk8s-pipelines.PipelineTaskBuilder">PipelineTaskBuilder</a>
-
----
-
-##### `withName` <a name="withName" id="cdk8s-pipelines.PipelineTaskBuilder.withName"></a>
-
-```typescript
-public withName(name: string): PipelineTaskBuilder
-```
-
-Provides the name for the pipeline task and will be rendered as the `name` property.
-
-###### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.PipelineTaskBuilder.withName.parameter.name"></a>
-
-- *Type:* string
-
----
-
-##### `withStringParam` <a name="withStringParam" id="cdk8s-pipelines.PipelineTaskBuilder.withStringParam"></a>
-
-```typescript
-public withStringParam(name: string, refName: string, value: string, description?: string, defaultValue?: string): PipelineTaskBuilder
-```
-
-Adds a parameter of type string to both the task and the pipeline itself.
-
-###### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.PipelineTaskBuilder.withStringParam.parameter.name"></a>
-
-- *Type:* string
-
-The name of the param on the task.
-
----
-
-###### `refName`<sup>Required</sup> <a name="refName" id="cdk8s-pipelines.PipelineTaskBuilder.withStringParam.parameter.refName"></a>
-
-- *Type:* string
-
-The name of the param at the pipeline level.
-
----
-
-###### `value`<sup>Required</sup> <a name="value" id="cdk8s-pipelines.PipelineTaskBuilder.withStringParam.parameter.value"></a>
-
-- *Type:* string
-
-The value of the parameter on the task.
-
----
-
-###### `description`<sup>Optional</sup> <a name="description" id="cdk8s-pipelines.PipelineTaskBuilder.withStringParam.parameter.description"></a>
-
-- *Type:* string
-
-The default value for the param at the pipeline level.
-
----
-
-###### `defaultValue`<sup>Optional</sup> <a name="defaultValue" id="cdk8s-pipelines.PipelineTaskBuilder.withStringParam.parameter.defaultValue"></a>
-
-- *Type:* string
-
-The default value for the param at the pipeline level.
-
----
-
-##### `withTaskReference` <a name="withTaskReference" id="cdk8s-pipelines.PipelineTaskBuilder.withTaskReference"></a>
-
-```typescript
-public withTaskReference(ref: string): PipelineTaskBuilder
-```
-
-Creates and adds a [task reference](https://tekton.dev/docs/pipelines/tasks/#configuring-a-task) to the task, using the value supplied as the name of the reference. It returns a reference to the builder.
-
-###### `ref`<sup>Required</sup> <a name="ref" id="cdk8s-pipelines.PipelineTaskBuilder.withTaskReference.parameter.ref"></a>
-
-- *Type:* string
-
-The name of the task that is referenced.
-
----
-
-##### `withWorkspace` <a name="withWorkspace" id="cdk8s-pipelines.PipelineTaskBuilder.withWorkspace"></a>
-
-```typescript
-public withWorkspace(name: string, refName: string, description: string): PipelineTaskBuilder
-```
-
-Adds workspace information to the pipeline task and returns a reference to the builder.
-
-###### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.PipelineTaskBuilder.withWorkspace.parameter.name"></a>
-
-- *Type:* string
-
-The name of the workspace on the pipeline task.
-
----
-
-###### `refName`<sup>Required</sup> <a name="refName" id="cdk8s-pipelines.PipelineTaskBuilder.withWorkspace.parameter.refName"></a>
-
-- *Type:* string
-
-The `workspace` value, which will be the name of the workspace at the Pipeline level.
-
----
-
-###### `description`<sup>Required</sup> <a name="description" id="cdk8s-pipelines.PipelineTaskBuilder.withWorkspace.parameter.description"></a>
-
-- *Type:* string
-
-The description of the Pipeline workspace.
-
----
-
-#### Static Functions <a name="Static Functions" id="Static Functions"></a>
-
-| **Name** | **Description** |
-| --- | --- |
-| <code><a href="#cdk8s-pipelines.PipelineTaskBuilder.createFromTask">createFromTask</a></code> | Creates an instance of this builder with the provided `TaskBuilder` as a source. |
-
----
-
-##### `createFromTask` <a name="createFromTask" id="cdk8s-pipelines.PipelineTaskBuilder.createFromTask"></a>
-
-```typescript
-import { PipelineTaskBuilder } from 'cdk8s-pipelines'
-
-PipelineTaskBuilder.createFromTask(task: TaskBuilder)
-```
-
-Creates an instance of this builder with the provided `TaskBuilder` as a source.
-
-###### `task`<sup>Required</sup> <a name="task" id="cdk8s-pipelines.PipelineTaskBuilder.createFromTask.parameter.task"></a>
-
-- *Type:* <a href="#cdk8s-pipelines.TaskBuilder">TaskBuilder</a>
-
----
-
-#### Properties <a name="Properties" id="Properties"></a>
-
-| **Name** | **Type** | **Description** |
-| --- | --- | --- |
-| <code><a href="#cdk8s-pipelines.PipelineTaskBuilder.property.name">name</a></code> | <code>string</code> | Returns the name of the task being built by the task builder. |
-| <code><a href="#cdk8s-pipelines.PipelineTaskBuilder.property.parameters">parameters</a></code> | <code><a href="#cdk8s-pipelines.ParamRec">ParamRec</a>[]</code> | Returns the parameter records for the task builder. |
-| <code><a href="#cdk8s-pipelines.PipelineTaskBuilder.property.taskReference">taskReference</a></code> | <code>string</code> | Returns the task reference name for the task builder. |
-| <code><a href="#cdk8s-pipelines.PipelineTaskBuilder.property.workspaces">workspaces</a></code> | <code><a href="#cdk8s-pipelines.WorkspaceRec">WorkspaceRec</a>[]</code> | Returns the workspace records for the task builder. |
-
----
-
-##### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.PipelineTaskBuilder.property.name"></a>
-
-```typescript
-public readonly name: string;
-```
-
-- *Type:* string
-
-Returns the name of the task being built by the task builder.
-
----
-
-##### `parameters`<sup>Required</sup> <a name="parameters" id="cdk8s-pipelines.PipelineTaskBuilder.property.parameters"></a>
-
-```typescript
-public readonly parameters: ParamRec[];
-```
-
-- *Type:* <a href="#cdk8s-pipelines.ParamRec">ParamRec</a>[]
-
-Returns the parameter records for the task builder.
-
----
-
-##### `taskReference`<sup>Required</sup> <a name="taskReference" id="cdk8s-pipelines.PipelineTaskBuilder.property.taskReference"></a>
-
-```typescript
-public readonly taskReference: string;
-```
-
-- *Type:* string
-
-Returns the task reference name for the task builder.
-
----
-
-##### `workspaces`<sup>Required</sup> <a name="workspaces" id="cdk8s-pipelines.PipelineTaskBuilder.property.workspaces"></a>
-
-```typescript
-public readonly workspaces: WorkspaceRec[];
-```
-
-- *Type:* <a href="#cdk8s-pipelines.WorkspaceRec">WorkspaceRec</a>[]
-
-Returns the workspace records for the task builder.
 
 ---
 
@@ -2388,44 +2218,26 @@ Adds the given `step` (`TaskStepBuilder`) to the `Task`.
 ##### `withStringParam` <a name="withStringParam" id="cdk8s-pipelines.TaskBuilder.withStringParam"></a>
 
 ```typescript
-public withStringParam(name: string, description?: string, defaultValue?: string): TaskBuilder
+public withStringParam(param: ParameterBuilder): TaskBuilder
 ```
 
-###### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.TaskBuilder.withStringParam.parameter.name"></a>
+###### `param`<sup>Required</sup> <a name="param" id="cdk8s-pipelines.TaskBuilder.withStringParam.parameter.param"></a>
 
-- *Type:* string
-
----
-
-###### `description`<sup>Optional</sup> <a name="description" id="cdk8s-pipelines.TaskBuilder.withStringParam.parameter.description"></a>
-
-- *Type:* string
-
----
-
-###### `defaultValue`<sup>Optional</sup> <a name="defaultValue" id="cdk8s-pipelines.TaskBuilder.withStringParam.parameter.defaultValue"></a>
-
-- *Type:* string
+- *Type:* <a href="#cdk8s-pipelines.ParameterBuilder">ParameterBuilder</a>
 
 ---
 
 ##### `withWorkspace` <a name="withWorkspace" id="cdk8s-pipelines.TaskBuilder.withWorkspace"></a>
 
 ```typescript
-public withWorkspace(name: string, description?: string): TaskBuilder
+public withWorkspace(workspace: WorkspaceBuilder): TaskBuilder
 ```
 
 Adds the specified workspace to the `Task`.
 
-###### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.TaskBuilder.withWorkspace.parameter.name"></a>
+###### `workspace`<sup>Required</sup> <a name="workspace" id="cdk8s-pipelines.TaskBuilder.withWorkspace.parameter.workspace"></a>
 
-- *Type:* string
-
----
-
-###### `description`<sup>Optional</sup> <a name="description" id="cdk8s-pipelines.TaskBuilder.withWorkspace.parameter.description"></a>
-
-- *Type:* string
+- *Type:* <a href="#cdk8s-pipelines.WorkspaceBuilder">WorkspaceBuilder</a>
 
 ---
 
@@ -2434,8 +2246,21 @@ Adds the specified workspace to the `Task`.
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.property.logicalID">logicalID</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.description">description</a></code> | <code>string</code> | Gets the `description` of the `Task`. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.name">name</a></code> | <code>string</code> | Gets the name of the `Task` built by the `TaskBuilder`. |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.property.parameters">parameters</a></code> | <code><a href="#cdk8s-pipelines.ParameterBuilder">ParameterBuilder</a>[]</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.property.workspaces">workspaces</a></code> | <code><a href="#cdk8s-pipelines.WorkspaceBuilder">WorkspaceBuilder</a>[]</code> | *No description.* |
+
+---
+
+##### `logicalID`<sup>Required</sup> <a name="logicalID" id="cdk8s-pipelines.TaskBuilder.property.logicalID"></a>
+
+```typescript
+public readonly logicalID: string;
+```
+
+- *Type:* string
 
 ---
 
@@ -2460,6 +2285,26 @@ public readonly name: string;
 - *Type:* string
 
 Gets the name of the `Task` built by the `TaskBuilder`.
+
+---
+
+##### `parameters`<sup>Optional</sup> <a name="parameters" id="cdk8s-pipelines.TaskBuilder.property.parameters"></a>
+
+```typescript
+public readonly parameters: ParameterBuilder[];
+```
+
+- *Type:* <a href="#cdk8s-pipelines.ParameterBuilder">ParameterBuilder</a>[]
+
+---
+
+##### `workspaces`<sup>Optional</sup> <a name="workspaces" id="cdk8s-pipelines.TaskBuilder.property.workspaces"></a>
+
+```typescript
+public readonly workspaces: WorkspaceBuilder[];
+```
+
+- *Type:* <a href="#cdk8s-pipelines.WorkspaceBuilder">WorkspaceBuilder</a>[]
 
 ---
 
@@ -2767,6 +2612,103 @@ Gets the URL from which the script data should be loaded, if it is defined.
 
 ```typescript
 public readonly workingDir: string;
+```
+
+- *Type:* string
+
+---
+
+
+### WorkspaceBuilder <a name="WorkspaceBuilder" id="cdk8s-pipelines.WorkspaceBuilder"></a>
+
+#### Initializers <a name="Initializers" id="cdk8s-pipelines.WorkspaceBuilder.Initializer"></a>
+
+```typescript
+import { WorkspaceBuilder } from 'cdk8s-pipelines'
+
+new WorkspaceBuilder(id: string)
+```
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.WorkspaceBuilder.Initializer.parameter.id">id</a></code> | <code>string</code> | *No description.* |
+
+---
+
+##### `id`<sup>Required</sup> <a name="id" id="cdk8s-pipelines.WorkspaceBuilder.Initializer.parameter.id"></a>
+
+- *Type:* string
+
+---
+
+#### Methods <a name="Methods" id="Methods"></a>
+
+| **Name** | **Description** |
+| --- | --- |
+| <code><a href="#cdk8s-pipelines.WorkspaceBuilder.withDescription">withDescription</a></code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.WorkspaceBuilder.withName">withName</a></code> | *No description.* |
+
+---
+
+##### `withDescription` <a name="withDescription" id="cdk8s-pipelines.WorkspaceBuilder.withDescription"></a>
+
+```typescript
+public withDescription(desc: string): WorkspaceBuilder
+```
+
+###### `desc`<sup>Required</sup> <a name="desc" id="cdk8s-pipelines.WorkspaceBuilder.withDescription.parameter.desc"></a>
+
+- *Type:* string
+
+---
+
+##### `withName` <a name="withName" id="cdk8s-pipelines.WorkspaceBuilder.withName"></a>
+
+```typescript
+public withName(name: string): WorkspaceBuilder
+```
+
+###### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.WorkspaceBuilder.withName.parameter.name"></a>
+
+- *Type:* string
+
+---
+
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.WorkspaceBuilder.property.description">description</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.WorkspaceBuilder.property.logicalID">logicalID</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.WorkspaceBuilder.property.name">name</a></code> | <code>string</code> | *No description.* |
+
+---
+
+##### `description`<sup>Required</sup> <a name="description" id="cdk8s-pipelines.WorkspaceBuilder.property.description"></a>
+
+```typescript
+public readonly description: string;
+```
+
+- *Type:* string
+
+---
+
+##### `logicalID`<sup>Optional</sup> <a name="logicalID" id="cdk8s-pipelines.WorkspaceBuilder.property.logicalID"></a>
+
+```typescript
+public readonly logicalID: string;
+```
+
+- *Type:* string
+
+---
+
+##### `name`<sup>Optional</sup> <a name="name" id="cdk8s-pipelines.WorkspaceBuilder.property.name"></a>
+
+```typescript
+public readonly name: string;
 ```
 
 - *Type:* string
