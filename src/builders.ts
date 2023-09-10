@@ -492,8 +492,8 @@ export class TaskBuilder {
 }
 
 export class PipelineBuilder {
-  private readonly _scope?: Construct;
-  private readonly _id?: string;
+  private readonly _scope: Construct;
+  private readonly _id: string;
   private _name?: string;
   private _description?: string;
   private _tasks?: TaskBuilder[];
@@ -517,7 +517,7 @@ export class PipelineBuilder {
    * Gets the name of the pipeline
    */
   public get name(): string {
-    return this._name!;
+    return this._name || this._id;
   }
 
   /**
@@ -546,8 +546,9 @@ export class PipelineBuilder {
    */
   public buildPipeline(): void {
     // TODO: validate the object
-    const pipelineParams: PipelineParam[] = new Array<PipelineParam>();
-    const pipelineWorkspaces: PipelineWorkspace[] = new Array<PipelineWorkspace>();
+
+    const pipelineParams = new Map<string, PipelineParam>();
+    const pipelineWorkspaces = new Map<string, PipelineWorkspace>();
     const pipelineTasks: PipelineTask[] = new Array<PipelineTask>();
 
     this._tasks?.forEach(t => {
@@ -556,9 +557,9 @@ export class PipelineBuilder {
       const taskWorkspaces: PipelineTaskWorkspace[] = new Array<TaskWorkspace>();
 
       t.parameters?.forEach(p => {
-        const pp = pipelineParams.find((value, index, obj) => value.name == obj[index].name);
+        const pp = pipelineParams.get(p.name!);
         if (!pp) {
-          pipelineParams.push({
+          pipelineParams.set(p.name!, {
             name: p.name,
             type: p.type,
           });
@@ -573,9 +574,9 @@ export class PipelineBuilder {
       t.workspaces?.forEach((w) => {
         // Only add the workspace on the pipeline level if it is not already
         // there...
-        const ws = pipelineWorkspaces.find((value, index, obj) => value.name == obj[index].name);
+        const ws = pipelineWorkspaces.get(w.name!);
         if (!ws) {
-          pipelineWorkspaces.push({
+          pipelineWorkspaces.set(w.name!, {
             name: w.name,
             description: w.description,
           });
@@ -604,8 +605,8 @@ export class PipelineBuilder {
         },
       spec: {
         description: this._description,
-        params: pipelineParams,
-        workspaces: pipelineWorkspaces,
+        params: Array.from(pipelineParams.values()),
+        workspaces: Array.from(pipelineWorkspaces.values()),
         tasks: pipelineTasks,
       },
     });

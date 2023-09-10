@@ -47,6 +47,93 @@ exports[`PipelineBuilderTest PipelineBuilder 1`] = `
 ]
 `;
 
+exports[`PipelineBuilderTest PipelineBuilderWithComplexTasks 1`] = `
+[
+  {
+    "apiVersion": "tekton.dev/v1beta1",
+    "kind": "Pipeline",
+    "metadata": {
+      "name": "clone-build-push",
+    },
+    "spec": {
+      "description": "This pipeline closes a repository, builds a Docker image, etc.",
+      "params": [
+        {
+          "name": "repo-url",
+          "type": "string",
+        },
+        {
+          "name": "your-name",
+          "type": "string",
+        },
+        {
+          "name": "your-color",
+          "type": "string",
+        },
+        {
+          "name": "your-quest",
+          "type": "string",
+        },
+      ],
+      "tasks": [
+        {
+          "name": "fetch-source",
+          "params": [
+            {
+              "name": "url",
+              "value": "$(params.repo-url)",
+            },
+            {
+              "name": "name",
+              "value": "$(params.your-name)",
+            },
+            {
+              "name": "color",
+              "value": "$(params.your-color)",
+            },
+            {
+              "name": "quest",
+              "value": "$(params.your-quest)",
+            },
+          ],
+          "taskRef": {
+            "name": "git-clone",
+          },
+          "workspaces": [
+            {
+              "name": "output",
+              "workspace": "shared-data",
+            },
+            {
+              "name": "ssh-credentials",
+              "workspace": "ssh-creds",
+            },
+            {
+              "name": "config",
+              "workspace": "config-data",
+            },
+          ],
+        },
+      ],
+      "workspaces": [
+        {
+          "description": "The files cloned by the task",
+          "name": "shared-data",
+        },
+        {
+          "description": "The SSH files for credentials",
+          "name": "ssh-creds",
+        },
+        {
+          "description": "The files for configuration for stuff",
+          "name": "config-data",
+        },
+      ],
+    },
+  },
+]
+`;
+
 exports[`PipelineBuilderTest PipelineBuilderWithDuplicates 1`] = `
 [
   {
