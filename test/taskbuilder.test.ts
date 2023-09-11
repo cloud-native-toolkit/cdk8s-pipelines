@@ -100,6 +100,22 @@ class TestBasicTaskBuildFromObject extends Chart {
   }
 }
 
+class TestBasicTaskBuildFromScriptData extends Chart {
+
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    new TaskBuilder(this, 'my-task')
+      .withName('ansible-runner')
+      .withDescription('Task to run Ansible playbooks using Ansible Runner')
+      .withStep(new TaskStepBuilder()
+        .withName('requirements')
+        .withImage('docker.io/hello-world')
+        .fromScriptData('#!/usr/bin/env bash\necho this is my script data'))
+      .buildTask();
+  }
+}
+
 class TestPullRequestTaskBuild extends Chart {
   constructor(scope: Construct, id: string, props?: ChartProps) {
     super(scope, id, props);
@@ -165,6 +181,12 @@ describe('TaskBuilderTest', () => {
   test('ObjectTaskBuilder', () => {
     const app = Testing.app();
     const chart = new TestBasicTaskBuildFromObject(app, 'apply-object');
+    const results = Testing.synth(chart);
+    expect(results).toMatchSnapshot();
+  });
+  test('ScriptDataBuilder', () => {
+    const app = Testing.app();
+    const chart = new TestBasicTaskBuildFromScriptData(app, 'apply-object');
     const results = Testing.synth(chart);
     expect(results).toMatchSnapshot();
   });

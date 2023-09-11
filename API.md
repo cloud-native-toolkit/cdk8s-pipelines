@@ -774,6 +774,8 @@ Returns the apiVersion and kind for "Task".
 
 ### BuilderOptions <a name="BuilderOptions" id="cdk8s-pipelines.BuilderOptions"></a>
 
+The options for builders for the `buildXX()` methods.
+
 #### Initializer <a name="Initializer" id="cdk8s-pipelines.BuilderOptions.Initializer"></a>
 
 ```typescript
@@ -786,17 +788,36 @@ const builderOptions: BuilderOptions = { ... }
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#cdk8s-pipelines.BuilderOptions.property.buildDependencies">buildDependencies</a></code> | <code>boolean</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.BuilderOptions.property.includeDependencies">includeDependencies</a></code> | <code>boolean</code> | If true, all the dependent objects are generated with the build. |
+| <code><a href="#cdk8s-pipelines.BuilderOptions.property.includeRuns">includeRuns</a></code> | <code>boolean</code> | If true, the builder will also synth associated runs. |
 
 ---
 
-##### `buildDependencies`<sup>Required</sup> <a name="buildDependencies" id="cdk8s-pipelines.BuilderOptions.property.buildDependencies"></a>
+##### `includeDependencies`<sup>Optional</sup> <a name="includeDependencies" id="cdk8s-pipelines.BuilderOptions.property.includeDependencies"></a>
 
 ```typescript
-public readonly buildDependencies: boolean;
+public readonly includeDependencies: boolean;
 ```
 
 - *Type:* boolean
+
+If true, all the dependent objects are generated with the build.
+
+This is
+designed to run on as minimal cluster as possible, with as few pre steps
+as possible.
+
+---
+
+##### `includeRuns`<sup>Optional</sup> <a name="includeRuns" id="cdk8s-pipelines.BuilderOptions.property.includeRuns"></a>
+
+```typescript
+public readonly includeRuns: boolean;
+```
+
+- *Type:* boolean
+
+If true, the builder will also synth associated runs.
 
 ---
 
@@ -2423,6 +2444,7 @@ new TaskStepBuilder()
 | **Name** | **Description** |
 | --- | --- |
 | <code><a href="#cdk8s-pipelines.TaskStepBuilder.buildTaskStep">buildTaskStep</a></code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskStepBuilder.fromScriptData">fromScriptData</a></code> | If supplied, uses the provided script data as-is for the script value. |
 | <code><a href="#cdk8s-pipelines.TaskStepBuilder.fromScriptObject">fromScriptObject</a></code> | If supplied, uses the cdk8s `ApiObject` supplied as the body of the `script` for the `Task`. |
 | <code><a href="#cdk8s-pipelines.TaskStepBuilder.fromScriptUrl">fromScriptUrl</a></code> | If supplied, uses the content found at the given URL for the `script` value of the step. |
 | <code><a href="#cdk8s-pipelines.TaskStepBuilder.withArgs">withArgs</a></code> | The args to use with the `command`. |
@@ -2439,6 +2461,25 @@ new TaskStepBuilder()
 ```typescript
 public buildTaskStep(): TaskStep
 ```
+
+##### `fromScriptData` <a name="fromScriptData" id="cdk8s-pipelines.TaskStepBuilder.fromScriptData"></a>
+
+```typescript
+public fromScriptData(data: string): TaskStepBuilder
+```
+
+If supplied, uses the provided script data as-is for the script value.
+
+Use this when you have the script data from a source other than a file or
+an object. Use the other methods, such as `fromScriptUrl` (when the script
+is in a file) or `scriptFromObject` (when the script is a CDK8s object)
+rather than resolving those yourself.
+
+###### `data`<sup>Required</sup> <a name="data" id="cdk8s-pipelines.TaskStepBuilder.fromScriptData.parameter.data"></a>
+
+- *Type:* string
+
+---
 
 ##### `fromScriptObject` <a name="fromScriptObject" id="cdk8s-pipelines.TaskStepBuilder.fromScriptObject"></a>
 
@@ -2577,6 +2618,7 @@ The `workingDir` of the `Task`.
 | <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.command">command</a></code> | <code>string[]</code> | Gets the command used for the `Step` on the `Task`. |
 | <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.image">image</a></code> | <code>string</code> | The name of the container `image` used to execute the `Step` of the `Task`. |
 | <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.name">name</a></code> | <code>string</code> | The name of the `Step` of the `Task`. |
+| <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.scriptData">scriptData</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.scriptObj">scriptObj</a></code> | <code>cdk8s.ApiObject</code> | Gets the object that is used for the `script` value, if there is one defined. |
 | <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.scriptUrl">scriptUrl</a></code> | <code>string</code> | Gets the URL from which the script data should be loaded, if it is defined. |
 | <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.workingDir">workingDir</a></code> | <code>string</code> | *No description.* |
@@ -2631,6 +2673,16 @@ The name of the `Step` of the `Task`.
 
 ---
 
+##### `scriptData`<sup>Optional</sup> <a name="scriptData" id="cdk8s-pipelines.TaskStepBuilder.property.scriptData"></a>
+
+```typescript
+public readonly scriptData: string;
+```
+
+- *Type:* string
+
+---
+
 ##### `scriptObj`<sup>Optional</sup> <a name="scriptObj" id="cdk8s-pipelines.TaskStepBuilder.property.scriptObj"></a>
 
 ```typescript
@@ -2667,6 +2719,8 @@ public readonly workingDir: string;
 
 
 ### WorkspaceBuilder <a name="WorkspaceBuilder" id="cdk8s-pipelines.WorkspaceBuilder"></a>
+
+Builds the Workspaces for use by Tasks and Pipelines.
 
 #### Initializers <a name="Initializers" id="cdk8s-pipelines.WorkspaceBuilder.Initializer"></a>
 

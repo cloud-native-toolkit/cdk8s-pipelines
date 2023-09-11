@@ -10,10 +10,33 @@ import { buildParam } from './common';
 import { Pipeline, PipelineParam, PipelineTask, PipelineTaskWorkspace, PipelineWorkspace } from './pipelines';
 import { Task, TaskEnvValueSource, TaskParam, TaskProps, TaskSpecParam, TaskStep, TaskStepEnv, TaskWorkspace } from './tasks';
 
+/**
+ * The options for builders for the `buildXX()` methods.
+ */
 export interface BuilderOptions {
-  readonly buildDependencies: boolean;
+  /**
+   * If true, all the dependent objects are generated with the build. This is
+   * designed to run on as minimal cluster as possible, with as few pre steps
+   * as possible.
+   */
+  readonly includeDependencies?: boolean;
+  /**
+   * If true, the builder will also synth associated runs.
+   */
+  readonly includeRuns?: boolean;
 }
 
+/**
+ * The default options for the builders.
+ */
+export const DefaultBuilderOptions: BuilderOptions = {
+  includeDependencies: false,
+  includeRuns: false,
+};
+
+/**
+ * Builds the Workspaces for use by Tasks and Pipelines.
+ */
 export class WorkspaceBuilder {
   private _logicalID: string;
   private _name?: string;
@@ -169,6 +192,7 @@ export class TaskStepBuilder {
   private _cmd?: string[];
   private _args?: string[];
   private _env?: TaskStepEnv[];
+  private _script?: string;
 
   /**
    *
@@ -205,6 +229,12 @@ export class TaskStepBuilder {
    */
   public get scriptObj(): ApiObject | undefined {
     return this._obj;
+  }
+
+  public get scriptData(): string | undefined {
+    // TODO: This should always return something, so if called it will resolve
+    // from the scriptObj or the scriptUrl if that's what needs to be done
+    return this._script;
   }
 
   /**
@@ -286,6 +316,21 @@ export class TaskStepBuilder {
   }
 
   /**
+   * If supplied, uses the provided script data as-is for the script value.
+   *
+   * Use this when you have the script data from a source other than a file or
+   * an object. Use the other methods, such as `fromScriptUrl` (when the script
+   * is in a file) or `scriptFromObject` (when the script is a CDK8s object)
+   * rather than resolving those yourself.
+   *
+   * @param data
+   */
+  public fromScriptData(data: string): TaskStepBuilder {
+    this._script = data;
+    return this;
+  }
+
+  /**
    * The `workingDir` of the `Task`.
    * @param dir
    */
@@ -306,6 +351,7 @@ export class TaskStepBuilder {
   }
 
   public buildTaskStep(): TaskStep | undefined {
+    // TODO: Clean this up.
     if (this.scriptUrl) {
       if (this.scriptObj) {
         throw new Error('Cannot specify both a URL source and an object source for the script.');
@@ -340,6 +386,14 @@ export class TaskStepBuilder {
           env: this._env,
         };
       }
+    } else if (this._script) {
+      return {
+        name: this.name,
+        image: this.image,
+        script: this.scriptData,
+        workingDir: this.workingDir,
+        env: this._env,
+      };
     } else {
       return {
         name: this.name,
@@ -557,7 +611,7 @@ export class PipelineBuilder {
    * Builds the actual [Pipeline]() from the settings configured using the
    * fluid syntax.
    */
-  public buildPipeline(opts: BuilderOptions = { buildDependencies: false }): void {
+  public buildPipeline(opts: BuilderOptions = DefaultBuilderOptions): void {
     // TODO: validate the object
 
     const pipelineParams = new Map<string, PipelineParam>();
@@ -613,7 +667,7 @@ export class PipelineBuilder {
         workspaces: taskWorkspaces,
       });
 
-      if (opts.buildDependencies) {
+      if (opts.includeDependencies) {
         // Build the task if the user has asked for the dependencies to be
         // built along with the pipeline.
         t.buildTask();
