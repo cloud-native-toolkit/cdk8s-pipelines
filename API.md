@@ -2426,6 +2426,8 @@ public readonly name: string;
 
 ### TaskStepBuilder <a name="TaskStepBuilder" id="cdk8s-pipelines.TaskStepBuilder"></a>
 
+Creates a `Step` in a `Task`.
+
 #### Initializers <a name="Initializers" id="cdk8s-pipelines.TaskStepBuilder.Initializer"></a>
 
 ```typescript

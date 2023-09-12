@@ -197,29 +197,57 @@ export class ParameterBuilder {
   }
 }
 
+/**
+ * Resolves the `script` through different means.
+ */
 interface ScriptResolver {
+  /**
+   * Gets the body of the script.
+   * @returns string The script.
+   */
   scriptData(): string;
 }
 
+/**
+ * Resolves the provided object into a YAML string.
+ */
 class ObjScriptResolver implements ScriptResolver {
   readonly _obj: any;
 
+  /**
+   * Creates an instance of the `ObjScriptResolver`.
+   * @param obj The object to serialize to YAML for the script.
+   */
   constructor(obj: any) {
     this._obj = obj;
   }
 
+  /**
+   * Gets the body of the script as a YAML representation of the object.
+   */
   public scriptData(): string {
     return Yaml.stringify(this._obj);
   }
 }
 
+/**
+ * Gets the content from the provided URL and returns it as the script data.
+ */
 class UrlScriptResolver implements ScriptResolver {
   readonly _url: string;
 
+  /**
+   * Creates an instance of the `UrlScriptResolver` with the provided URL.
+   * @param url
+   */
   constructor(url: string) {
     this._url = url;
   }
 
+  /**
+   * Gets the body of the script from the provided URL.
+   * @return string Script data.
+   */
   public scriptData(): string {
     const data = fs.readFileSync(this._url, {
       encoding: 'utf8',
@@ -230,18 +258,31 @@ class UrlScriptResolver implements ScriptResolver {
   }
 }
 
+/**
+ * Gets the content from the static value provided.
+ */
 class StaticScriptResolver implements ScriptResolver {
   readonly _script: string;
 
+  /**
+   * Creates an instance of the `StaticScriptResolver`.
+   * @param data
+   */
   constructor(data: string) {
     this._script = data;
   }
 
+  /**
+   * Returns the static value provided.
+   */
   public scriptData(): string {
     return this._script;
   }
 }
 
+/**
+ * Creates a `Step` in a `Task`.
+ */
 export class TaskStepBuilder {
   private _name?: string;
   private _dir?: string;
