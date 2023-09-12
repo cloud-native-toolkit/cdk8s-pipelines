@@ -4,7 +4,7 @@
 
 
 import * as fs from 'fs';
-import { ApiObject, Yaml } from 'cdk8s';
+import { Yaml } from 'cdk8s';
 import { Construct } from 'constructs';
 import { buildParam } from './common';
 import { Pipeline, PipelineParam, PipelineTask, PipelineTaskWorkspace, PipelineWorkspace } from './pipelines';
@@ -42,18 +42,32 @@ export class WorkspaceBuilder {
   private _name?: string;
   private _description?: string;
 
+  /**
+   * Creates the `WorkspaceBuilder`, using the given `id` as the logical ID for
+   * the workspace.
+   * @param id
+   */
   constructor(id: string) {
     this._logicalID = id;
   }
 
+  /**
+   * Gets the logical ID of the `Workspace`.
+   */
   public get logicalID(): string | undefined {
     return this._logicalID;
   }
 
+  /**
+   * Gets the name of the workspace.
+   */
   public get name(): string | undefined {
     return this._name;
   }
 
+  /**
+   * Gets the description of the workspace.
+   */
   public get description(): string {
     return this._description || '';
   }
@@ -178,21 +192,64 @@ export class ParameterBuilder {
   /**
    * Returns true if this parameter expects input at the pipeline level.
    */
-  public get requiresPipelineParameter() : boolean {
+  public get requiresPipelineParameter(): boolean {
     return this._requiresPipelineParam;
   }
 }
 
+interface ScriptResolver {
+  scriptData(): string;
+}
+
+class ObjScriptResolver implements ScriptResolver {
+  readonly _obj: any;
+
+  constructor(obj: any) {
+    this._obj = obj;
+  }
+
+  public scriptData(): string {
+    return Yaml.stringify(this._obj);
+  }
+}
+
+class UrlScriptResolver implements ScriptResolver {
+  readonly _url: string;
+
+  constructor(url: string) {
+    this._url = url;
+  }
+
+  public scriptData(): string {
+    const data = fs.readFileSync(this._url, {
+      encoding: 'utf8',
+      flag: 'r',
+    });
+
+    return data.replace(/\n/g, '\\n');
+  }
+}
+
+class StaticScriptResolver implements ScriptResolver {
+  readonly _script: string;
+
+  constructor(data: string) {
+    this._script = data;
+  }
+
+  public scriptData(): string {
+    return this._script;
+  }
+}
+
 export class TaskStepBuilder {
-  private _url?: string;
-  private _obj?: any;
   private _name?: string;
   private _dir?: string;
   private _image?: string;
   private _cmd?: string[];
   private _args?: string[];
   private _env?: TaskStepEnv[];
-  private _script?: string;
+  private _script?: ScriptResolver;
 
   /**
    *
@@ -216,25 +273,8 @@ export class TaskStepBuilder {
     return this._image;
   }
 
-  /**
-   * Gets the URL from which the script data should be loaded, if it is defined.
-   */
-  public get scriptUrl(): string | undefined {
-    return this._url;
-  }
-
-  /**
-   * Gets the object that is used for the `script` value, if there is one
-   * defined.
-   */
-  public get scriptObj(): ApiObject | undefined {
-    return this._obj;
-  }
-
   public get scriptData(): string | undefined {
-    // TODO: This should always return something, so if called it will resolve
-    // from the scriptObj or the scriptUrl if that's what needs to be done
-    return this._script;
+    return this._script?.scriptData();
   }
 
   /**
@@ -297,7 +337,7 @@ export class TaskStepBuilder {
    * @param url
    */
   public fromScriptUrl(url: string): TaskStepBuilder {
-    this._url = url;
+    this._script = new UrlScriptResolver(url);
     return this;
   }
 
@@ -311,7 +351,7 @@ export class TaskStepBuilder {
    * @param obj
    */
   public fromScriptObject(obj: any): TaskStepBuilder {
-    this._obj = obj;
+    this._script = new ObjScriptResolver(obj);
     return this;
   }
 
@@ -326,7 +366,7 @@ export class TaskStepBuilder {
    * @param data
    */
   public fromScriptData(data: string): TaskStepBuilder {
-    this._script = data;
+    this._script = new StaticScriptResolver(data);
     return this;
   }
 
@@ -351,42 +391,7 @@ export class TaskStepBuilder {
   }
 
   public buildTaskStep(): TaskStep | undefined {
-    // TODO: Clean this up.
-    if (this.scriptUrl) {
-      if (this.scriptObj) {
-        throw new Error('Cannot specify both a URL source and an object source for the script.');
-      }
-      // Load the script from the URL location and use it
-      const data = fs.readFileSync(this.scriptUrl, {
-        encoding: 'utf8',
-        flag: 'r',
-      });
-
-      const lines = data.replace(/\n/g, '\\n');
-      if (data) {
-        return {
-          name: this.name,
-          image: this.image,
-          script: lines,
-          workingDir: this.workingDir,
-          env: this._env,
-        };
-      }
-    } else if (this.scriptObj) {
-      if (this.scriptUrl) {
-        throw new Error('Cannot specify both an object source and a URL source for the script');
-      }
-      const yamlData = Yaml.stringify(this.scriptObj);
-      if (yamlData) {
-        return {
-          name: this.name,
-          image: this.image,
-          script: yamlData,
-          workingDir: this.workingDir,
-          env: this._env,
-        };
-      }
-    } else if (this._script) {
+    if (this._script) {
       return {
         name: this.name,
         image: this.image,
@@ -406,8 +411,6 @@ export class TaskStepBuilder {
     }
     return undefined;
   }
-
-
 }
 
 /**

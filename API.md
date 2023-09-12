@@ -2619,8 +2619,6 @@ The `workingDir` of the `Task`.
 | <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.image">image</a></code> | <code>string</code> | The name of the container `image` used to execute the `Step` of the `Task`. |
 | <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.name">name</a></code> | <code>string</code> | The name of the `Step` of the `Task`. |
 | <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.scriptData">scriptData</a></code> | <code>string</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.scriptObj">scriptObj</a></code> | <code>cdk8s.ApiObject</code> | Gets the object that is used for the `script` value, if there is one defined. |
-| <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.scriptUrl">scriptUrl</a></code> | <code>string</code> | Gets the URL from which the script data should be loaded, if it is defined. |
 | <code><a href="#cdk8s-pipelines.TaskStepBuilder.property.workingDir">workingDir</a></code> | <code>string</code> | *No description.* |
 
 ---
@@ -2680,30 +2678,6 @@ public readonly scriptData: string;
 ```
 
 - *Type:* string
-
----
-
-##### `scriptObj`<sup>Optional</sup> <a name="scriptObj" id="cdk8s-pipelines.TaskStepBuilder.property.scriptObj"></a>
-
-```typescript
-public readonly scriptObj: ApiObject;
-```
-
-- *Type:* cdk8s.ApiObject
-
-Gets the object that is used for the `script` value, if there is one defined.
-
----
-
-##### `scriptUrl`<sup>Optional</sup> <a name="scriptUrl" id="cdk8s-pipelines.TaskStepBuilder.property.scriptUrl"></a>
-
-```typescript
-public readonly scriptUrl: string;
-```
-
-- *Type:* string
-
-Gets the URL from which the script data should be loaded, if it is defined.
 
 ---
 
@@ -2780,9 +2754,9 @@ public withName(name: string): WorkspaceBuilder
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#cdk8s-pipelines.WorkspaceBuilder.property.description">description</a></code> | <code>string</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.WorkspaceBuilder.property.logicalID">logicalID</a></code> | <code>string</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.WorkspaceBuilder.property.name">name</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.WorkspaceBuilder.property.description">description</a></code> | <code>string</code> | Gets the description of the workspace. |
+| <code><a href="#cdk8s-pipelines.WorkspaceBuilder.property.logicalID">logicalID</a></code> | <code>string</code> | Gets the logical ID of the `Workspace`. |
+| <code><a href="#cdk8s-pipelines.WorkspaceBuilder.property.name">name</a></code> | <code>string</code> | Gets the name of the workspace. |
 
 ---
 
@@ -2794,6 +2768,8 @@ public readonly description: string;
 
 - *Type:* string
 
+Gets the description of the workspace.
+
 ---
 
 ##### `logicalID`<sup>Optional</sup> <a name="logicalID" id="cdk8s-pipelines.WorkspaceBuilder.property.logicalID"></a>
@@ -2804,6 +2780,8 @@ public readonly logicalID: string;
 
 - *Type:* string
 
+Gets the logical ID of the `Workspace`.
+
 ---
 
 ##### `name`<sup>Optional</sup> <a name="name" id="cdk8s-pipelines.WorkspaceBuilder.property.name"></a>
@@ -2813,6 +2791,8 @@ public readonly name: string;
 ```
 
 - *Type:* string
+
+Gets the name of the workspace.
 
 ---
 
