@@ -19,7 +19,7 @@ class MyTestChart extends Chart {
       .withName('clone-build-push')
       .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
       .withTask(myTask)
-      .buildPipeline({ buildDependencies: true });
+      .buildPipeline({ includeDependencies: true });
   }
 }
 
