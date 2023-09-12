@@ -222,6 +222,13 @@ export class Task extends ApiObject {
   private readonly _spec?: TaskSpec;
 
   /**
+   * The `Task` `spec`.
+   */
+  public get spec(): TaskSpec | undefined {
+    return this._spec;
+  }
+
+  /**
    * Defines a "Task" API object
    * @param scope the scope in which to define this object
    * @param id a scope-local name for the object
