@@ -149,6 +149,33 @@ request and populate the pr workspace with the state of the pull request, includ
 ]
 `;
 
+exports[`TaskBuilderTest ScriptDataBuilder 1`] = `
+[
+  {
+    "apiVersion": "tekton.dev/v1beta1",
+    "kind": "Task",
+    "metadata": {
+      "name": "ansible-runner",
+    },
+    "spec": {
+      "description": "Task to run Ansible playbooks using Ansible Runner",
+      "params": [],
+      "steps": [
+        {
+          "env": undefined,
+          "image": "docker.io/hello-world",
+          "name": "requirements",
+          "script": "#!/usr/bin/env bash
+echo this is my script data",
+          "workingDir": undefined,
+        },
+      ],
+      "workspaces": [],
+    },
+  },
+]
+`;
+
 exports[`TaskBuilderTest TaskBuilderBasic 1`] = `
 [
   {
