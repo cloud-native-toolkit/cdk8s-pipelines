@@ -158,6 +158,98 @@ exports[`PipelineBuilderTest PipelineBuilderWithComplexTasks 1`] = `
 ]
 `;
 
+exports[`PipelineBuilderTest PipelineBuilderWithDuplicateTasks 1`] = `
+[
+  {
+    "apiVersion": "tekton.dev/v1beta1",
+    "kind": "Task",
+    "metadata": {
+      "name": "fetch-source",
+    },
+    "spec": {
+      "description": undefined,
+      "params": [
+        {
+          "default": "",
+          "description": "",
+          "name": "url",
+        },
+      ],
+      "steps": [],
+      "workspaces": [
+        {
+          "description": "The files cloned by the task",
+          "name": "output",
+        },
+      ],
+    },
+  },
+  {
+    "apiVersion": "tekton.dev/v1beta1",
+    "kind": "Pipeline",
+    "metadata": {
+      "name": "clone-build-push",
+    },
+    "spec": {
+      "description": "This pipeline closes a repository, builds a Docker image, etc.",
+      "params": [
+        {
+          "name": "repo-url",
+          "type": "string",
+        },
+      ],
+      "tasks": [
+        {
+          "name": "git-clone",
+          "params": [
+            {
+              "name": "url",
+              "value": "$(params.repo-url)",
+            },
+          ],
+          "taskRef": {
+            "name": "fetch-source",
+          },
+          "workspaces": [
+            {
+              "name": "output",
+              "workspace": "shared-data",
+            },
+          ],
+        },
+        {
+          "name": "git-clone",
+          "params": [
+            {
+              "name": "url",
+              "value": "$(params.repo-url)",
+            },
+          ],
+          "runAfter": [
+            "git-clone",
+          ],
+          "taskRef": {
+            "name": "fetch-source",
+          },
+          "workspaces": [
+            {
+              "name": "output",
+              "workspace": "shared-data",
+            },
+          ],
+        },
+      ],
+      "workspaces": [
+        {
+          "description": "The files cloned by the task",
+          "name": "shared-data",
+        },
+      ],
+    },
+  },
+]
+`;
+
 exports[`PipelineBuilderTest PipelineBuilderWithDuplicates 1`] = `
 [
   {
@@ -200,6 +292,9 @@ exports[`PipelineBuilderTest PipelineBuilderWithDuplicates 1`] = `
               "name": "url",
               "value": "$(params.repo-url)",
             },
+          ],
+          "runAfter": [
+            "git-clone",
           ],
           "taskRef": {
             "name": "print-readme",
