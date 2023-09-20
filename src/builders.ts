@@ -661,8 +661,12 @@ export class PipelineBuilder {
     const pipelineParams = new Map<string, PipelineParam>();
     const pipelineWorkspaces = new Map<string, PipelineWorkspace>();
     const pipelineTasks: PipelineTask[] = new Array<PipelineTask>();
+    // For making a list to make sure that tasks aren't duplicated when doing
+    // the build. Not that it really hurts anything, but it makes the multidoc
+    // YAML file bigger and more complex than it needs to be.
+    const taskList: string[] = new Array<string>();
 
-    this._tasks?.forEach(t => {
+    this._tasks?.forEach((t, i) => {
 
       const taskParams: TaskParam[] = new Array<TaskParam>();
       const taskWorkspaces: PipelineTaskWorkspace[] = new Array<TaskWorkspace>();
@@ -702,19 +706,20 @@ export class PipelineBuilder {
         });
       });
 
-      pipelineTasks.push({
-        name: t.logicalID,
-        taskRef: {
-          name: t.name,
-        },
-        params: taskParams,
-        workspaces: taskWorkspaces,
-      });
+      const pt = createOrderedPipelineTask(t, ((i > 0) ? this._tasks![i - 1].logicalID : ''), taskParams, taskWorkspaces);
+
+      pipelineTasks.push(pt);
 
       if (opts.includeDependencies) {
         // Build the task if the user has asked for the dependencies to be
-        // built along with the pipeline.
-        t.buildTask();
+        // built along with the pipeline, but only if we haven't already
+        // built the task yet.
+        if (!taskList.find(it => {
+          return it == t.name;
+        })) {
+          t.buildTask();
+        }
+        taskList.push(t.name!);
       }
     });
 
@@ -731,4 +736,26 @@ export class PipelineBuilder {
       },
     });
   }
+}
+
+function createOrderedPipelineTask(t: TaskBuilder, after: string, params: TaskParam[], ws: TaskWorkspace[]): PipelineTask {
+  if (after) {
+    return {
+      name: t.logicalID,
+      taskRef: {
+        name: t.name,
+      },
+      runAfter: [after],
+      params: params,
+      workspaces: ws,
+    };
+  }
+  return {
+    name: t.logicalID,
+    taskRef: {
+      name: t.name,
+    },
+    params: params,
+    workspaces: ws,
+  };
 }

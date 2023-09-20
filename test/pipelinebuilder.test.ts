@@ -2,7 +2,7 @@ import { Chart, Testing } from 'cdk8s';
 import { ChartProps } from 'cdk8s/lib/chart';
 import { Construct } from 'constructs';
 // @ts-ignore
-import { Pipeline, PipelineBuilder, PipelineTaskBuilder, PipelineTaskDef, TaskRef, TaskBuilder, WorkspaceBuilder, ParameterBuilder } from '../src';
+import { ParameterBuilder, Pipeline, PipelineBuilder, PipelineTaskBuilder, PipelineTaskDef, TaskBuilder, TaskRef, WorkspaceBuilder } from '../src';
 
 class MyTestChart extends Chart {
   constructor(scope: Construct, id: string, props?: ChartProps) {
@@ -51,7 +51,7 @@ class MySecondTestChart extends Chart {
   }
 }
 
-class MyTestChartWithDups extends Chart {
+class MyTestChartWithDuplicateParams extends Chart {
   constructor(scope: Construct, id: string, props?: ChartProps) {
     super(scope, id, props);
 
@@ -107,6 +107,32 @@ class MyTestChartWithStaticOverride extends Chart {
   }
 }
 
+class MyTestChartWithDuplicateTasks extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const myWorkspace = new WorkspaceBuilder('output')
+      .withDescription('The files cloned by the task')
+      .withName('shared-data');
+
+    const urlParam = new ParameterBuilder('url')
+      .withPiplineParameter('repo-url', '');
+
+    const myTask = new TaskBuilder(this, 'git-clone')
+      .withName('fetch-source')
+      .withWorkspace(myWorkspace)
+      .withStringParam(urlParam)
+    ;
+
+    new PipelineBuilder(this, 'my-pipeline')
+      .withName('clone-build-push')
+      .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
+      .withTask(myTask)
+      .withTask(myTask)
+      .buildPipeline({ includeDependencies: true });
+  }
+}
+
 describe('PipelineBuilderTest', () => {
   test('PipelineBuilder', () => {
     const app = Testing.app();
@@ -124,7 +150,7 @@ describe('PipelineBuilderTest', () => {
 
   test('PipelineBuilderWithDuplicates', () => {
     const app = Testing.app();
-    const chart = new MyTestChartWithDups(app, 'test-chart');
+    const chart = new MyTestChartWithDuplicateParams(app, 'test-chart');
     const results = Testing.synth(chart);
     expect(results).toMatchSnapshot();
   });
@@ -132,6 +158,13 @@ describe('PipelineBuilderTest', () => {
   test('PipelineBuilderWithStaticOverride', () => {
     const app = Testing.app();
     const chart = new MyTestChartWithStaticOverride(app, 'test-chart');
+    const results = Testing.synth(chart);
+    expect(results).toMatchSnapshot();
+  });
+
+  test('PipelineBuilderWithDuplicateTasks', () => {
+    const app = Testing.app();
+    const chart = new MyTestChartWithDuplicateTasks(app, 'test-chart');
     const results = Testing.synth(chart);
     expect(results).toMatchSnapshot();
   });
