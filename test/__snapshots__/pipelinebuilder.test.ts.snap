@@ -3,7 +3,26 @@
 exports[`PipelineBuilderTest PipelineBuilder 1`] = `
 [
   {
-    "apiVersion": "tekton.dev/v1beta1",
+    "apiVersion": "rbac.authorization.k8s.io/v1",
+    "kind": "ClusterRoleBinding",
+    "metadata": {
+      "name": "pipeline-admin-default-crb",
+      "namespace": "default",
+    },
+    "roleRef": {
+      "kind": "ClusterRole",
+      "name": "cluster-admin",
+    },
+    "subjecs": [
+      {
+        "kind": "ServiceAccount",
+        "name": "pipeline",
+        "namespace": "default",
+      },
+    ],
+  },
+  {
+    "apiVersion": "tekton.dev/v1",
     "kind": "Task",
     "metadata": {
       "name": "git-clone",
@@ -27,7 +46,7 @@ exports[`PipelineBuilderTest PipelineBuilder 1`] = `
     },
   },
   {
-    "apiVersion": "tekton.dev/v1beta1",
+    "apiVersion": "tekton.dev/v1",
     "kind": "Pipeline",
     "metadata": {
       "name": "clone-build-push",
@@ -74,7 +93,7 @@ exports[`PipelineBuilderTest PipelineBuilder 1`] = `
 exports[`PipelineBuilderTest PipelineBuilderWithComplexTasks 1`] = `
 [
   {
-    "apiVersion": "tekton.dev/v1beta1",
+    "apiVersion": "tekton.dev/v1",
     "kind": "Pipeline",
     "metadata": {
       "name": "clone-build-push",
@@ -161,7 +180,26 @@ exports[`PipelineBuilderTest PipelineBuilderWithComplexTasks 1`] = `
 exports[`PipelineBuilderTest PipelineBuilderWithDuplicateTasks 1`] = `
 [
   {
-    "apiVersion": "tekton.dev/v1beta1",
+    "apiVersion": "rbac.authorization.k8s.io/v1",
+    "kind": "ClusterRoleBinding",
+    "metadata": {
+      "name": "pipeline-admin-default-crb",
+      "namespace": "default",
+    },
+    "roleRef": {
+      "kind": "ClusterRole",
+      "name": "cluster-admin",
+    },
+    "subjecs": [
+      {
+        "kind": "ServiceAccount",
+        "name": "pipeline",
+        "namespace": "default",
+      },
+    ],
+  },
+  {
+    "apiVersion": "tekton.dev/v1",
     "kind": "Task",
     "metadata": {
       "name": "fetch-source",
@@ -185,7 +223,7 @@ exports[`PipelineBuilderTest PipelineBuilderWithDuplicateTasks 1`] = `
     },
   },
   {
-    "apiVersion": "tekton.dev/v1beta1",
+    "apiVersion": "tekton.dev/v1",
     "kind": "Pipeline",
     "metadata": {
       "name": "clone-build-push",
@@ -253,7 +291,7 @@ exports[`PipelineBuilderTest PipelineBuilderWithDuplicateTasks 1`] = `
 exports[`PipelineBuilderTest PipelineBuilderWithDuplicates 1`] = `
 [
   {
-    "apiVersion": "tekton.dev/v1beta1",
+    "apiVersion": "tekton.dev/v1",
     "kind": "Pipeline",
     "metadata": {
       "name": "clone-build-push",
@@ -321,7 +359,7 @@ exports[`PipelineBuilderTest PipelineBuilderWithDuplicates 1`] = `
 exports[`PipelineBuilderTest PipelineBuilderWithStaticOverride 1`] = `
 [
   {
-    "apiVersion": "tekton.dev/v1beta1",
+    "apiVersion": "tekton.dev/v1",
     "kind": "Pipeline",
     "metadata": {
       "name": "clone-build-push",

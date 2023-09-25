@@ -1,6 +1,6 @@
 import { ApiObject, ApiObjectMetadata, GroupVersionKind } from 'cdk8s';
 import { Construct } from 'constructs';
-import { NamedResource } from './common';
+import { NamedResource, TektonV1ApiVersion } from './common';
 import { TaskParam, TaskRef } from './tasks';
 
 // The following interfaces and classes are strictly for generating the YAML or
@@ -92,7 +92,7 @@ export class Pipeline extends ApiObject {
    * Returns the apiVersion and kind for "Pipeline"
    */
   public static readonly GVK: GroupVersionKind = {
-    apiVersion: 'tekton.dev/v1beta1',
+    apiVersion: TektonV1ApiVersion,
     kind: 'Pipeline',
   };
 

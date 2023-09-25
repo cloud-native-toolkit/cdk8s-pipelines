@@ -4,11 +4,32 @@
 
 
 import * as fs from 'fs';
-import { Yaml } from 'cdk8s';
+import { ApiObject, ApiObjectProps, Yaml } from 'cdk8s';
 import { Construct } from 'constructs';
 import { buildParam } from './common';
 import { Pipeline, PipelineParam, PipelineTask, PipelineTaskWorkspace, PipelineWorkspace } from './pipelines';
 import { Task, TaskEnvValueSource, TaskParam, TaskProps, TaskSpecParam, TaskStep, TaskStepEnv, TaskWorkspace } from './tasks';
+
+const DefaultPipelineRoleProps: ApiObjectProps = {
+  apiVersion: 'rbac.authorization.k8s.io/v1',
+  kind: 'ClusterRoleBinding',
+  metadata: {
+    name: 'pipeline-admin-default-crb',
+    namespace: 'default',
+  },
+  roleRef: {
+    kind: 'ClusterRole',
+    name: 'cluster-admin',
+  },
+  subjecs: [
+    {
+      kind: 'ServiceAccount',
+      name: 'pipeline',
+      namespace: 'default',
+    },
+  ],
+};
+
 
 /**
  * The options for builders for the `buildXX()` methods.
@@ -665,6 +686,12 @@ export class PipelineBuilder {
     // the build. Not that it really hurts anything, but it makes the multidoc
     // YAML file bigger and more complex than it needs to be.
     const taskList: string[] = new Array<string>();
+
+    if (opts.includeDependencies) {
+      // Create the default cluster role binding to the pipeline service
+      // account role.
+      new ApiObject(this._scope, 'pipeline-admin-default-crb', DefaultPipelineRoleProps);
+    }
 
     this._tasks?.forEach((t, i) => {
 

@@ -3,7 +3,7 @@
 exports[`TaskBuilderTest ObjectTaskBuilder 1`] = `
 [
   {
-    "apiVersion": "tekton.dev/v1beta1",
+    "apiVersion": "tekton.dev/v1",
     "kind": "Task",
     "metadata": {
       "name": "ansible-runner",
@@ -64,7 +64,7 @@ spec:
 exports[`TaskBuilderTest PullRequestTaskBuilder 1`] = `
 [
   {
-    "apiVersion": "tekton.dev/v1beta1",
+    "apiVersion": "tekton.dev/v1",
     "kind": "Task",
     "metadata": {
       "name": "pull-request",
@@ -152,7 +152,7 @@ request and populate the pr workspace with the state of the pull request, includ
 exports[`TaskBuilderTest ScriptDataBuilder 1`] = `
 [
   {
-    "apiVersion": "tekton.dev/v1beta1",
+    "apiVersion": "tekton.dev/v1",
     "kind": "Task",
     "metadata": {
       "name": "ansible-runner",
@@ -179,7 +179,7 @@ echo this is my script data",
 exports[`TaskBuilderTest TaskBuilderBasic 1`] = `
 [
   {
-    "apiVersion": "tekton.dev/v1beta1",
+    "apiVersion": "tekton.dev/v1",
     "kind": "Task",
     "metadata": {
       "name": "ansible-runner",
