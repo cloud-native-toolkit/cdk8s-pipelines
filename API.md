@@ -2796,7 +2796,7 @@ public withClusterRoleBindingProps(props: ApiObjectProps): PipelineRunBuilder
 ##### `withRunParam` <a name="withRunParam" id="cdk8s-pipelines.PipelineRunBuilder.withRunParam"></a>
 
 ```typescript
-public withRunParam(name: string, value: string): void
+public withRunParam(name: string, value: string): PipelineRunBuilder
 ```
 
 Adds a run parameter to the `PipelineRun`.

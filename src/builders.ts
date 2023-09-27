@@ -868,7 +868,7 @@ export class PipelineRunBuilder {
    * @param name The name of the parameter added to the pipeline run.
    * @param value The value of the parameter added to the pipeline run.
    */
-  public withRunParam(name: string, value: string) {
+  public withRunParam(name: string, value: string): PipelineRunBuilder {
     const params = this._pipeline.params;
     const p = params.find((obj) => obj.name === name);
     if (p) {
@@ -877,8 +877,9 @@ export class PipelineRunBuilder {
         value: value,
       });
     } else {
-      throw new Error(`PipelineRun parameter ${name} does not exist in pipeline ${this._pipeline.name}`);
+      throw new Error(`PipelineRun parameter '${name}' does not exist in pipeline '${this._pipeline.name}'`);
     }
+    return this;
   }
 
   public withClusterRoleBindingProps(props: ApiObjectProps): PipelineRunBuilder {
@@ -907,6 +908,16 @@ export class PipelineRunBuilder {
       // Generate the ClusterRoleBinding document, if configured to do so.
       new ApiObject(this._scope, this._crbProps.metadata?.name!, this._crbProps);
     }
+
+    // Throw an error here if the parameters are not defined that are required
+    // by the Pipeline, because there is really no point in going any further.
+    const params = this._pipeline.params;
+    params.forEach((p) => {
+      const prp = this._runParams.find((obj) => obj.name == p.name);
+      if (!prp) {
+        throw new Error(`Pipeline parameter '${p.name}' is not defined in PipelineRun '${this._id}'`);
+      }
+    });
 
     new PipelineRun(this._scope, this._id, {
       metadata: {

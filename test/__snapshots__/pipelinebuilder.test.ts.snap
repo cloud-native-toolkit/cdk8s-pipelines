@@ -373,7 +373,12 @@ exports[`PipelineBuilderTest PipelineRunBuilder 1`] = `
       "name": "my-pipeline-run",
     },
     "spec": {
-      "params": [],
+      "params": [
+        {
+          "name": "repo-url",
+          "value": "https://github.com/exmaple/my-repo",
+        },
+      ],
       "pipelineRef": {
         "name": "clone-build-push",
       },
