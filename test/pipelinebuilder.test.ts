@@ -2,9 +2,15 @@ import { Chart, Testing } from 'cdk8s';
 import { ChartProps } from 'cdk8s/lib/chart';
 import { Construct } from 'constructs';
 // @ts-ignore
-import { ParameterBuilder, Pipeline, PipelineBuilder, PipelineTaskBuilder, PipelineTaskDef, TaskBuilder, TaskRef, WorkspaceBuilder } from '../src';
+import {
+  ParameterBuilder,
+  PipelineBuilder,
+  PipelineRunBuilder,
+  TaskBuilder,
+  WorkspaceBuilder,
+} from '../src';
 
-class MyTestChart extends Chart {
+class PipelineRunTest extends Chart {
   constructor(scope: Construct, id: string, props?: ChartProps) {
     super(scope, id, props);
 
@@ -15,11 +21,14 @@ class MyTestChart extends Chart {
         .withDescription('The files cloned by the task'))
       .withStringParam(new ParameterBuilder('url').withPiplineParameter('repo-url', ''));
 
-    new PipelineBuilder(this, 'my-pipeline')
+    const pipeline = new PipelineBuilder(this, 'my-pipeline')
       .withName('clone-build-push')
       .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
-      .withTask(myTask)
-      .buildPipeline({ includeDependencies: true });
+      .withTask(myTask);
+    pipeline.buildPipeline({ includeDependencies: true });
+
+    new PipelineRunBuilder(this, 'my-pipeline-run', pipeline)
+      .buildPipelineRun({ includeDependencies: true });
   }
 }
 
@@ -134,9 +143,9 @@ class MyTestChartWithDuplicateTasks extends Chart {
 }
 
 describe('PipelineBuilderTest', () => {
-  test('PipelineBuilder', () => {
+  test('PipelineRunBuilder', () => {
     const app = Testing.app();
-    const chart = new MyTestChart(app, 'test-chart');
+    const chart = new PipelineRunTest(app, 'test-chart');
     const results = Testing.synth(chart);
     expect(results).toMatchSnapshot();
   });

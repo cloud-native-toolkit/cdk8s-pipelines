@@ -54,6 +54,9 @@ export interface PipelineTaskDef extends PipelineTask {
  * @see https://tekton.dev/docs/pipelines/pipelines/
  */
 export interface PipelineSpec {
+  /**
+   * The description of the `Pipeline`.
+   */
   readonly description?: string;
   readonly params?: PipelineParam[];
   /**
@@ -62,6 +65,7 @@ export interface PipelineSpec {
   readonly tasks: PipelineTask[];
   /**
    * Pipeline workspaces.
+   *
    * Workspaces allow you to specify one or more volumes that each Task in the
    * Pipeline requires during execution. You specify one or more Workspaces in
    * the workspaces field.
@@ -134,6 +138,119 @@ export class Pipeline extends ApiObject {
   public toJson(): any {
     const result = {
       ...Pipeline.GVK,
+      ...{
+        metadata: this._metadata,
+        spec: this._spec,
+      },
+    };
+    return Object.entries(result).reduce((r, i) => (i[1] === undefined) ? r : ({
+      ...r,
+      [i[0]]: i[1],
+    }), {});
+  }
+}
+
+/**
+ * A reference to a `Pipeline` by its name.
+ *
+ * @see https://tekton.dev/docs/pipelines/pipelineruns/#specifying-the-target-pipeline
+ */
+export interface PipelineRef {
+  /**
+   * The name of the `Pipeline` to that is referenced.
+   */
+  readonly name: string;
+}
+
+/**
+ * The parameters for a particular `PipelineRun`.
+ */
+export interface PipelineRunParam extends NamedResource {
+  /**
+   * The value of the parameter in this `PipelineRun`.
+   */
+  readonly value: string;
+}
+
+/**
+ * The details for the `PipelineRun`.
+ * @see https://tekton.dev/docs/pipelines/pipelineruns/#configuring-a-pipelinerun
+ */
+export interface PipelineRunSpec {
+  /**
+   * Required `Pipeline` reference.
+   */
+  readonly pipelineRef: PipelineRef;
+  readonly params?: PipelineRunParam[];
+}
+
+export interface PipelineRunProps {
+  readonly metadata?: ApiObjectMetadata;
+  /**
+   * Specifies the configuration information for this `PipelineRun` object.
+   */
+  readonly spec?: PipelineRunSpec;
+  /**
+   * Specifies a `ServiceAccount` object that supplies specific execution
+   * credentials for the `Pipeline`.
+   */
+  readonly serviceAccountName?: string;
+}
+
+/**
+ * The PipelineRun allows you to specify how you want to execute a `Pipeline`.
+ *
+ * @see https://tekton.dev/docs/pipelines/pipelineruns/
+ * @schema PipelineRun
+ */
+export class PipelineRun extends ApiObject {
+
+  /**
+   * Returns the apiVersion and kind for "PipelineRun"
+   */
+  public static readonly GVK: GroupVersionKind = {
+    apiVersion: TektonV1ApiVersion,
+    kind: 'PipelineRun',
+  };
+
+  /**
+   * Renders a Kubernetes manifest for `PipelineRun`.
+   *
+   * This can be used to inline resource manifests inside other objects (e.g. as templates).
+   *
+   * @param props initialization props
+   */
+  public static manifest(props: PipelineProps = {}): any {
+    return {
+      ...PipelineRun.GVK,
+      ...props,
+    };
+  }
+
+  private readonly _metadata?: ApiObjectMetadata;
+  private readonly _spec?: PipelineRunSpec;
+
+  /**
+   * Defines a `PipelineRun` API object
+   * @param scope the scope in which to define this object
+   * @param id a scope-local name for the object
+   * @param props initialization props
+   */
+  public constructor(scope: Construct, id: string, props: PipelineRunProps = {}) {
+    super(scope, id, {
+      ...PipelineRun.GVK,
+    });
+    this._metadata = props.metadata;
+    this._spec = props.spec;
+  }
+
+
+  /**
+   * Renders the object to Kubernetes JSON.
+   */
+  public toJson(): any {
+    const result = {
+      ...PipelineRun.GVK,
       ...{
         metadata: this._metadata,
         spec: this._spec,

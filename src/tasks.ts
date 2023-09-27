@@ -222,7 +222,7 @@ export class Task extends ApiObject {
   private readonly _spec?: TaskSpec;
 
   /**
-   * The `Task` `spec`.
+   * The configuration for the `Task`.
    */
   public get spec(): TaskSpec | undefined {
     return this._spec;
