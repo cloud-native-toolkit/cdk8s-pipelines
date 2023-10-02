@@ -8,6 +8,11 @@
 //   return valid;
 // }
 
+/**
+ * The supported apiVerion for the Pipelines, Tasks, etc.
+ */
+export const TektonV1ApiVersion = 'tekton.dev/v1';
+
 export interface NamedResource {
   readonly name?: string;
 }

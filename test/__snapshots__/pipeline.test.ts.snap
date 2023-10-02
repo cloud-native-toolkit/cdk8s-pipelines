@@ -3,7 +3,7 @@
 exports[`SamplePipeline ClonePipeline 1`] = `
 [
   {
-    "apiVersion": "tekton.dev/v1beta1",
+    "apiVersion": "tekton.dev/v1",
     "kind": "Pipeline",
     "metadata": {
       "name": "clone-build-push",
