@@ -4,11 +4,50 @@
 
 
 import * as fs from 'fs';
-import { Yaml } from 'cdk8s';
+import { ApiObject, ApiObjectProps, Yaml } from 'cdk8s';
 import { Construct } from 'constructs';
 import { buildParam } from './common';
-import { Pipeline, PipelineParam, PipelineTask, PipelineTaskWorkspace, PipelineWorkspace } from './pipelines';
+import { Pipeline, PipelineParam, PipelineRun, PipelineRunParam, PipelineTask, PipelineTaskWorkspace, PipelineWorkspace } from './pipelines';
 import { Task, TaskEnvValueSource, TaskParam, TaskProps, TaskSpecParam, TaskStep, TaskStepEnv, TaskWorkspace } from './tasks';
+
+const DefaultPipelineServiceAccountName = 'default:pipeline';
+
+/**
+ * Creates the properties for a `ClusterRoleBinding`
+ * @param bindingName
+ * @param bindingNs
+ * @param rolename
+ * @param sa
+ * @param saNamespace
+ */
+function createRoleBindingProps(bindingName: string, bindingNs: string, rolename: string, sa: string, saNamespace: string): ApiObjectProps {
+  return {
+    apiVersion: 'rbac.authorization.k8s.io/v1',
+    kind: 'ClusterRoleBinding',
+    metadata: {
+      name: bindingName,
+      namespace: bindingNs,
+    },
+    roleRef: {
+      kind: 'ClusterRole',
+      name: rolename,
+    },
+    subjects: [
+      {
+        kind: 'ServiceAccount',
+        name: sa,
+        namespace: saNamespace,
+      },
+    ],
+  };
+}
+
+const DefaultClusterRoleBindingProps = createRoleBindingProps(
+  'pipeline-admin-default-crb',
+  'default',
+  'cluster-admin',
+  'pipeline',
+  'default');
 
 /**
  * The options for builders for the `buildXX()` methods.
@@ -20,10 +59,6 @@ export interface BuilderOptions {
    * as possible.
    */
   readonly includeDependencies?: boolean;
-  /**
-   * If true, the builder will also synth associated runs.
-   */
-  readonly includeRuns?: boolean;
 }
 
 /**
@@ -31,14 +66,13 @@ export interface BuilderOptions {
  */
 export const DefaultBuilderOptions: BuilderOptions = {
   includeDependencies: false,
-  includeRuns: false,
 };
 
 /**
  * Builds the Workspaces for use by Tasks and Pipelines.
  */
 export class WorkspaceBuilder {
-  private _logicalID: string;
+  private readonly _logicalID: string;
   private _name?: string;
   private _description?: string;
 
@@ -450,13 +484,11 @@ export class TaskStepBuilder {
         env: this._env,
       };
     }
-    return undefined;
   }
 }
 
 /**
- * This is the builder for creating Tekton `Task` objects that are independent
- * of a `Pipeline`. They
+ * Builds Tekton `Task` objects that are independent of a `Pipeline`.
  *
  * To use a builder for tasks that will be used in a Pipeline, use the
  * `PipelineBuilder` instead.
@@ -602,6 +634,9 @@ export class TaskBuilder {
   }
 }
 
+/**
+ *
+ */
 export class PipelineBuilder {
   private readonly _scope: Construct;
   private readonly _id: string;
@@ -652,8 +687,40 @@ export class PipelineBuilder {
   }
 
   /**
-   * Builds the actual [Pipeline]() from the settings configured using the
-   * fluid syntax.
+   * Returns the array of `PipelineParam` objects.
+   *
+   * Note this is an "expensive" get because it loops through the tasks in the
+   * pipeline and checks for duplicates in the pipeline parameters for each task
+   * parameter found. You should avoid calling this in a loop--instead, declare
+   * a local variable before the loop and reference that instead.
+   *
+   * @returns PipelineParam[] An array of the pipeline parameters.
+   */
+  public get params(): PipelineParam[] {
+    // Not trying to prematurely optimize here, but this could be an expensive
+    // operation, so we only need to do it if the state of the object has not
+    // changed.
+    const pipelineParams = new Map<string, PipelineParam>();
+    this._tasks?.forEach((t) => {
+      t.parameters?.forEach(p => {
+        const pp = pipelineParams.get(p.name!);
+        if (!pp) {
+          // Do not add it to the pipeline if there is no need to add it...
+          if (p.requiresPipelineParameter) {
+            pipelineParams.set(p.name!, {
+              name: p.name,
+              type: p.type,
+            });
+          }
+        }
+      });
+    });
+    return Array.from(pipelineParams.values());
+  }
+
+  /**
+   * Builds the actual [Pipeline](https://tekton.dev/docs/getting-started/pipelines/)
+   * from the settings configured using the fluid syntax.
    */
   public buildPipeline(opts: BuilderOptions = DefaultBuilderOptions): void {
     // TODO: validate the object
@@ -758,4 +825,111 @@ function createOrderedPipelineTask(t: TaskBuilder, after: string, params: TaskPa
     params: params,
     workspaces: ws,
   };
+}
+
+/**
+ * Builds a `PipelineRun` using the supplied configuration.
+ *
+ * @see https://tekton.dev/docs/pipelines/pipelineruns/
+ */
+export class PipelineRunBuilder {
+  private readonly _scope: Construct;
+  private readonly _id: string;
+  private readonly _pipeline: PipelineBuilder;
+  private readonly _runParams: PipelineRunParam[];
+  private _sa: string;
+  private _crbProps: ApiObjectProps;
+
+  /**
+   * Creates a new instance of the `PipelineRunBuilder` for the specified
+   * `Pipeline` that is built by the `PipelineBuilder` supplied here.
+   *
+   * A pipeline run is configured only for a specific pipeline, so it did not
+   * make any sense here to allow the run to be created without the pipeline
+   * specified.
+   *
+   * @param scope The `Construct` in which to create the `PipelineRun`.
+   * @param id The logical ID of the `PipelineRun` construct.
+   * @param pipeline The `Pipeline` for which to create this run, using the `PipelineBuilder`.
+   */
+  public constructor(scope: Construct, id: string, pipeline: PipelineBuilder) {
+    this._scope = scope;
+    this._id = id;
+    this._pipeline = pipeline;
+    this._sa = DefaultPipelineServiceAccountName;
+    this._crbProps = DefaultClusterRoleBindingProps;
+    this._runParams = new Array<PipelineRunParam>();
+  }
+
+  /**
+   * Adds a run parameter to the `PipelineRun`. It will throw an error if you try
+   * to add a parameter that does not exist on the pipeline.
+   *
+   * @param name The name of the parameter added to the pipeline run.
+   * @param value The value of the parameter added to the pipeline run.
+   */
+  public withRunParam(name: string, value: string): PipelineRunBuilder {
+    const params = this._pipeline.params;
+    const p = params.find((obj) => obj.name === name);
+    if (p) {
+      this._runParams.push({
+        name: name,
+        value: value,
+      });
+    } else {
+      throw new Error(`PipelineRun parameter '${name}' does not exist in pipeline '${this._pipeline.name}'`);
+    }
+    return this;
+  }
+
+  public withClusterRoleBindingProps(props: ApiObjectProps): PipelineRunBuilder {
+    this._crbProps = props;
+    return this;
+  }
+
+  /**
+   * Uses the provided role name for the `serviceAccountName` on the
+   * `PipelineRun`. If this method is not called prior to `buildPipelineRun()`,
+   * then the default service account will be used, which is _default:pipeline_.
+   *
+   * @param sa The name of the service account (`serviceAccountName`) to use.
+   */
+  public withServiceAccount(sa: string): PipelineRunBuilder {
+    this._sa = sa;
+    return this;
+  }
+
+  /**
+   * Builds the `PipelineRun` for the configured `Pipeline` used in the constructor.
+   * @param opts
+   */
+  public buildPipelineRun(opts: BuilderOptions = DefaultBuilderOptions): void {
+    if (opts && opts.includeDependencies) {
+      // Generate the ClusterRoleBinding document, if configured to do so.
+      new ApiObject(this._scope, this._crbProps.metadata?.name!, this._crbProps);
+    }
+
+    // Throw an error here if the parameters are not defined that are required
+    // by the Pipeline, because there is really no point in going any further.
+    const params = this._pipeline.params;
+    params.forEach((p) => {
+      const prp = this._runParams.find((obj) => obj.name == p.name);
+      if (!prp) {
+        throw new Error(`Pipeline parameter '${p.name}' is not defined in PipelineRun '${this._id}'`);
+      }
+    });
+
+    new PipelineRun(this._scope, this._id, {
+      metadata: {
+        name: this._id,
+      },
+      serviceAccountName: this._sa,
+      spec: {
+        pipelineRef: {
+          name: this._pipeline.name,
+        },
+        params: this._runParams,
+      },
+    });
+  }
 }

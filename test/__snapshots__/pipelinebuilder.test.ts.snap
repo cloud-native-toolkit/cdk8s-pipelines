@@ -1,80 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`PipelineBuilderTest PipelineBuilder 1`] = `
-[
-  {
-    "apiVersion": "tekton.dev/v1beta1",
-    "kind": "Task",
-    "metadata": {
-      "name": "git-clone",
-    },
-    "spec": {
-      "description": undefined,
-      "params": [
-        {
-          "default": "",
-          "description": "",
-          "name": "url",
-        },
-      ],
-      "steps": [],
-      "workspaces": [
-        {
-          "description": "The files cloned by the task",
-          "name": "output",
-        },
-      ],
-    },
-  },
-  {
-    "apiVersion": "tekton.dev/v1beta1",
-    "kind": "Pipeline",
-    "metadata": {
-      "name": "clone-build-push",
-    },
-    "spec": {
-      "description": "This pipeline closes a repository, builds a Docker image, etc.",
-      "params": [
-        {
-          "name": "repo-url",
-          "type": "string",
-        },
-      ],
-      "tasks": [
-        {
-          "name": "fetch-source",
-          "params": [
-            {
-              "name": "url",
-              "value": "$(params.repo-url)",
-            },
-          ],
-          "taskRef": {
-            "name": "git-clone",
-          },
-          "workspaces": [
-            {
-              "name": "output",
-              "workspace": "shared-data",
-            },
-          ],
-        },
-      ],
-      "workspaces": [
-        {
-          "description": "The files cloned by the task",
-          "name": "shared-data",
-        },
-      ],
-    },
-  },
-]
-`;
-
 exports[`PipelineBuilderTest PipelineBuilderWithComplexTasks 1`] = `
 [
   {
-    "apiVersion": "tekton.dev/v1beta1",
+    "apiVersion": "tekton.dev/v1",
     "kind": "Pipeline",
     "metadata": {
       "name": "clone-build-push",
@@ -161,7 +90,7 @@ exports[`PipelineBuilderTest PipelineBuilderWithComplexTasks 1`] = `
 exports[`PipelineBuilderTest PipelineBuilderWithDuplicateTasks 1`] = `
 [
   {
-    "apiVersion": "tekton.dev/v1beta1",
+    "apiVersion": "tekton.dev/v1",
     "kind": "Task",
     "metadata": {
       "name": "fetch-source",
@@ -185,7 +114,7 @@ exports[`PipelineBuilderTest PipelineBuilderWithDuplicateTasks 1`] = `
     },
   },
   {
-    "apiVersion": "tekton.dev/v1beta1",
+    "apiVersion": "tekton.dev/v1",
     "kind": "Pipeline",
     "metadata": {
       "name": "clone-build-push",
@@ -253,7 +182,7 @@ exports[`PipelineBuilderTest PipelineBuilderWithDuplicateTasks 1`] = `
 exports[`PipelineBuilderTest PipelineBuilderWithDuplicates 1`] = `
 [
   {
-    "apiVersion": "tekton.dev/v1beta1",
+    "apiVersion": "tekton.dev/v1",
     "kind": "Pipeline",
     "metadata": {
       "name": "clone-build-push",
@@ -321,7 +250,7 @@ exports[`PipelineBuilderTest PipelineBuilderWithDuplicates 1`] = `
 exports[`PipelineBuilderTest PipelineBuilderWithStaticOverride 1`] = `
 [
   {
-    "apiVersion": "tekton.dev/v1beta1",
+    "apiVersion": "tekton.dev/v1",
     "kind": "Pipeline",
     "metadata": {
       "name": "clone-build-push",
@@ -345,6 +274,114 @@ exports[`PipelineBuilderTest PipelineBuilderWithStaticOverride 1`] = `
         },
       ],
       "workspaces": [],
+    },
+  },
+]
+`;
+
+exports[`PipelineBuilderTest PipelineRunBuilder 1`] = `
+[
+  {
+    "apiVersion": "tekton.dev/v1",
+    "kind": "Task",
+    "metadata": {
+      "name": "git-clone",
+    },
+    "spec": {
+      "description": undefined,
+      "params": [
+        {
+          "default": "",
+          "description": "",
+          "name": "url",
+        },
+      ],
+      "steps": [],
+      "workspaces": [
+        {
+          "description": "The files cloned by the task",
+          "name": "output",
+        },
+      ],
+    },
+  },
+  {
+    "apiVersion": "tekton.dev/v1",
+    "kind": "Pipeline",
+    "metadata": {
+      "name": "clone-build-push",
+    },
+    "spec": {
+      "description": "This pipeline closes a repository, builds a Docker image, etc.",
+      "params": [
+        {
+          "name": "repo-url",
+          "type": "string",
+        },
+      ],
+      "tasks": [
+        {
+          "name": "fetch-source",
+          "params": [
+            {
+              "name": "url",
+              "value": "$(params.repo-url)",
+            },
+          ],
+          "taskRef": {
+            "name": "git-clone",
+          },
+          "workspaces": [
+            {
+              "name": "output",
+              "workspace": "shared-data",
+            },
+          ],
+        },
+      ],
+      "workspaces": [
+        {
+          "description": "The files cloned by the task",
+          "name": "shared-data",
+        },
+      ],
+    },
+  },
+  {
+    "apiVersion": "rbac.authorization.k8s.io/v1",
+    "kind": "ClusterRoleBinding",
+    "metadata": {
+      "name": "pipeline-admin-default-crb",
+      "namespace": "default",
+    },
+    "roleRef": {
+      "kind": "ClusterRole",
+      "name": "cluster-admin",
+    },
+    "subjects": [
+      {
+        "kind": "ServiceAccount",
+        "name": "pipeline",
+        "namespace": "default",
+      },
+    ],
+  },
+  {
+    "apiVersion": "tekton.dev/v1",
+    "kind": "PipelineRun",
+    "metadata": {
+      "name": "my-pipeline-run",
+    },
+    "spec": {
+      "params": [
+        {
+          "name": "repo-url",
+          "value": "https://github.com/exmaple/my-repo",
+        },
+      ],
+      "pipelineRef": {
+        "name": "clone-build-push",
+      },
     },
   },
 ]

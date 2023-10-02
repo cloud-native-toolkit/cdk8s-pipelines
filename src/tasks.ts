@@ -19,7 +19,7 @@
  */
 import { ApiObject, ApiObjectMetadata, GroupVersionKind } from 'cdk8s';
 import { Construct } from 'constructs';
-import { NamedResource, NameKeyPair } from './common';
+import { NamedResource, NameKeyPair, TektonV1ApiVersion } from './common';
 
 
 /**
@@ -200,7 +200,7 @@ export class Task extends ApiObject {
    * Returns the apiVersion and kind for "Task"
    */
   public static readonly GVK: GroupVersionKind = {
-    apiVersion: 'tekton.dev/v1beta1',
+    apiVersion: TektonV1ApiVersion,
     kind: 'Task',
   };
 
@@ -222,7 +222,7 @@ export class Task extends ApiObject {
   private readonly _spec?: TaskSpec;
 
   /**
-   * The `Task` `spec`.
+   * The configuration for the `Task`.
    */
   public get spec(): TaskSpec | undefined {
     return this._spec;

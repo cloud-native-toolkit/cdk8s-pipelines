@@ -437,6 +437,334 @@ Returns the apiVersion and kind for "Pipeline".
 
 ---
 
+### PipelineRun <a name="PipelineRun" id="cdk8s-pipelines.PipelineRun"></a>
+
+The PipelineRun allows you to specify how you want to execute a `Pipeline`.
+
+> [https://tekton.dev/docs/pipelines/pipelineruns/](https://tekton.dev/docs/pipelines/pipelineruns/)
+
+#### Initializers <a name="Initializers" id="cdk8s-pipelines.PipelineRun.Initializer"></a>
+
+```typescript
+import { PipelineRun } from 'cdk8s-pipelines'
+
+new PipelineRun(scope: Construct, id: string, props?: PipelineRunProps)
+```
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.PipelineRun.Initializer.parameter.scope">scope</a></code> | <code>constructs.Construct</code> | the scope in which to define this object. |
+| <code><a href="#cdk8s-pipelines.PipelineRun.Initializer.parameter.id">id</a></code> | <code>string</code> | a scope-local name for the object. |
+| <code><a href="#cdk8s-pipelines.PipelineRun.Initializer.parameter.props">props</a></code> | <code><a href="#cdk8s-pipelines.PipelineRunProps">PipelineRunProps</a></code> | initialization props. |
+
+---
+
+##### `scope`<sup>Required</sup> <a name="scope" id="cdk8s-pipelines.PipelineRun.Initializer.parameter.scope"></a>
+
+- *Type:* constructs.Construct
+
+the scope in which to define this object.
+
+---
+
+##### `id`<sup>Required</sup> <a name="id" id="cdk8s-pipelines.PipelineRun.Initializer.parameter.id"></a>
+
+- *Type:* string
+
+a scope-local name for the object.
+
+---
+
+##### `props`<sup>Optional</sup> <a name="props" id="cdk8s-pipelines.PipelineRun.Initializer.parameter.props"></a>
+
+- *Type:* <a href="#cdk8s-pipelines.PipelineRunProps">PipelineRunProps</a>
+
+initialization props.
+
+---
+
+#### Methods <a name="Methods" id="Methods"></a>
+
+| **Name** | **Description** |
+| --- | --- |
+| <code><a href="#cdk8s-pipelines.PipelineRun.toString">toString</a></code> | Returns a string representation of this construct. |
+| <code><a href="#cdk8s-pipelines.PipelineRun.addDependency">addDependency</a></code> | Create a dependency between this ApiObject and other constructs. |
+| <code><a href="#cdk8s-pipelines.PipelineRun.addJsonPatch">addJsonPatch</a></code> | Applies a set of RFC-6902 JSON-Patch operations to the manifest synthesized for this API object. |
+| <code><a href="#cdk8s-pipelines.PipelineRun.toJson">toJson</a></code> | Renders the object to Kubernetes JSON. |
+
+---
+
+##### `toString` <a name="toString" id="cdk8s-pipelines.PipelineRun.toString"></a>
+
+```typescript
+public toString(): string
+```
+
+Returns a string representation of this construct.
+
+##### `addDependency` <a name="addDependency" id="cdk8s-pipelines.PipelineRun.addDependency"></a>
+
+```typescript
+public addDependency(dependencies: IConstruct): void
+```
+
+Create a dependency between this ApiObject and other constructs.
+
+These can be other ApiObjects, Charts, or custom.
+
+###### `dependencies`<sup>Required</sup> <a name="dependencies" id="cdk8s-pipelines.PipelineRun.addDependency.parameter.dependencies"></a>
+
+- *Type:* constructs.IConstruct
+
+the dependencies to add.
+
+---
+
+##### `addJsonPatch` <a name="addJsonPatch" id="cdk8s-pipelines.PipelineRun.addJsonPatch"></a>
+
+```typescript
+public addJsonPatch(ops: JsonPatch): void
+```
+
+Applies a set of RFC-6902 JSON-Patch operations to the manifest synthesized for this API object.
+
+*Example*
+
+```typescript
+  kubePod.addJsonPatch(JsonPatch.replace('/spec/enableServiceLinks', true));
+```
+
+
+###### `ops`<sup>Required</sup> <a name="ops" id="cdk8s-pipelines.PipelineRun.addJsonPatch.parameter.ops"></a>
+
+- *Type:* cdk8s.JsonPatch
+
+The JSON-Patch operations to apply.
+
+---
+
+##### `toJson` <a name="toJson" id="cdk8s-pipelines.PipelineRun.toJson"></a>
+
+```typescript
+public toJson(): any
+```
+
+Renders the object to Kubernetes JSON.
+
+#### Static Functions <a name="Static Functions" id="Static Functions"></a>
+
+| **Name** | **Description** |
+| --- | --- |
+| <code><a href="#cdk8s-pipelines.PipelineRun.isConstruct">isConstruct</a></code> | Checks if `x` is a construct. |
+| <code><a href="#cdk8s-pipelines.PipelineRun.isApiObject">isApiObject</a></code> | Return whether the given object is an `ApiObject`. |
+| <code><a href="#cdk8s-pipelines.PipelineRun.of">of</a></code> | Returns the `ApiObject` named `Resource` which is a child of the given construct. |
+| <code><a href="#cdk8s-pipelines.PipelineRun.manifest">manifest</a></code> | Renders a Kubernetes manifest for `PipelineRun`. |
+
+---
+
+##### ~~`isConstruct`~~ <a name="isConstruct" id="cdk8s-pipelines.PipelineRun.isConstruct"></a>
+
+```typescript
+import { PipelineRun } from 'cdk8s-pipelines'
+
+PipelineRun.isConstruct(x: any)
+```
+
+Checks if `x` is a construct.
+
+###### `x`<sup>Required</sup> <a name="x" id="cdk8s-pipelines.PipelineRun.isConstruct.parameter.x"></a>
+
+- *Type:* any
+
+Any object.
+
+---
+
+##### `isApiObject` <a name="isApiObject" id="cdk8s-pipelines.PipelineRun.isApiObject"></a>
+
+```typescript
+import { PipelineRun } from 'cdk8s-pipelines'
+
+PipelineRun.isApiObject(o: any)
+```
+
+Return whether the given object is an `ApiObject`.
+
+We do attribute detection since we can't reliably use 'instanceof'.
+
+###### `o`<sup>Required</sup> <a name="o" id="cdk8s-pipelines.PipelineRun.isApiObject.parameter.o"></a>
+
+- *Type:* any
+
+The object to check.
+
+---
+
+##### `of` <a name="of" id="cdk8s-pipelines.PipelineRun.of"></a>
+
+```typescript
+import { PipelineRun } from 'cdk8s-pipelines'
+
+PipelineRun.of(c: IConstruct)
+```
+
+Returns the `ApiObject` named `Resource` which is a child of the given construct.
+
+If `c` is an `ApiObject`, it is returned directly. Throws an
+exception if the construct does not have a child named `Default` _or_ if
+this child is not an `ApiObject`.
+
+###### `c`<sup>Required</sup> <a name="c" id="cdk8s-pipelines.PipelineRun.of.parameter.c"></a>
+
+- *Type:* constructs.IConstruct
+
+The higher-level construct.
+
+---
+
+##### `manifest` <a name="manifest" id="cdk8s-pipelines.PipelineRun.manifest"></a>
+
+```typescript
+import { PipelineRun } from 'cdk8s-pipelines'
+
+PipelineRun.manifest(props?: PipelineProps)
+```
+
+Renders a Kubernetes manifest for `PipelineRun`.
+
+This can be used to inline resource manifests inside other objects (e.g. as templates).
+
+###### `props`<sup>Optional</sup> <a name="props" id="cdk8s-pipelines.PipelineRun.manifest.parameter.props"></a>
+
+- *Type:* <a href="#cdk8s-pipelines.PipelineProps">PipelineProps</a>
+
+initialization props.
+
+---
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.PipelineRun.property.node">node</a></code> | <code>constructs.Node</code> | The tree node. |
+| <code><a href="#cdk8s-pipelines.PipelineRun.property.apiGroup">apiGroup</a></code> | <code>string</code> | The group portion of the API version (e.g. `authorization.k8s.io`). |
+| <code><a href="#cdk8s-pipelines.PipelineRun.property.apiVersion">apiVersion</a></code> | <code>string</code> | The object's API version (e.g. `authorization.k8s.io/v1`). |
+| <code><a href="#cdk8s-pipelines.PipelineRun.property.chart">chart</a></code> | <code>cdk8s.Chart</code> | The chart in which this object is defined. |
+| <code><a href="#cdk8s-pipelines.PipelineRun.property.kind">kind</a></code> | <code>string</code> | The object kind. |
+| <code><a href="#cdk8s-pipelines.PipelineRun.property.metadata">metadata</a></code> | <code>cdk8s.ApiObjectMetadataDefinition</code> | Metadata associated with this API object. |
+| <code><a href="#cdk8s-pipelines.PipelineRun.property.name">name</a></code> | <code>string</code> | The name of the API object. |
+
+---
+
+##### `node`<sup>Required</sup> <a name="node" id="cdk8s-pipelines.PipelineRun.property.node"></a>
+
+```typescript
+public readonly node: Node;
+```
+
+- *Type:* constructs.Node
+
+The tree node.
+
+---
+
+##### `apiGroup`<sup>Required</sup> <a name="apiGroup" id="cdk8s-pipelines.PipelineRun.property.apiGroup"></a>
+
+```typescript
+public readonly apiGroup: string;
+```
+
+- *Type:* string
+
+The group portion of the API version (e.g. `authorization.k8s.io`).
+
+---
+
+##### `apiVersion`<sup>Required</sup> <a name="apiVersion" id="cdk8s-pipelines.PipelineRun.property.apiVersion"></a>
+
+```typescript
+public readonly apiVersion: string;
+```
+
+- *Type:* string
+
+The object's API version (e.g. `authorization.k8s.io/v1`).
+
+---
+
+##### `chart`<sup>Required</sup> <a name="chart" id="cdk8s-pipelines.PipelineRun.property.chart"></a>
+
+```typescript
+public readonly chart: Chart;
+```
+
+- *Type:* cdk8s.Chart
+
+The chart in which this object is defined.
+
+---
+
+##### `kind`<sup>Required</sup> <a name="kind" id="cdk8s-pipelines.PipelineRun.property.kind"></a>
+
+```typescript
+public readonly kind: string;
+```
+
+- *Type:* string
+
+The object kind.
+
+---
+
+##### `metadata`<sup>Required</sup> <a name="metadata" id="cdk8s-pipelines.PipelineRun.property.metadata"></a>
+
+```typescript
+public readonly metadata: ApiObjectMetadataDefinition;
+```
+
+- *Type:* cdk8s.ApiObjectMetadataDefinition
+
+Metadata associated with this API object.
+
+---
+
+##### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.PipelineRun.property.name"></a>
+
+```typescript
+public readonly name: string;
+```
+
+- *Type:* string
+
+The name of the API object.
+
+If a name is specified in `metadata.name` this will be the name returned.
+Otherwise, a name will be generated by calling
+`Chart.of(this).generatedObjectName(this)`, which by default uses the
+construct path to generate a DNS-compatible name for the resource.
+
+---
+
+#### Constants <a name="Constants" id="Constants"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.PipelineRun.property.GVK">GVK</a></code> | <code>cdk8s.GroupVersionKind</code> | Returns the apiVersion and kind for "PipelineRun". |
+
+---
+
+##### `GVK`<sup>Required</sup> <a name="GVK" id="cdk8s-pipelines.PipelineRun.property.GVK"></a>
+
+```typescript
+public readonly GVK: GroupVersionKind;
+```
+
+- *Type:* cdk8s.GroupVersionKind
+
+Returns the apiVersion and kind for "PipelineRun".
+
+---
+
 ### Task <a name="Task" id="cdk8s-pipelines.Task"></a>
 
 A Tekton Task, which is > a collection of Steps that you define and arrange in > a specific order of execution as part of your continuous integration flow.
@@ -658,7 +986,7 @@ initialization props.
 | <code><a href="#cdk8s-pipelines.Task.property.kind">kind</a></code> | <code>string</code> | The object kind. |
 | <code><a href="#cdk8s-pipelines.Task.property.metadata">metadata</a></code> | <code>cdk8s.ApiObjectMetadataDefinition</code> | Metadata associated with this API object. |
 | <code><a href="#cdk8s-pipelines.Task.property.name">name</a></code> | <code>string</code> | The name of the API object. |
-| <code><a href="#cdk8s-pipelines.Task.property.spec">spec</a></code> | <code><a href="#cdk8s-pipelines.TaskSpec">TaskSpec</a></code> | The `Task` `spec`. |
+| <code><a href="#cdk8s-pipelines.Task.property.spec">spec</a></code> | <code><a href="#cdk8s-pipelines.TaskSpec">TaskSpec</a></code> | The configuration for the `Task`. |
 
 ---
 
@@ -759,7 +1087,7 @@ public readonly spec: TaskSpec;
 
 - *Type:* <a href="#cdk8s-pipelines.TaskSpec">TaskSpec</a>
 
-The `Task` `spec`.
+The configuration for the `Task`.
 
 ---
 
@@ -802,7 +1130,6 @@ const builderOptions: BuilderOptions = { ... }
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
 | <code><a href="#cdk8s-pipelines.BuilderOptions.property.includeDependencies">includeDependencies</a></code> | <code>boolean</code> | If true, all the dependent objects are generated with the build. |
-| <code><a href="#cdk8s-pipelines.BuilderOptions.property.includeRuns">includeRuns</a></code> | <code>boolean</code> | If true, the builder will also synth associated runs. |
 
 ---
 
@@ -819,18 +1146,6 @@ If true, all the dependent objects are generated with the build.
 This is
 designed to run on as minimal cluster as possible, with as few pre steps
 as possible.
-
----
-
-##### `includeRuns`<sup>Optional</sup> <a name="includeRuns" id="cdk8s-pipelines.BuilderOptions.property.includeRuns"></a>
-
-```typescript
-public readonly includeRuns: boolean;
-```
-
-- *Type:* boolean
-
-If true, the builder will also synth associated runs.
 
 ---
 
@@ -996,6 +1311,182 @@ public readonly spec: PipelineSpec;
 
 ---
 
+### PipelineRef <a name="PipelineRef" id="cdk8s-pipelines.PipelineRef"></a>
+
+A reference to a `Pipeline` by its name.
+
+> [https://tekton.dev/docs/pipelines/pipelineruns/#specifying-the-target-pipeline](https://tekton.dev/docs/pipelines/pipelineruns/#specifying-the-target-pipeline)
+
+#### Initializer <a name="Initializer" id="cdk8s-pipelines.PipelineRef.Initializer"></a>
+
+```typescript
+import { PipelineRef } from 'cdk8s-pipelines'
+
+const pipelineRef: PipelineRef = { ... }
+```
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.PipelineRef.property.name">name</a></code> | <code>string</code> | The name of the `Pipeline` to that is referenced. |
+
+---
+
+##### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.PipelineRef.property.name"></a>
+
+```typescript
+public readonly name: string;
+```
+
+- *Type:* string
+
+The name of the `Pipeline` to that is referenced.
+
+---
+
+### PipelineRunParam <a name="PipelineRunParam" id="cdk8s-pipelines.PipelineRunParam"></a>
+
+The parameters for a particular `PipelineRun`.
+
+#### Initializer <a name="Initializer" id="cdk8s-pipelines.PipelineRunParam.Initializer"></a>
+
+```typescript
+import { PipelineRunParam } from 'cdk8s-pipelines'
+
+const pipelineRunParam: PipelineRunParam = { ... }
+```
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.PipelineRunParam.property.name">name</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.PipelineRunParam.property.value">value</a></code> | <code>string</code> | The value of the parameter in this `PipelineRun`. |
+
+---
+
+##### `name`<sup>Optional</sup> <a name="name" id="cdk8s-pipelines.PipelineRunParam.property.name"></a>
+
+```typescript
+public readonly name: string;
+```
+
+- *Type:* string
+
+---
+
+##### `value`<sup>Required</sup> <a name="value" id="cdk8s-pipelines.PipelineRunParam.property.value"></a>
+
+```typescript
+public readonly value: string;
+```
+
+- *Type:* string
+
+The value of the parameter in this `PipelineRun`.
+
+---
+
+### PipelineRunProps <a name="PipelineRunProps" id="cdk8s-pipelines.PipelineRunProps"></a>
+
+#### Initializer <a name="Initializer" id="cdk8s-pipelines.PipelineRunProps.Initializer"></a>
+
+```typescript
+import { PipelineRunProps } from 'cdk8s-pipelines'
+
+const pipelineRunProps: PipelineRunProps = { ... }
+```
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.PipelineRunProps.property.metadata">metadata</a></code> | <code>cdk8s.ApiObjectMetadata</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.PipelineRunProps.property.serviceAccountName">serviceAccountName</a></code> | <code>string</code> | Specifies a `ServiceAccount` object that supplies specific execution credentials for the `Pipeline`. |
+| <code><a href="#cdk8s-pipelines.PipelineRunProps.property.spec">spec</a></code> | <code><a href="#cdk8s-pipelines.PipelineRunSpec">PipelineRunSpec</a></code> | Specifies the configuration information for this `PipelineRun` object. |
+
+---
+
+##### `metadata`<sup>Optional</sup> <a name="metadata" id="cdk8s-pipelines.PipelineRunProps.property.metadata"></a>
+
+```typescript
+public readonly metadata: ApiObjectMetadata;
+```
+
+- *Type:* cdk8s.ApiObjectMetadata
+
+---
+
+##### `serviceAccountName`<sup>Optional</sup> <a name="serviceAccountName" id="cdk8s-pipelines.PipelineRunProps.property.serviceAccountName"></a>
+
+```typescript
+public readonly serviceAccountName: string;
+```
+
+- *Type:* string
+
+Specifies a `ServiceAccount` object that supplies specific execution credentials for the `Pipeline`.
+
+---
+
+##### `spec`<sup>Optional</sup> <a name="spec" id="cdk8s-pipelines.PipelineRunProps.property.spec"></a>
+
+```typescript
+public readonly spec: PipelineRunSpec;
+```
+
+- *Type:* <a href="#cdk8s-pipelines.PipelineRunSpec">PipelineRunSpec</a>
+
+Specifies the configuration information for this `PipelineRun` object.
+
+---
+
+### PipelineRunSpec <a name="PipelineRunSpec" id="cdk8s-pipelines.PipelineRunSpec"></a>
+
+The details for the `PipelineRun`.
+
+> [https://tekton.dev/docs/pipelines/pipelineruns/#configuring-a-pipelinerun](https://tekton.dev/docs/pipelines/pipelineruns/#configuring-a-pipelinerun)
+
+#### Initializer <a name="Initializer" id="cdk8s-pipelines.PipelineRunSpec.Initializer"></a>
+
+```typescript
+import { PipelineRunSpec } from 'cdk8s-pipelines'
+
+const pipelineRunSpec: PipelineRunSpec = { ... }
+```
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.PipelineRunSpec.property.pipelineRef">pipelineRef</a></code> | <code><a href="#cdk8s-pipelines.PipelineRef">PipelineRef</a></code> | Required `Pipeline` reference. |
+| <code><a href="#cdk8s-pipelines.PipelineRunSpec.property.params">params</a></code> | <code><a href="#cdk8s-pipelines.PipelineRunParam">PipelineRunParam</a>[]</code> | *No description.* |
+
+---
+
+##### `pipelineRef`<sup>Required</sup> <a name="pipelineRef" id="cdk8s-pipelines.PipelineRunSpec.property.pipelineRef"></a>
+
+```typescript
+public readonly pipelineRef: PipelineRef;
+```
+
+- *Type:* <a href="#cdk8s-pipelines.PipelineRef">PipelineRef</a>
+
+Required `Pipeline` reference.
+
+---
+
+##### `params`<sup>Optional</sup> <a name="params" id="cdk8s-pipelines.PipelineRunSpec.property.params"></a>
+
+```typescript
+public readonly params: PipelineRunParam[];
+```
+
+- *Type:* <a href="#cdk8s-pipelines.PipelineRunParam">PipelineRunParam</a>[]
+
+---
+
 ### PipelineSpec <a name="PipelineSpec" id="cdk8s-pipelines.PipelineSpec"></a>
 
 The `spec` part of the Pipeline.
@@ -1015,7 +1506,7 @@ const pipelineSpec: PipelineSpec = { ... }
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
 | <code><a href="#cdk8s-pipelines.PipelineSpec.property.tasks">tasks</a></code> | <code><a href="#cdk8s-pipelines.PipelineTask">PipelineTask</a>[]</code> | The `tasks` are required on the Pipeline. |
-| <code><a href="#cdk8s-pipelines.PipelineSpec.property.description">description</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.PipelineSpec.property.description">description</a></code> | <code>string</code> | The description of the `Pipeline`. |
 | <code><a href="#cdk8s-pipelines.PipelineSpec.property.params">params</a></code> | <code><a href="#cdk8s-pipelines.PipelineParam">PipelineParam</a>[]</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.PipelineSpec.property.workspaces">workspaces</a></code> | <code><a href="#cdk8s-pipelines.PipelineWorkspace">PipelineWorkspace</a>[]</code> | Pipeline workspaces. |
 
@@ -1040,6 +1531,8 @@ public readonly description: string;
 ```
 
 - *Type:* string
+
+The description of the `Pipeline`.
 
 ---
 
@@ -2116,7 +2609,7 @@ new PipelineBuilder(scope: Construct, id: string)
 
 | **Name** | **Description** |
 | --- | --- |
-| <code><a href="#cdk8s-pipelines.PipelineBuilder.buildPipeline">buildPipeline</a></code> | Builds the actual [Pipeline]() from the settings configured using the fluid syntax. |
+| <code><a href="#cdk8s-pipelines.PipelineBuilder.buildPipeline">buildPipeline</a></code> | Builds the actual [Pipeline](https://tekton.dev/docs/getting-started/pipelines/) from the settings configured using the fluid syntax. |
 | <code><a href="#cdk8s-pipelines.PipelineBuilder.withDescription">withDescription</a></code> | Provides the name for the pipeline task and will be rendered as the `name` property. |
 | <code><a href="#cdk8s-pipelines.PipelineBuilder.withName">withName</a></code> | Provides the name for the pipeline task and will be rendered as the `name` property. |
 | <code><a href="#cdk8s-pipelines.PipelineBuilder.withTask">withTask</a></code> | *No description.* |
@@ -2129,7 +2622,7 @@ new PipelineBuilder(scope: Construct, id: string)
 public buildPipeline(opts?: BuilderOptions): void
 ```
 
-Builds the actual [Pipeline]() from the settings configured using the fluid syntax.
+Builds the actual [Pipeline](https://tekton.dev/docs/getting-started/pipelines/) from the settings configured using the fluid syntax.
 
 ###### `opts`<sup>Optional</sup> <a name="opts" id="cdk8s-pipelines.PipelineBuilder.buildPipeline.parameter.opts"></a>
 
@@ -2183,6 +2676,7 @@ public withTask(taskB: TaskBuilder): PipelineBuilder
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
 | <code><a href="#cdk8s-pipelines.PipelineBuilder.property.name">name</a></code> | <code>string</code> | Gets the name of the pipeline. |
+| <code><a href="#cdk8s-pipelines.PipelineBuilder.property.params">params</a></code> | <code><a href="#cdk8s-pipelines.PipelineParam">PipelineParam</a>[]</code> | Returns the array of `PipelineParam` objects. |
 
 ---
 
@@ -2198,10 +2692,159 @@ Gets the name of the pipeline.
 
 ---
 
+##### `params`<sup>Required</sup> <a name="params" id="cdk8s-pipelines.PipelineBuilder.property.params"></a>
+
+```typescript
+public readonly params: PipelineParam[];
+```
+
+- *Type:* <a href="#cdk8s-pipelines.PipelineParam">PipelineParam</a>[]
+
+Returns the array of `PipelineParam` objects.
+
+Note this is an "expensive" get because it loops through the tasks in the
+pipeline and checks for duplicates in the pipeline parameters for each task
+parameter found. You should avoid calling this in a loop--instead, declare
+a local variable before the loop and reference that instead.
+
+---
+
+
+### PipelineRunBuilder <a name="PipelineRunBuilder" id="cdk8s-pipelines.PipelineRunBuilder"></a>
+
+Builds a `PipelineRun` using the supplied configuration.
+
+> [https://tekton.dev/docs/pipelines/pipelineruns/](https://tekton.dev/docs/pipelines/pipelineruns/)
+
+#### Initializers <a name="Initializers" id="cdk8s-pipelines.PipelineRunBuilder.Initializer"></a>
+
+```typescript
+import { PipelineRunBuilder } from 'cdk8s-pipelines'
+
+new PipelineRunBuilder(scope: Construct, id: string, pipeline: PipelineBuilder)
+```
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.PipelineRunBuilder.Initializer.parameter.scope">scope</a></code> | <code>constructs.Construct</code> | The `Construct` in which to create the `PipelineRun`. |
+| <code><a href="#cdk8s-pipelines.PipelineRunBuilder.Initializer.parameter.id">id</a></code> | <code>string</code> | The logical ID of the `PipelineRun` construct. |
+| <code><a href="#cdk8s-pipelines.PipelineRunBuilder.Initializer.parameter.pipeline">pipeline</a></code> | <code><a href="#cdk8s-pipelines.PipelineBuilder">PipelineBuilder</a></code> | The `Pipeline` for which to create this run, using the `PipelineBuilder`. |
+
+---
+
+##### `scope`<sup>Required</sup> <a name="scope" id="cdk8s-pipelines.PipelineRunBuilder.Initializer.parameter.scope"></a>
+
+- *Type:* constructs.Construct
+
+The `Construct` in which to create the `PipelineRun`.
+
+---
+
+##### `id`<sup>Required</sup> <a name="id" id="cdk8s-pipelines.PipelineRunBuilder.Initializer.parameter.id"></a>
+
+- *Type:* string
+
+The logical ID of the `PipelineRun` construct.
+
+---
+
+##### `pipeline`<sup>Required</sup> <a name="pipeline" id="cdk8s-pipelines.PipelineRunBuilder.Initializer.parameter.pipeline"></a>
+
+- *Type:* <a href="#cdk8s-pipelines.PipelineBuilder">PipelineBuilder</a>
+
+The `Pipeline` for which to create this run, using the `PipelineBuilder`.
+
+---
+
+#### Methods <a name="Methods" id="Methods"></a>
+
+| **Name** | **Description** |
+| --- | --- |
+| <code><a href="#cdk8s-pipelines.PipelineRunBuilder.buildPipelineRun">buildPipelineRun</a></code> | Builds the `PipelineRun` for the configured `Pipeline` used in the constructor. |
+| <code><a href="#cdk8s-pipelines.PipelineRunBuilder.withClusterRoleBindingProps">withClusterRoleBindingProps</a></code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.PipelineRunBuilder.withRunParam">withRunParam</a></code> | Adds a run parameter to the `PipelineRun`. |
+| <code><a href="#cdk8s-pipelines.PipelineRunBuilder.withServiceAccount">withServiceAccount</a></code> | Uses the provided role name for the `serviceAccountName` on the `PipelineRun`. |
+
+---
+
+##### `buildPipelineRun` <a name="buildPipelineRun" id="cdk8s-pipelines.PipelineRunBuilder.buildPipelineRun"></a>
+
+```typescript
+public buildPipelineRun(opts?: BuilderOptions): void
+```
+
+Builds the `PipelineRun` for the configured `Pipeline` used in the constructor.
+
+###### `opts`<sup>Optional</sup> <a name="opts" id="cdk8s-pipelines.PipelineRunBuilder.buildPipelineRun.parameter.opts"></a>
+
+- *Type:* <a href="#cdk8s-pipelines.BuilderOptions">BuilderOptions</a>
+
+---
+
+##### `withClusterRoleBindingProps` <a name="withClusterRoleBindingProps" id="cdk8s-pipelines.PipelineRunBuilder.withClusterRoleBindingProps"></a>
+
+```typescript
+public withClusterRoleBindingProps(props: ApiObjectProps): PipelineRunBuilder
+```
+
+###### `props`<sup>Required</sup> <a name="props" id="cdk8s-pipelines.PipelineRunBuilder.withClusterRoleBindingProps.parameter.props"></a>
+
+- *Type:* cdk8s.ApiObjectProps
+
+---
+
+##### `withRunParam` <a name="withRunParam" id="cdk8s-pipelines.PipelineRunBuilder.withRunParam"></a>
+
+```typescript
+public withRunParam(name: string, value: string): PipelineRunBuilder
+```
+
+Adds a run parameter to the `PipelineRun`.
+
+It will throw an error if you try
+to add a parameter that does not exist on the pipeline.
+
+###### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.PipelineRunBuilder.withRunParam.parameter.name"></a>
+
+- *Type:* string
+
+The name of the parameter added to the pipeline run.
+
+---
+
+###### `value`<sup>Required</sup> <a name="value" id="cdk8s-pipelines.PipelineRunBuilder.withRunParam.parameter.value"></a>
+
+- *Type:* string
+
+The value of the parameter added to the pipeline run.
+
+---
+
+##### `withServiceAccount` <a name="withServiceAccount" id="cdk8s-pipelines.PipelineRunBuilder.withServiceAccount"></a>
+
+```typescript
+public withServiceAccount(sa: string): PipelineRunBuilder
+```
+
+Uses the provided role name for the `serviceAccountName` on the `PipelineRun`.
+
+If this method is not called prior to `buildPipelineRun()`,
+then the default service account will be used, which is _default:pipeline_.
+
+###### `sa`<sup>Required</sup> <a name="sa" id="cdk8s-pipelines.PipelineRunBuilder.withServiceAccount.parameter.sa"></a>
+
+- *Type:* string
+
+The name of the service account (`serviceAccountName`) to use.
+
+---
+
+
+
 
 ### TaskBuilder <a name="TaskBuilder" id="cdk8s-pipelines.TaskBuilder"></a>
 
-This is the builder for creating Tekton `Task` objects that are independent of a `Pipeline`. They.
+Builds Tekton `Task` objects that are independent of a `Pipeline`.
 
 To use a builder for tasks that will be used in a Pipeline, use the
 `PipelineBuilder` instead.
