@@ -1216,6 +1216,36 @@ public readonly key: string;
 
 ---
 
+### PersistentVolumeClaimRef <a name="PersistentVolumeClaimRef" id="cdk8s-pipelines.PersistentVolumeClaimRef"></a>
+
+A reference to a PersistentVolumeClaim.
+
+#### Initializer <a name="Initializer" id="cdk8s-pipelines.PersistentVolumeClaimRef.Initializer"></a>
+
+```typescript
+import { PersistentVolumeClaimRef } from 'cdk8s-pipelines'
+
+const persistentVolumeClaimRef: PersistentVolumeClaimRef = { ... }
+```
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.PersistentVolumeClaimRef.property.claimName">claimName</a></code> | <code>string</code> | *No description.* |
+
+---
+
+##### `claimName`<sup>Required</sup> <a name="claimName" id="cdk8s-pipelines.PersistentVolumeClaimRef.property.claimName"></a>
+
+```typescript
+public readonly claimName: string;
+```
+
+- *Type:* string
+
+---
+
 ### PipelineParam <a name="PipelineParam" id="cdk8s-pipelines.PipelineParam"></a>
 
 A Pipeline parameter.
@@ -1462,6 +1492,7 @@ const pipelineRunSpec: PipelineRunSpec = { ... }
 | --- | --- | --- |
 | <code><a href="#cdk8s-pipelines.PipelineRunSpec.property.pipelineRef">pipelineRef</a></code> | <code><a href="#cdk8s-pipelines.PipelineRef">PipelineRef</a></code> | Required `Pipeline` reference. |
 | <code><a href="#cdk8s-pipelines.PipelineRunSpec.property.params">params</a></code> | <code><a href="#cdk8s-pipelines.PipelineRunParam">PipelineRunParam</a>[]</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.PipelineRunSpec.property.workspaces">workspaces</a></code> | <code><a href="#cdk8s-pipelines.PipelineRunWorkspace">PipelineRunWorkspace</a>[]</code> | *No description.* |
 
 ---
 
@@ -1484,6 +1515,70 @@ public readonly params: PipelineRunParam[];
 ```
 
 - *Type:* <a href="#cdk8s-pipelines.PipelineRunParam">PipelineRunParam</a>[]
+
+---
+
+##### `workspaces`<sup>Optional</sup> <a name="workspaces" id="cdk8s-pipelines.PipelineRunSpec.property.workspaces"></a>
+
+```typescript
+public readonly workspaces: PipelineRunWorkspace[];
+```
+
+- *Type:* <a href="#cdk8s-pipelines.PipelineRunWorkspace">PipelineRunWorkspace</a>[]
+
+---
+
+### PipelineRunWorkspace <a name="PipelineRunWorkspace" id="cdk8s-pipelines.PipelineRunWorkspace"></a>
+
+The `Workspace` configuration for a `PipelineRun`.
+
+> [https://tekton.dev/docs/pipelines/pipelineruns/#specifying-workspaces](https://tekton.dev/docs/pipelines/pipelineruns/#specifying-workspaces)
+
+#### Initializer <a name="Initializer" id="cdk8s-pipelines.PipelineRunWorkspace.Initializer"></a>
+
+```typescript
+import { PipelineRunWorkspace } from 'cdk8s-pipelines'
+
+const pipelineRunWorkspace: PipelineRunWorkspace = { ... }
+```
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.PipelineRunWorkspace.property.name">name</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.PipelineRunWorkspace.property.persistentVolumeClaim">persistentVolumeClaim</a></code> | <code><a href="#cdk8s-pipelines.PersistentVolumeClaimRef">PersistentVolumeClaimRef</a></code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.PipelineRunWorkspace.property.subPath">subPath</a></code> | <code>string</code> | *No description.* |
+
+---
+
+##### `name`<sup>Optional</sup> <a name="name" id="cdk8s-pipelines.PipelineRunWorkspace.property.name"></a>
+
+```typescript
+public readonly name: string;
+```
+
+- *Type:* string
+
+---
+
+##### `persistentVolumeClaim`<sup>Required</sup> <a name="persistentVolumeClaim" id="cdk8s-pipelines.PipelineRunWorkspace.property.persistentVolumeClaim"></a>
+
+```typescript
+public readonly persistentVolumeClaim: PersistentVolumeClaimRef;
+```
+
+- *Type:* <a href="#cdk8s-pipelines.PersistentVolumeClaimRef">PersistentVolumeClaimRef</a>
+
+---
+
+##### `subPath`<sup>Required</sup> <a name="subPath" id="cdk8s-pipelines.PipelineRunWorkspace.property.subPath"></a>
+
+```typescript
+public readonly subPath: string;
+```
+
+- *Type:* string
 
 ---
 
@@ -2361,6 +2456,8 @@ public readonly logicalID: string;
 
 ### ParameterBuilder <a name="ParameterBuilder" id="cdk8s-pipelines.ParameterBuilder"></a>
 
+Builds the parameters for use by Tasks and Pipelines.
+
 #### Initializers <a name="Initializers" id="cdk8s-pipelines.ParameterBuilder.Initializer"></a>
 
 ```typescript
@@ -2492,7 +2589,7 @@ Sets the value for the parameter.
 | <code><a href="#cdk8s-pipelines.ParameterBuilder.property.description">description</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.ParameterBuilder.property.requiresPipelineParameter">requiresPipelineParameter</a></code> | <code>boolean</code> | Returns true if this parameter expects input at the pipeline level. |
 | <code><a href="#cdk8s-pipelines.ParameterBuilder.property.defaultValue">defaultValue</a></code> | <code>string</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.ParameterBuilder.property.logicalID">logicalID</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.ParameterBuilder.property.logicalID">logicalID</a></code> | <code>string</code> | Gets the logicalID for the `ParameterBuilder`, which is used by the underlying construct. |
 | <code><a href="#cdk8s-pipelines.ParameterBuilder.property.name">name</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.ParameterBuilder.property.type">type</a></code> | <code>string</code> | Gets the type of the parameter. |
 | <code><a href="#cdk8s-pipelines.ParameterBuilder.property.value">value</a></code> | <code>string</code> | Gets the value of the parameter. |
@@ -2538,6 +2635,8 @@ public readonly logicalID: string;
 ```
 
 - *Type:* string
+
+Gets the logicalID for the `ParameterBuilder`, which is used by the underlying construct.
 
 ---
 
@@ -2676,7 +2775,8 @@ public withTask(taskB: TaskBuilder): PipelineBuilder
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
 | <code><a href="#cdk8s-pipelines.PipelineBuilder.property.name">name</a></code> | <code>string</code> | Gets the name of the pipeline. |
-| <code><a href="#cdk8s-pipelines.PipelineBuilder.property.params">params</a></code> | <code><a href="#cdk8s-pipelines.PipelineParam">PipelineParam</a>[]</code> | Returns the array of `PipelineParam` objects. |
+| <code><a href="#cdk8s-pipelines.PipelineBuilder.property.params">params</a></code> | <code><a href="#cdk8s-pipelines.PipelineParam">PipelineParam</a>[]</code> | Returns the array of `PipelineParam` objects that represent the parameters configured for the `Pipeline`. |
+| <code><a href="#cdk8s-pipelines.PipelineBuilder.property.workspaces">workspaces</a></code> | <code><a href="#cdk8s-pipelines.PipelineWorkspace">PipelineWorkspace</a>[]</code> | Returns the array of `PipelineWorkspace` objects that represent the workspaces configured for the `Pipeline`. |
 
 ---
 
@@ -2700,11 +2800,28 @@ public readonly params: PipelineParam[];
 
 - *Type:* <a href="#cdk8s-pipelines.PipelineParam">PipelineParam</a>[]
 
-Returns the array of `PipelineParam` objects.
+Returns the array of `PipelineParam` objects that represent the parameters configured for the `Pipeline`.
 
 Note this is an "expensive" get because it loops through the tasks in the
 pipeline and checks for duplicates in the pipeline parameters for each task
 parameter found. You should avoid calling this in a loop--instead, declare
+a local variable before the loop and reference that instead.
+
+---
+
+##### `workspaces`<sup>Required</sup> <a name="workspaces" id="cdk8s-pipelines.PipelineBuilder.property.workspaces"></a>
+
+```typescript
+public readonly workspaces: PipelineWorkspace[];
+```
+
+- *Type:* <a href="#cdk8s-pipelines.PipelineWorkspace">PipelineWorkspace</a>[]
+
+Returns the array of `PipelineWorkspace` objects that represent the workspaces configured for the `Pipeline`.
+
+This is an "expensive" get because it loops through the workspaces in the
+pipeline and checks for duplicates in the pipeline workspaces for each task
+workspace found. You should avoid calling this in a loop--instead, declare
 a local variable before the loop and reference that instead.
 
 ---
@@ -2764,6 +2881,7 @@ The `Pipeline` for which to create this run, using the `PipelineBuilder`.
 | <code><a href="#cdk8s-pipelines.PipelineRunBuilder.withClusterRoleBindingProps">withClusterRoleBindingProps</a></code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.PipelineRunBuilder.withRunParam">withRunParam</a></code> | Adds a run parameter to the `PipelineRun`. |
 | <code><a href="#cdk8s-pipelines.PipelineRunBuilder.withServiceAccount">withServiceAccount</a></code> | Uses the provided role name for the `serviceAccountName` on the `PipelineRun`. |
+| <code><a href="#cdk8s-pipelines.PipelineRunBuilder.withWorkspace">withWorkspace</a></code> | Allows you to specify the name of a `PersistentVolumeClaim` but does not do any compile-time validation on the volume claim's name or existence. |
 
 ---
 
@@ -2836,6 +2954,40 @@ then the default service account will be used, which is _default:pipeline_.
 - *Type:* string
 
 The name of the service account (`serviceAccountName`) to use.
+
+---
+
+##### `withWorkspace` <a name="withWorkspace" id="cdk8s-pipelines.PipelineRunBuilder.withWorkspace"></a>
+
+```typescript
+public withWorkspace(name: string, claimName: string, subPath: string): PipelineRunBuilder
+```
+
+Allows you to specify the name of a `PersistentVolumeClaim` but does not do any compile-time validation on the volume claim's name or existence.
+
+> [https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/#create-a-persistentvolumeclaim](https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/#create-a-persistentvolumeclaim)
+
+###### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.PipelineRunBuilder.withWorkspace.parameter.name"></a>
+
+- *Type:* string
+
+The name of the workspace in the `PipelineRun` that will be used by the `Pipeline`.
+
+---
+
+###### `claimName`<sup>Required</sup> <a name="claimName" id="cdk8s-pipelines.PipelineRunBuilder.withWorkspace.parameter.claimName"></a>
+
+- *Type:* string
+
+The name of the `PersistentVolumeClaim` to use for the `workspace`.
+
+---
+
+###### `subPath`<sup>Required</sup> <a name="subPath" id="cdk8s-pipelines.PipelineRunBuilder.withWorkspace.parameter.subPath"></a>
+
+- *Type:* string
+
+The sub path on the `persistentVolumeClaim` to use for the `workspace`.
 
 ---
 
