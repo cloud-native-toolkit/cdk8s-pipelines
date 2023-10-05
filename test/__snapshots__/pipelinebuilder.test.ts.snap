@@ -382,6 +382,15 @@ exports[`PipelineBuilderTest PipelineRunBuilder 1`] = `
       "pipelineRef": {
         "name": "clone-build-push",
       },
+      "workspaces": [
+        {
+          "name": "shared-data",
+          "persistentVolumeClaim": {
+            "claimName": "dataPVC",
+          },
+          "subPath": "my-shared-data",
+        },
+      ],
     },
   },
 ]

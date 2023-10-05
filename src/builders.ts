@@ -985,6 +985,7 @@ export class PipelineRunBuilder {
           name: this._pipeline.name,
         },
         params: this._runParams,
+        workspaces: this._runWorkspaces,
       },
     });
   }
