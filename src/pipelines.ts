@@ -173,6 +173,23 @@ export interface PipelineRunParam extends NamedResource {
 }
 
 /**
+ * A reference to a PersistentVolumeClaim
+ */
+export interface PersistentVolumeClaimRef {
+  readonly claimName: string;
+}
+
+/**
+ * The `Workspace` configuration for a `PipelineRun`.
+ *
+ * @see https://tekton.dev/docs/pipelines/pipelineruns/#specifying-workspaces
+ */
+export interface PipelineRunWorkspace extends NamedResource {
+  readonly persistentVolumeClaim: PersistentVolumeClaimRef;
+  readonly subPath: string;
+}
+
+/**
  * The details for the `PipelineRun`.
  * @see https://tekton.dev/docs/pipelines/pipelineruns/#configuring-a-pipelinerun
  */
@@ -182,6 +199,7 @@ export interface PipelineRunSpec {
    */
   readonly pipelineRef: PipelineRef;
   readonly params?: PipelineRunParam[];
+  readonly workspaces?: PipelineRunWorkspace[];
 }
 
 export interface PipelineRunProps {
