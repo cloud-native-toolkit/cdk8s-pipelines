@@ -7,7 +7,16 @@ import * as fs from 'fs';
 import { ApiObject, ApiObjectProps, Yaml } from 'cdk8s';
 import { Construct } from 'constructs';
 import { buildParam } from './common';
-import { Pipeline, PipelineParam, PipelineRun, PipelineRunParam, PipelineTask, PipelineTaskWorkspace, PipelineWorkspace } from './pipelines';
+import {
+  Pipeline,
+  PipelineParam,
+  PipelineRun,
+  PipelineRunParam,
+  PipelineRunWorkspace,
+  PipelineTask,
+  PipelineTaskWorkspace,
+  PipelineWorkspace,
+} from './pipelines';
 import { Task, TaskEnvValueSource, TaskParam, TaskProps, TaskSpecParam, TaskStep, TaskStepEnv, TaskWorkspace } from './tasks';
 
 const DefaultPipelineServiceAccountName = 'default:pipeline';
@@ -118,6 +127,9 @@ export class WorkspaceBuilder {
 
 }
 
+/**
+ * Builds the parameters for use by Tasks and Pipelines.
+ */
 export class ParameterBuilder {
   private readonly _logicalID: string;
   private _name?: string;
@@ -132,6 +144,10 @@ export class ParameterBuilder {
     this._requiresPipelineParam = false;
   }
 
+  /**
+   * Gets the logicalID for the `ParameterBuilder`, which is used by the underlying
+   * construct.
+   */
   public get logicalID(): string | undefined {
     return this._logicalID;
   }
@@ -687,7 +703,8 @@ export class PipelineBuilder {
   }
 
   /**
-   * Returns the array of `PipelineParam` objects.
+   * Returns the array of `PipelineParam` objects that represent the parameters
+   * configured for the `Pipeline`.
    *
    * Note this is an "expensive" get because it loops through the tasks in the
    * pipeline and checks for duplicates in the pipeline parameters for each task
@@ -719,14 +736,41 @@ export class PipelineBuilder {
   }
 
   /**
+   * Returns the array of `PipelineWorkspace` objects that represent the workspaces
+   * configured for the `Pipeline`.
+   *
+   * This is an "expensive" get because it loops through the workspaces in the
+   * pipeline and checks for duplicates in the pipeline workspaces for each task
+   * workspace found. You should avoid calling this in a loop--instead, declare
+   * a local variable before the loop and reference that instead.
+   *
+   * @returns PipelineWorkspace[] An array of the pipeline workspaces.
+   */
+  public get workspaces(): PipelineWorkspace[] {
+    const pipelineWorkspaces = new Map<string, PipelineWorkspace>();
+    this._tasks?.forEach((t) => {
+      t.workspaces?.forEach((w) => {
+        // Only add the workspace on the pipeline level if it is not already
+        // there...
+        const ws = pipelineWorkspaces.get(w.name!);
+        if (!ws) {
+          pipelineWorkspaces.set(w.name!, {
+            name: w.name,
+            description: w.description,
+          });
+        }
+      });
+    });
+    return Array.from(pipelineWorkspaces.values());
+  }
+
+  /**
    * Builds the actual [Pipeline](https://tekton.dev/docs/getting-started/pipelines/)
    * from the settings configured using the fluid syntax.
    */
   public buildPipeline(opts: BuilderOptions = DefaultBuilderOptions): void {
     // TODO: validate the object
 
-    const pipelineParams = new Map<string, PipelineParam>();
-    const pipelineWorkspaces = new Map<string, PipelineWorkspace>();
     const pipelineTasks: PipelineTask[] = new Array<PipelineTask>();
     // For making a list to make sure that tasks aren't duplicated when doing
     // the build. Not that it really hurts anything, but it makes the multidoc
@@ -739,17 +783,6 @@ export class PipelineBuilder {
       const taskWorkspaces: PipelineTaskWorkspace[] = new Array<TaskWorkspace>();
 
       t.parameters?.forEach(p => {
-        const pp = pipelineParams.get(p.name!);
-        if (!pp) {
-          // Do not add it to the pipeline if there is no need to add it...
-          if (p.requiresPipelineParameter) {
-            pipelineParams.set(p.name!, {
-              name: p.name,
-              type: p.type,
-            });
-          }
-        }
-
         taskParams.push({
           name: p.logicalID,
           value: p.value,
@@ -757,16 +790,6 @@ export class PipelineBuilder {
       });
 
       t.workspaces?.forEach((w) => {
-        // Only add the workspace on the pipeline level if it is not already
-        // there...
-        const ws = pipelineWorkspaces.get(w.name!);
-        if (!ws) {
-          pipelineWorkspaces.set(w.name!, {
-            name: w.name,
-            description: w.description,
-          });
-        }
-
         taskWorkspaces.push({
           name: w.logicalID,
           workspace: w.name,
@@ -797,8 +820,8 @@ export class PipelineBuilder {
         },
       spec: {
         description: this._description,
-        params: Array.from(pipelineParams.values()),
-        workspaces: Array.from(pipelineWorkspaces.values()),
+        params: this.params,
+        workspaces: this.workspaces,
         tasks: pipelineTasks,
       },
     });
@@ -837,6 +860,7 @@ export class PipelineRunBuilder {
   private readonly _id: string;
   private readonly _pipeline: PipelineBuilder;
   private readonly _runParams: PipelineRunParam[];
+  private readonly _runWorkspaces: PipelineRunWorkspace[];
   private _sa: string;
   private _crbProps: ApiObjectProps;
 
@@ -859,6 +883,7 @@ export class PipelineRunBuilder {
     this._sa = DefaultPipelineServiceAccountName;
     this._crbProps = DefaultClusterRoleBindingProps;
     this._runParams = new Array<PipelineRunParam>();
+    this._runWorkspaces = new Array<PipelineRunWorkspace>();
   }
 
   /**
@@ -879,6 +904,27 @@ export class PipelineRunBuilder {
     } else {
       throw new Error(`PipelineRun parameter '${name}' does not exist in pipeline '${this._pipeline.name}'`);
     }
+    return this;
+  }
+
+  /**
+   * Allows you to specify the name of a `PersistentVolumeClaim` but does not
+   * do any compile-time validation on the volume claim's name or existence.
+   *
+   * @see https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/#create-a-persistentvolumeclaim
+   *
+   * @param name The name of the workspace in the `PipelineRun` that will be used by the `Pipeline`.
+   * @param claimName The name of the `PersistentVolumeClaim` to use for the `workspace`.
+   * @param subPath The sub path on the `persistentVolumeClaim` to use for the `workspace`.
+   */
+  public withWorkspace(name: string, claimName: string, subPath: string): PipelineRunBuilder {
+    this._runWorkspaces.push({
+      name: name,
+      persistentVolumeClaim: {
+        claimName: claimName,
+      },
+      subPath: subPath,
+    });
     return this;
   }
 
@@ -916,6 +962,16 @@ export class PipelineRunBuilder {
       const prp = this._runParams.find((obj) => obj.name == p.name);
       if (!prp) {
         throw new Error(`Pipeline parameter '${p.name}' is not defined in PipelineRun '${this._id}'`);
+      }
+    });
+
+    // Do the same thing for workspaces. Check to make sure that the workspaces
+    // expected by the Pipeline are defined in the PipelineRun.
+    const workspaces: PipelineWorkspace[] = this._pipeline.workspaces;
+    workspaces.forEach((ws) => {
+      const pws = this._runWorkspaces.find((obj) => obj.name == ws.name);
+      if (! pws) {
+        throw new Error(`Pipeline workspace '${ws.name}' is not defined in PipelineRun '${this._id}'`);
       }
     });
 

@@ -29,6 +29,30 @@ class PipelineRunTest extends Chart {
 
     new PipelineRunBuilder(this, 'my-pipeline-run', pipeline)
       .withRunParam('repo-url', 'https://github.com/exmaple/my-repo')
+      .withWorkspace('shared-data', 'dataPVC', 'my-shared-data')
+      .buildPipelineRun({ includeDependencies: true });
+  }
+}
+
+class PipelineRunTestWithUndefinedWorkspaceError extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const myTask = new TaskBuilder(this, 'fetch-source')
+      .withName('git-clone')
+      .withWorkspace(new WorkspaceBuilder('output')
+        .withName('shared-data')
+        .withDescription('The files cloned by the task'))
+      .withStringParam(new ParameterBuilder('url').withPiplineParameter('repo-url', ''));
+
+    const pipeline = new PipelineBuilder(this, 'my-pipeline')
+      .withName('clone-build-push')
+      .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
+      .withTask(myTask);
+    pipeline.buildPipeline({ includeDependencies: true });
+
+    new PipelineRunBuilder(this, 'my-pipeline-run', pipeline)
+      .withRunParam('repo-url', 'https://github.com/exmaple/my-repo')
       .buildPipelineRun({ includeDependencies: true });
   }
 }
@@ -213,6 +237,14 @@ describe('PipelineBuilderTest', () => {
       new PipelineRunTestWithUndefinedParamError(app, 'test-chart');
     };
     expect(f).toThrowError('PipelineRun parameter \'theundefinedparam\' does not exist in pipeline \'clone-build-push\'');
+  });
+
+  test('PipelineRunBuilderWithWorkspaceError', () => {
+    const app = Testing.app();
+    const f = () => {
+      new PipelineRunTestWithUndefinedWorkspaceError(app, 'test-chart');
+    };
+    expect(f).toThrowError('Pipeline workspace \'shared-data\' is not defined in PipelineRun \'my-pipeline-run\'');
   });
 
   test('PipelineBuilderWithComplexTasks', () => {
