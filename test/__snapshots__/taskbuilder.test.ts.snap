@@ -6,6 +6,8 @@ exports[`TaskBuilderTest ObjectTaskBuilder 1`] = `
     "apiVersion": "tekton.dev/v1",
     "kind": "Task",
     "metadata": {
+      "annotations": undefined,
+      "labels": undefined,
       "name": "ansible-runner",
     },
     "spec": {
@@ -17,6 +19,7 @@ exports[`TaskBuilderTest ObjectTaskBuilder 1`] = `
           "name": "project-dir",
         },
       ],
+      "results": [],
       "steps": [
         {
           "env": undefined,
@@ -67,6 +70,8 @@ exports[`TaskBuilderTest PullRequestTaskBuilder 1`] = `
     "apiVersion": "tekton.dev/v1",
     "kind": "Task",
     "metadata": {
+      "annotations": undefined,
+      "labels": undefined,
       "name": "pull-request",
     },
     "spec": {
@@ -105,6 +110,7 @@ request and populate the pr workspace with the state of the pull request, includ
           "name": "insecure-skip-tls-verify",
         },
       ],
+      "results": [],
       "steps": [
         {
           "args": [
@@ -155,11 +161,14 @@ exports[`TaskBuilderTest ScriptDataBuilder 1`] = `
     "apiVersion": "tekton.dev/v1",
     "kind": "Task",
     "metadata": {
+      "annotations": undefined,
+      "labels": undefined,
       "name": "ansible-runner",
     },
     "spec": {
       "description": "Task to run Ansible playbooks using Ansible Runner",
       "params": [],
+      "results": [],
       "steps": [
         {
           "env": undefined,
@@ -182,6 +191,8 @@ exports[`TaskBuilderTest TaskBuilderBasic 1`] = `
     "apiVersion": "tekton.dev/v1",
     "kind": "Task",
     "metadata": {
+      "annotations": undefined,
+      "labels": undefined,
       "name": "ansible-runner",
     },
     "spec": {
@@ -193,6 +204,7 @@ exports[`TaskBuilderTest TaskBuilderBasic 1`] = `
           "name": "project-dir",
         },
       ],
+      "results": [],
       "steps": [
         {
           "env": undefined,
@@ -223,6 +235,49 @@ exports[`TaskBuilderTest TaskBuilderBasic 1`] = `
           "name": "runner-dir",
         },
       ],
+    },
+  },
+]
+`;
+
+exports[`TaskBuilderTest TaskBuilderIBMSecretGet 1`] = `
+[
+  {
+    "apiVersion": "tekton.dev/v1",
+    "kind": "Task",
+    "metadata": {
+      "annotations": {
+        "tekton.dev/categories": "IBM Cloud",
+        "tekton.dev/displayName": "IBM Cloud Secrets Manager Get Secret",
+        "tekton.dev/pipelines.minVersion": "0.17.0",
+        "tekton.dev/platforms": "linux/amd64",
+        "tekton.dev/tags": "cli",
+      },
+      "labels": {
+        "app.kubernetes.io/version": "0.1",
+      },
+      "name": "ibmcloud-secrets-manager-get",
+    },
+    "spec": {
+      "description": "This task retrieves a secret from IBM Cloud Secrets Manager using a key ID",
+      "params": [
+        {
+          "default": "968d7819-f2c5-7b67-c420-3c6bfd51521e",
+          "description": "An IBM Cloud Secrets Manager key ID",
+          "name": "KEY_ID",
+        },
+      ],
+      "results": [],
+      "steps": [
+        {
+          "env": undefined,
+          "image": "quay.io/openshift/origin-cli:4.7",
+          "name": "retrieve-key",
+          "script": "#!/usr/bin/env bash\\nset -x\\n\\n# Retrieves the IBM Cloud API Key configured in a \`deployer\` cluster\\n\\nexport IBMCLOUD_API_KEY=$(oc get secret ibm-secret -n kube-system -o jsonpath='{.data.apiKey}' | base64 -d)\\nexport AUTH_RESPONSE_JSON=$(curl -s -X POST \\\\n  "https://iam.cloud.ibm.com/identity/token" \\\\n  --header 'Content-Type: application/x-www-form-urlencoded' \\\\n  --header 'Accept: application/json' \\\\n  --data-urlencode 'grant_type=urn:ibm:params:oauth:grant-type:apikey' \\\\n  --data-urlencode "apikey=\${IBMCLOUD_API_KEY}")\\nexport ACCESS_TOKEN=$(echo $AUTH_RESPONSE_JSON | grep -o '"access_token":"[^"]*' | grep -o '[^"]*$')\\nexport SECRET_JSON=$(curl -s -X GET --location --header "Authorization: Bearer \${ACCESS_TOKEN}" --header "Accept: application/json" "$(params.SECRETS_MANAGER_ENDPOINT_URL)/api/v2/secrets/$(params.KEY_ID)")\\nexport SECRET=$(echo $SECRET_JSON |  grep -o '"payload":"[^"]*' | grep -o '[^"]*$')\\nprintf "\${SECRET}" | tee $(results.secret-value.path)",
+          "workingDir": undefined,
+        },
+      ],
+      "workspaces": [],
     },
   },
 ]
