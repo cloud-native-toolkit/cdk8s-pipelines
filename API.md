@@ -2054,6 +2054,7 @@ const taskSpec: TaskSpec = { ... }
 | --- | --- | --- |
 | <code><a href="#cdk8s-pipelines.TaskSpec.property.description">description</a></code> | <code>string</code> | The description of the `Task`. |
 | <code><a href="#cdk8s-pipelines.TaskSpec.property.params">params</a></code> | <code><a href="#cdk8s-pipelines.TaskSpecParam">TaskSpecParam</a>[]</code> | The `Task`'s parameters. |
+| <code><a href="#cdk8s-pipelines.TaskSpec.property.results">results</a></code> | <code><a href="#cdk8s-pipelines.TaskSpecResult">TaskSpecResult</a>[]</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.TaskSpec.property.steps">steps</a></code> | <code><a href="#cdk8s-pipelines.TaskStep">TaskStep</a>[]</code> | The steps that will be executed as part of the Task. |
 | <code><a href="#cdk8s-pipelines.TaskSpec.property.workspaces">workspaces</a></code> | <code><a href="#cdk8s-pipelines.TaskWorkspace">TaskWorkspace</a>[]</code> | *No description.* |
 
@@ -2084,6 +2085,16 @@ public readonly params: TaskSpecParam[];
 The `Task`'s parameters.
 
 > [https://tekton.dev/docs/pipelines/tasks/#specifying-parameters](https://tekton.dev/docs/pipelines/tasks/#specifying-parameters)
+
+---
+
+##### `results`<sup>Optional</sup> <a name="results" id="cdk8s-pipelines.TaskSpec.property.results"></a>
+
+```typescript
+public readonly results: TaskSpecResult[];
+```
+
+- *Type:* <a href="#cdk8s-pipelines.TaskSpecResult">TaskSpecResult</a>[]
 
 ---
 
@@ -2180,6 +2191,67 @@ public readonly type: string;
 - *Type:* string
 
 The parameter's type.
+
+---
+
+### TaskSpecResult <a name="TaskSpecResult" id="cdk8s-pipelines.TaskSpecResult"></a>
+
+The Task results.
+
+> [https://tekton.dev/docs/pipelines/tasks/#emitting-results](https://tekton.dev/docs/pipelines/tasks/#emitting-results)
+
+#### Initializer <a name="Initializer" id="cdk8s-pipelines.TaskSpecResult.Initializer"></a>
+
+```typescript
+import { TaskSpecResult } from 'cdk8s-pipelines'
+
+const taskSpecResult: TaskSpecResult = { ... }
+```
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.TaskSpecResult.property.name">name</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskSpecResult.property.description">description</a></code> | <code>string</code> | The description of the result. |
+| <code><a href="#cdk8s-pipelines.TaskSpecResult.property.type">type</a></code> | <code>string</code> | The type of result. |
+
+---
+
+##### `name`<sup>Optional</sup> <a name="name" id="cdk8s-pipelines.TaskSpecResult.property.name"></a>
+
+```typescript
+public readonly name: string;
+```
+
+- *Type:* string
+
+---
+
+##### `description`<sup>Optional</sup> <a name="description" id="cdk8s-pipelines.TaskSpecResult.property.description"></a>
+
+```typescript
+public readonly description: string;
+```
+
+- *Type:* string
+
+The description of the result.
+
+---
+
+##### `type`<sup>Optional</sup> <a name="type" id="cdk8s-pipelines.TaskSpecResult.property.type"></a>
+
+```typescript
+public readonly type: string;
+```
+
+- *Type:* string
+
+The type of result.
+
+This could be an array, but if it is not supplied the
+default is a string.
 
 ---
 
@@ -3033,10 +3105,13 @@ new TaskBuilder(scope: Construct, id: string)
 | **Name** | **Description** |
 | --- | --- |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.buildTask">buildTask</a></code> | Builds the `Task`. |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.withAnnotation">withAnnotation</a></code> | Adds an annotation to the `Task` `metadata` with the provided key and value. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.withDescription">withDescription</a></code> | Sets the `description` of the `Task` being built. |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.withLabel">withLabel</a></code> | Adds a label to the `Task` with the provided label key and value. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.withName">withName</a></code> | Sets the name of the `Task` being built. |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.withResult">withResult</a></code> | Allows you to add an result to the Task. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.withStep">withStep</a></code> | Adds the given `step` (`TaskStepBuilder`) to the `Task`. |
-| <code><a href="#cdk8s-pipelines.TaskBuilder.withStringParam">withStringParam</a></code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.withStringParam">withStringParam</a></code> | Adds a parameter of type string to the `Task`. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.withWorkspace">withWorkspace</a></code> | Adds the specified workspace to the `Task`. |
 
 ---
@@ -3049,6 +3124,32 @@ public buildTask(): void
 
 Builds the `Task`.
 
+##### `withAnnotation` <a name="withAnnotation" id="cdk8s-pipelines.TaskBuilder.withAnnotation"></a>
+
+```typescript
+public withAnnotation(key: string, value: string): TaskBuilder
+```
+
+Adds an annotation to the `Task` `metadata` with the provided key and value.
+
+> [https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/)
+
+###### `key`<sup>Required</sup> <a name="key" id="cdk8s-pipelines.TaskBuilder.withAnnotation.parameter.key"></a>
+
+- *Type:* string
+
+The annotation's key.
+
+---
+
+###### `value`<sup>Required</sup> <a name="value" id="cdk8s-pipelines.TaskBuilder.withAnnotation.parameter.value"></a>
+
+- *Type:* string
+
+The annotation's value.
+
+---
+
 ##### `withDescription` <a name="withDescription" id="cdk8s-pipelines.TaskBuilder.withDescription"></a>
 
 ```typescript
@@ -3058,6 +3159,28 @@ public withDescription(description: string): TaskBuilder
 Sets the `description` of the `Task` being built.
 
 ###### `description`<sup>Required</sup> <a name="description" id="cdk8s-pipelines.TaskBuilder.withDescription.parameter.description"></a>
+
+- *Type:* string
+
+---
+
+##### `withLabel` <a name="withLabel" id="cdk8s-pipelines.TaskBuilder.withLabel"></a>
+
+```typescript
+public withLabel(key: string, value: string): TaskBuilder
+```
+
+Adds a label to the `Task` with the provided label key and value.
+
+> [https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)
+
+###### `key`<sup>Required</sup> <a name="key" id="cdk8s-pipelines.TaskBuilder.withLabel.parameter.key"></a>
+
+- *Type:* string
+
+---
+
+###### `value`<sup>Required</sup> <a name="value" id="cdk8s-pipelines.TaskBuilder.withLabel.parameter.value"></a>
 
 - *Type:* string
 
@@ -3074,6 +3197,32 @@ Sets the name of the `Task` being built.
 ###### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.TaskBuilder.withName.parameter.name"></a>
 
 - *Type:* string
+
+---
+
+##### `withResult` <a name="withResult" id="cdk8s-pipelines.TaskBuilder.withResult"></a>
+
+```typescript
+public withResult(name: string, description: string): TaskBuilder
+```
+
+Allows you to add an result to the Task.
+
+> [https://tekton.dev/docs/pipelines/tasks/#emitting-results](https://tekton.dev/docs/pipelines/tasks/#emitting-results)
+
+###### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.TaskBuilder.withResult.parameter.name"></a>
+
+- *Type:* string
+
+The name of the result.
+
+---
+
+###### `description`<sup>Required</sup> <a name="description" id="cdk8s-pipelines.TaskBuilder.withResult.parameter.description"></a>
+
+- *Type:* string
+
+The result's description.
 
 ---
 
@@ -3096,6 +3245,8 @@ Adds the given `step` (`TaskStepBuilder`) to the `Task`.
 ```typescript
 public withStringParam(param: ParameterBuilder): TaskBuilder
 ```
+
+Adds a parameter of type string to the `Task`.
 
 ###### `param`<sup>Required</sup> <a name="param" id="cdk8s-pipelines.TaskBuilder.withStringParam.parameter.param"></a>
 
@@ -3126,7 +3277,7 @@ Adds the specified workspace to the `Task`.
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.description">description</a></code> | <code>string</code> | Gets the `description` of the `Task`. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.name">name</a></code> | <code>string</code> | Gets the name of the `Task` built by the `TaskBuilder`. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.parameters">parameters</a></code> | <code><a href="#cdk8s-pipelines.ParameterBuilder">ParameterBuilder</a>[]</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.TaskBuilder.property.workspaces">workspaces</a></code> | <code><a href="#cdk8s-pipelines.WorkspaceBuilder">WorkspaceBuilder</a>[]</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.property.workspaces">workspaces</a></code> | <code><a href="#cdk8s-pipelines.WorkspaceBuilder">WorkspaceBuilder</a>[]</code> | Gets the workspaces for the `Task`. |
 
 ---
 
@@ -3181,6 +3332,8 @@ public readonly workspaces: WorkspaceBuilder[];
 ```
 
 - *Type:* <a href="#cdk8s-pipelines.WorkspaceBuilder">WorkspaceBuilder</a>[]
+
+Gets the workspaces for the `Task`.
 
 ---
 

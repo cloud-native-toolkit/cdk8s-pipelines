@@ -17,7 +17,7 @@ import {
   PipelineTaskWorkspace,
   PipelineWorkspace,
 } from './pipelines';
-import { Task, TaskEnvValueSource, TaskParam, TaskProps, TaskSpecParam, TaskStep, TaskStepEnv, TaskWorkspace } from './tasks';
+import { Task, TaskEnvValueSource, TaskParam, TaskProps, TaskSpecParam, TaskSpecResult, TaskStep, TaskStepEnv, TaskWorkspace } from './tasks';
 
 const DefaultPipelineServiceAccountName = 'default:pipeline';
 
@@ -520,6 +520,13 @@ export class TaskBuilder {
   // multiple values are added that the last one will win.
   private _workspaces = new Map<string, WorkspaceBuilder>;
   private _params = new Map<string, ParameterBuilder>;
+  private _results: TaskSpecResult[] = new Array<TaskSpecResult>;
+  private _annotations?: {
+    [key: string]: string;
+  };
+  private _labels?: {
+    [key: string]: string;
+  };
 
   /**
    * Creates a new instance of the `TaskBuilder` using the given `scope` and
@@ -537,6 +544,38 @@ export class TaskBuilder {
 
   public get logicalID(): string {
     return this._id;
+  }
+
+  /**
+   * Adds a label to the `Task` with the provided label key and value.
+   *
+   * @see https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+   *
+   * @param key
+   * @param value
+   */
+  public withLabel(key: string, value: string): TaskBuilder {
+    if (! this._labels) {
+      this._labels = {};
+    }
+    this._labels[key] = value;
+    return this;
+  }
+
+  /**
+   * Adds an annotation to the `Task` `metadata` with the provided key and value.
+   *
+   * @see https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+   *
+   * @param key The annotation's key.
+   * @param value The annotation's value.
+   */
+  public withAnnotation(key: string, value: string): TaskBuilder {
+    if (! this._annotations) {
+      this._annotations = {};
+    }
+    this._annotations[key] = value;
+    return this;
   }
 
   /**
@@ -580,10 +619,18 @@ export class TaskBuilder {
     return this;
   }
 
+  /**
+   * Gets the workspaces for the `Task`.
+   */
   public get workspaces(): WorkspaceBuilder[] | undefined {
     return Array.from(this._workspaces?.values());
   }
 
+  /**
+   * Adds a parameter of type string to the `Task`.
+   *
+   * @param param
+   */
   public withStringParam(param: ParameterBuilder): TaskBuilder {
     this._params.set(param.logicalID!, param.ofType('string'));
     return this;
@@ -591,6 +638,27 @@ export class TaskBuilder {
 
   public get parameters(): ParameterBuilder[] | undefined {
     return Array.from(this._params?.values());
+  }
+
+  /**
+   * Allows you to add an result to the Task.
+   *
+   * @see https://tekton.dev/docs/pipelines/tasks/#emitting-results
+   *
+   * @param name The name of the result.
+   * @param description The result's description.
+   */
+  public withResult(name: string, description: string): TaskBuilder {
+    // First, check to see if there is already a result with this name
+    const existing = this._results.find((obj) => obj.name === name);
+    if (existing) {
+      throw new Error(`Cannot add result ${name}, as it already exists.`);
+    }
+    this._results.push({
+      name: name,
+      description: description,
+    });
+    return this;
   }
 
   /**
@@ -636,12 +704,15 @@ export class TaskBuilder {
     const props: TaskProps = {
       metadata: {
         name: this.name,
+        labels: this._labels,
+        annotations: this._annotations,
       },
       spec: {
         description: this.description,
         workspaces: taskWorkspaces,
         params: taskParams,
         steps: taskSteps,
+        results: this._results,
       },
     };
 
