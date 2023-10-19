@@ -116,6 +116,37 @@ class TestBasicTaskBuildFromScriptData extends Chart {
   }
 }
 
+/**
+ * This is a test to make sure the TaskBuilder is fully-featured enough to support
+ * building a task like the one here: https://github.com/cloud-native-toolkit/deployer-tekton-tasks/blob/main/tasks/ibmcloud-secrets-manager-get/0.1/ibmcloud-secrets-manager-get.yaml
+ */
+class TestIBMCloudSecretsManagerGet extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    // Build the task, using the https://github.com/tektoncd/catalog/blob/main/task/pull-request/0.1/pull-request.yaml
+    // as the example, just like with the `task.test.ts`. At some point, it would
+    // be nice to compare the snapshots with each other just to make sure that the
+    // builder does build the exact same object as the longer, non-builder method.
+    new TaskBuilder(this, 'ibmcloud-secrets-manager-get')
+      .withName('ibmcloud-secrets-manager-get')
+      .withLabel('app.kubernetes.io/version', '0.1')
+      .withAnnotation('tekton.dev/categories', 'IBM Cloud')
+      .withAnnotation('tekton.dev/pipelines.minVersion', '0.17.0')
+      .withAnnotation('tekton.dev/tags', 'cli')
+      .withAnnotation('tekton.dev/displayName', 'IBM Cloud Secrets Manager Get Secret')
+      .withAnnotation('tekton.dev/platforms', 'linux/amd64')
+      .withDescription('This task retrieves a secret from IBM Cloud Secrets Manager using a key ID')
+      .withStringParam(new ParameterBuilder('KEY_ID')
+        .withDefaultValue('968d7819-f2c5-7b67-c420-3c6bfd51521e')
+        .withDescription('An IBM Cloud Secrets Manager key ID'))
+      .withStep(new TaskStepBuilder().withName('retrieve-key')
+        .withImage('quay.io/openshift/origin-cli:4.7')
+        .fromScriptUrl('test/files/retrieve-secret.sh'))
+      .buildTask();
+  }
+}
+
 class TestPullRequestTaskBuild extends Chart {
   constructor(scope: Construct, id: string, props?: ChartProps) {
     super(scope, id, props);
@@ -169,6 +200,12 @@ describe('TaskBuilderTest', () => {
   test('TaskBuilderBasic', () => {
     const app = Testing.app();
     const chart = new TestBasicTaskBuild(app, 'test-chart');
+    const results = Testing.synth(chart);
+    expect(results).toMatchSnapshot();
+  });
+  test('TaskBuilderIBMSecretGet', () => {
+    const app = Testing.app();
+    const chart = new TestIBMCloudSecretsManagerGet(app, 'test-get-secret');
     const results = Testing.synth(chart);
     expect(results).toMatchSnapshot();
   });

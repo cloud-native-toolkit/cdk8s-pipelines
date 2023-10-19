@@ -79,6 +79,23 @@ export interface TaskParam extends NamedResource {
 }
 
 /**
+ * The Task results.
+ *
+ * @see https://tekton.dev/docs/pipelines/tasks/#emitting-results
+ */
+export interface TaskSpecResult extends NamedResource {
+  /**
+   * The description of the result.
+   */
+  readonly description?: string;
+  /**
+   * The type of result. This could be an array, but if it is not supplied the
+   * default is a string.
+   */
+  readonly type?: string;
+}
+
+/**
  * Specifies execution parameters for the Task.
  */
 export interface TaskSpecParam extends NamedResource {
@@ -159,6 +176,8 @@ export interface TaskSpec {
    * @see https://tekton.dev/docs/pipelines/tasks/#specifying-parameters
    */
   readonly params?: TaskSpecParam[];
+
+  readonly results?: TaskSpecResult[];
 
   readonly workspaces?: TaskWorkspace[];
   /**
