@@ -32,7 +32,7 @@ export function secretKeyRef(name: string, key: string): NameKeyPair {
  * Convenience method for formatting the value of a working directory.
  * @param workspace
  */
-export function buildWorkingDir(workspace: string): string {
+export function usingWorkspacePath(workspace: string): string {
   return `$(workspaces.${workspace}.path)`;
 }
 
@@ -43,6 +43,18 @@ export function buildWorkingDir(workspace: string): string {
  * For example, if the parameter is `foo`, the result will be `$(params.foo)`.
  * @param name The name of the parameter.
  */
-export function buildParam(name: string): string {
+export function usingBuildParameter(name: string): string {
   return `$(params.${name})`;
+}
+
+/**
+ * Builds the correct string for building a reference to the file in which the
+ * result can be written during the execution of the Task. For example, if the
+ * name of the result is `foo`, this function will return `$(results.foo.path)`.
+ *
+ * @see https://tekton.dev/docs/pipelines/tasks/#emitting-results
+ * @param resultName The name of the result from the task.
+ */
+export function usingResultsPath(resultName: string): string {
+  return `$(results.${resultName}.path)`;
 }
