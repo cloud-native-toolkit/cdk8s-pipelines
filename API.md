@@ -3109,7 +3109,7 @@ new TaskBuilder(scope: Construct, id: string)
 | <code><a href="#cdk8s-pipelines.TaskBuilder.withDescription">withDescription</a></code> | Sets the `description` of the `Task` being built. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.withLabel">withLabel</a></code> | Adds a label to the `Task` with the provided label key and value. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.withName">withName</a></code> | Sets the name of the `Task` being built. |
-| <code><a href="#cdk8s-pipelines.TaskBuilder.withResult">withResult</a></code> | Allows you to add an result to the Task. |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.withResult">withResult</a></code> | Allows you to add a result to the Task. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.withStep">withStep</a></code> | Adds the given `step` (`TaskStepBuilder`) to the `Task`. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.withStringParam">withStringParam</a></code> | Adds a parameter of type string to the `Task`. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.withWorkspace">withWorkspace</a></code> | Adds the specified workspace to the `Task`. |
@@ -3206,7 +3206,7 @@ Sets the name of the `Task` being built.
 public withResult(name: string, description: string): TaskBuilder
 ```
 
-Allows you to add an result to the Task.
+Allows you to add a result to the Task.
 
 > [https://tekton.dev/docs/pipelines/tasks/#emitting-results](https://tekton.dev/docs/pipelines/tasks/#emitting-results)
 
@@ -3410,6 +3410,7 @@ new TaskStepBuilder()
 | <code><a href="#cdk8s-pipelines.TaskStepBuilder.fromScriptData">fromScriptData</a></code> | If supplied, uses the provided script data as-is for the script value. |
 | <code><a href="#cdk8s-pipelines.TaskStepBuilder.fromScriptObject">fromScriptObject</a></code> | If supplied, uses the cdk8s `ApiObject` supplied as the body of the `script` for the `Task`. |
 | <code><a href="#cdk8s-pipelines.TaskStepBuilder.fromScriptUrl">fromScriptUrl</a></code> | If supplied, uses the content found at the given URL for the `script` value of the step. |
+| <code><a href="#cdk8s-pipelines.TaskStepBuilder.fromScriptUrlToResults">fromScriptUrlToResults</a></code> | If supplied, uses the content found at the given URL for the `script` value of the step and writes its output to the `results`. |
 | <code><a href="#cdk8s-pipelines.TaskStepBuilder.withArgs">withArgs</a></code> | The args to use with the `command`. |
 | <code><a href="#cdk8s-pipelines.TaskStepBuilder.withCommand">withCommand</a></code> | The name of the command to use when running the `Step` of the `Task`. |
 | <code><a href="#cdk8s-pipelines.TaskStepBuilder.withEnv">withEnv</a></code> | *No description.* |
@@ -3478,6 +3479,30 @@ is embedding hard-coded shell or other scripts in the step.
 If you supply this, do not supply a value for `fromScriptObject`.
 
 ###### `url`<sup>Required</sup> <a name="url" id="cdk8s-pipelines.TaskStepBuilder.fromScriptUrl.parameter.url"></a>
+
+- *Type:* string
+
+---
+
+##### `fromScriptUrlToResults` <a name="fromScriptUrlToResults" id="cdk8s-pipelines.TaskStepBuilder.fromScriptUrlToResults"></a>
+
+```typescript
+public fromScriptUrlToResults(url: string, resultsName: string): TaskStepBuilder
+```
+
+If supplied, uses the content found at the given URL for the `script` value of the step and writes its output to the `results`.
+
+Use this as an
+alternative to "heredoc", which is embedding hard-coded shell or other
+scripts in the step.
+
+###### `url`<sup>Required</sup> <a name="url" id="cdk8s-pipelines.TaskStepBuilder.fromScriptUrlToResults.parameter.url"></a>
+
+- *Type:* string
+
+---
+
+###### `resultsName`<sup>Required</sup> <a name="resultsName" id="cdk8s-pipelines.TaskStepBuilder.fromScriptUrlToResults.parameter.resultsName"></a>
 
 - *Type:* string
 
