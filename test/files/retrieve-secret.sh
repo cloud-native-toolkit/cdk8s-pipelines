@@ -13,4 +13,4 @@ export AUTH_RESPONSE_JSON=$(curl -s -X POST \
 export ACCESS_TOKEN=$(echo $AUTH_RESPONSE_JSON | grep -o '"access_token":"[^"]*' | grep -o '[^"]*$')
 export SECRET_JSON=$(curl -s -X GET --location --header "Authorization: Bearer ${ACCESS_TOKEN}" --header "Accept: application/json" "$(params.SECRETS_MANAGER_ENDPOINT_URL)/api/v2/secrets/$(params.KEY_ID)")
 export SECRET=$(echo $SECRET_JSON |  grep -o '"payload":"[^"]*' | grep -o '[^"]*$')
-printf "${SECRET}" | tee $(results.secret-value.path)
+printf "${SECRET}"

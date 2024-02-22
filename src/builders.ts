@@ -6,7 +6,7 @@
 import * as fs from 'fs';
 import { ApiObject, ApiObjectProps, Yaml } from 'cdk8s';
 import { Construct } from 'constructs';
-import { buildParam } from './common';
+import { usingBuildParameter, usingResultsPath } from './common';
 import {
   Pipeline,
   PipelineParam,
@@ -235,7 +235,7 @@ export class ParameterBuilder {
     this._requiresPipelineParam = true;
     this._name = pipelineParamName;
     this._defaultValue = defaultValue;
-    this._value = buildParam(pipelineParamName);
+    this._value = usingBuildParameter(pipelineParamName);
     return this;
   }
 
@@ -305,6 +305,20 @@ class UrlScriptResolver implements ScriptResolver {
     });
 
     return data.replace(/\n/g, '\\n');
+  }
+}
+
+class UrlScriptToResultsResolver implements ScriptResolver {
+  readonly _resolver: ScriptResolver;
+  readonly _resultsName: string;
+
+  constructor(url: string, resultsName: string) {
+    this._resolver = new UrlScriptResolver(url);
+    this._resultsName = resultsName;
+  }
+
+  public scriptData(): string {
+    return [this._resolver.scriptData(), `tee ${usingResultsPath(this._resultsName)}`].join(' | ');
   }
 }
 
@@ -429,6 +443,20 @@ export class TaskStepBuilder {
    */
   public fromScriptUrl(url: string): TaskStepBuilder {
     this._script = new UrlScriptResolver(url);
+    return this;
+  }
+
+  /**
+   * If supplied, uses the content found at the given URL for the `script` value
+   * of the step and writes its output to the `results`. Use this as an
+   * alternative to "heredoc", which is embedding hard-coded shell or other
+   * scripts in the step.
+   *
+   * @param url
+   * @param resultsName
+   */
+  public fromScriptUrlToResults(url: string, resultsName: string): TaskStepBuilder {
+    this._script = new UrlScriptToResultsResolver(url, resultsName);
     return this;
   }
 
@@ -641,7 +669,7 @@ export class TaskBuilder {
   }
 
   /**
-   * Allows you to add an result to the Task.
+   * Allows you to add a result to the Task.
    *
    * @see https://tekton.dev/docs/pipelines/tasks/#emitting-results
    *
