@@ -2,7 +2,7 @@ import * as path from 'path';
 import { Chart, Testing } from 'cdk8s';
 import { ChartProps } from 'cdk8s/lib/chart';
 import { Construct } from 'constructs';
-import { buildParam, buildWorkingDir, secretKeyRef, TaskBuilder, TaskStepBuilder, valueFrom, WorkspaceBuilder, ParameterBuilder } from '../src';
+import { usingBuildParameter, usingWorkspacePath, secretKeyRef, TaskBuilder, TaskStepBuilder, valueFrom, WorkspaceBuilder, ParameterBuilder } from '../src';
 
 /**
  * Using "ansible-runner" as the reference task that I want this test builder to
@@ -35,8 +35,8 @@ class TestBasicTaskBuild extends Chart {
         .withName('run-playbook')
         .withImage(imageName)
         .withCommand(['entrypoint'])
-        .withArgs(['ansible-runner', 'run', buildParam('args'), buildParam('project-dir')])
-        .withWorkingDir(buildWorkingDir('runner-dir')))
+        .withArgs(['ansible-runner', 'run', usingBuildParameter('args'), usingBuildParameter('project-dir')])
+        .withWorkingDir(usingWorkspacePath('runner-dir')))
       .buildTask();
   }
 }
@@ -124,10 +124,6 @@ class TestIBMCloudSecretsManagerGet extends Chart {
   constructor(scope: Construct, id: string, props?: ChartProps) {
     super(scope, id, props);
 
-    // Build the task, using the https://github.com/tektoncd/catalog/blob/main/task/pull-request/0.1/pull-request.yaml
-    // as the example, just like with the `task.test.ts`. At some point, it would
-    // be nice to compare the snapshots with each other just to make sure that the
-    // builder does build the exact same object as the longer, non-builder method.
     new TaskBuilder(this, 'ibmcloud-secrets-manager-get')
       .withName('ibmcloud-secrets-manager-get')
       .withLabel('app.kubernetes.io/version', '0.1')
@@ -140,9 +136,13 @@ class TestIBMCloudSecretsManagerGet extends Chart {
       .withStringParam(new ParameterBuilder('KEY_ID')
         .withDefaultValue('968d7819-f2c5-7b67-c420-3c6bfd51521e')
         .withDescription('An IBM Cloud Secrets Manager key ID'))
+      .withStringParam(new ParameterBuilder('SECRETS_MANAGER_ENDPOINT_URL')
+        .withDefaultValue('https://{instance_ID}.us-south.secrets-manager.appdomain.cloud')
+        .withDescription('An IBM Cloud Secrets Manager instance endpoint URL (https://cloud.ibm.com/apidocs/secrets-manager/secrets-manager-v2#endpoints)'))
+      .withResult('secret-value', ' A secret value retrieved using the provided KEY_ID')
       .withStep(new TaskStepBuilder().withName('retrieve-key')
         .withImage('quay.io/openshift/origin-cli:4.7')
-        .fromScriptUrl('test/files/retrieve-secret.sh'))
+        .fromScriptUrlToResults('test/files/retrieve-secret.sh', 'secret-value'))
       .buildTask();
   }
 }
@@ -178,7 +178,7 @@ class TestPullRequestTaskBuild extends Chart {
         .withName('pullrequest-init')
         .withImage('gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/pullrequest-init@sha256:69633ecd0e948f6462c61bb9e008b940a05b143ef51c67e6e4093278a23dac53')
         .withCommand(['/ko-app/pullrequest-init'])
-        .withEnv('AUTH_TOKEN', valueFrom(secretKeyRef(buildParam('secret-key-ref'), 'token')))
+        .withEnv('AUTH_TOKEN', valueFrom(secretKeyRef(usingBuildParameter('secret-key-ref'), 'token')))
         .withArgs([
           '-url',
           '$(params.url)',
@@ -203,7 +203,7 @@ describe('TaskBuilderTest', () => {
     const results = Testing.synth(chart);
     expect(results).toMatchSnapshot();
   });
-  test('TaskBuilderIBMSecretGet', () => {
+  test('TestIBMCloudSecretsManagerGet', () => {
     const app = Testing.app();
     const chart = new TestIBMCloudSecretsManagerGet(app, 'test-get-secret');
     const results = Testing.synth(chart);
