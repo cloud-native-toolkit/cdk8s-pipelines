@@ -318,7 +318,7 @@ class UrlScriptToResultsResolver implements ScriptResolver {
   }
 
   public scriptData(): string {
-    return [this._resolver.scriptData(), `tee ${usingResultsPath(this._resultsName)}`].join('|');
+    return [this._resolver.scriptData(), `tee ${usingResultsPath(this._resultsName)}`].join(' | ');
   }
 }
 

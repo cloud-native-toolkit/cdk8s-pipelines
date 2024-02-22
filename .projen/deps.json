@@ -29,7 +29,7 @@
     },
     {
       "name": "cdk8s",
-      "version": "2.30.0",
+      "version": "2.68.30",
       "type": "build"
     },
     {
@@ -77,12 +77,12 @@
     },
     {
       "name": "jsii-rosetta",
-      "version": "~5.0.0",
+      "version": "~5.2.0",
       "type": "build"
     },
     {
       "name": "jsii",
-      "version": "~5.0.0",
+      "version": "~5.2.0",
       "type": "build"
     },
     {
@@ -113,7 +113,7 @@
     },
     {
       "name": "cdk8s",
-      "version": "^2.30.0",
+      "version": "^2.68.30",
       "type": "peer"
     },
     {
