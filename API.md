@@ -119,7 +119,7 @@ new MyInstallPipeline(app, 'my-install-pipeline');
 app.synth();
 ```
 
-The output file will be _dist/my-install-pipeline.yml_.
+The output file after running `npx projen build` will be _dist/my-install-pipeline.yml_.
 
 Apply this file to a Kubernetes or OpenShift cluster using `oc apply -f dist/my-install-pipeline.yml`,
 substituting the name of your output file in the command. If using OpenShift
