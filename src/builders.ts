@@ -79,6 +79,8 @@ export const DefaultBuilderOptions: BuilderOptions = {
 
 /**
  * Builds the Workspaces for use by Tasks and Pipelines.
+ *
+ * @see https://tekton.dev/docs/pipelines/workspaces/
  */
 export class WorkspaceBuilder {
   private readonly _logicalID: string;
@@ -115,11 +117,19 @@ export class WorkspaceBuilder {
     return this._description || '';
   }
 
+  /**
+   * Sets the name of the workspace.
+   * @param name
+   */
   public withName(name: string): WorkspaceBuilder {
     this._name = name;
     return this;
   }
 
+  /**
+   * Sets the description of the workspace.
+   * @param desc
+   */
   public withDescription(desc: string): WorkspaceBuilder {
     this._description = desc;
     return this;
@@ -129,6 +139,8 @@ export class WorkspaceBuilder {
 
 /**
  * Builds the parameters for use by Tasks and Pipelines.
+ *
+ * @see https://tekton.dev/docs/pipelines/pipelines/#specifying-parameters
  */
 export class ParameterBuilder {
   private readonly _logicalID: string;
@@ -152,10 +164,16 @@ export class ParameterBuilder {
     return this._logicalID;
   }
 
+  /**
+   * Gets the name of the parameter.
+   */
   public get name(): string | undefined {
     return this._name;
   }
 
+  /**
+   * Gets the description of the parameter.
+   */
   public get description(): string {
     return this._description || '';
   }
@@ -308,15 +326,28 @@ class UrlScriptResolver implements ScriptResolver {
   }
 }
 
+/**
+ * Gets the content from the provided URL and returns it as the script data,
+ * but prints the output of running the script to the given results.
+ */
 class UrlScriptToResultsResolver implements ScriptResolver {
   readonly _resolver: ScriptResolver;
   readonly _resultsName: string;
 
+  /**
+   * Creates a new instance of the UrlScriptToResultsResolver.
+   * @param url The Uniform Resource Locator (URL) of the script.
+   * @param resultsName The name of the results into which the script prints output.
+   */
   constructor(url: string, resultsName: string) {
     this._resolver = new UrlScriptResolver(url);
     this._resultsName = resultsName;
   }
 
+  /**
+   * The body of the script. This will include a `tee <to the results location>`,
+   * so make sure the script you use here does not already have it.
+   */
   public scriptData(): string {
     return [this._resolver.scriptData(), `tee ${usingResultsPath(this._resultsName)}`].join(' | ');
   }
@@ -357,10 +388,9 @@ export class TaskStepBuilder {
   private _script?: ScriptResolver;
 
   /**
-   *
+   * Creates a new instance of the TaskStepBuilder.
    */
   public constructor() {
-
   }
 
   /**
@@ -378,6 +408,9 @@ export class TaskStepBuilder {
     return this._image;
   }
 
+  /**
+   * The body of the script.
+   */
   public get scriptData(): string | undefined {
     return this._script?.scriptData();
   }
@@ -396,10 +429,20 @@ export class TaskStepBuilder {
     return this._cmd;
   }
 
+  /**
+   * Gets the working directory of the `Step` of the `Task`.
+   *
+   * @see https://tekton.dev/docs/pipelines/tasks/#defining-steps
+   */
   public get workingDir(): string | undefined {
     return this._dir;
   }
 
+  /**
+   * Sets the name of the `Step` of the `Task`.
+   *
+   * @param name Name of the `Step`
+   */
   public withName(name: string): TaskStepBuilder {
     this._name = name;
     return this;
@@ -498,6 +541,15 @@ export class TaskStepBuilder {
     return this;
   }
 
+  /**
+   * Sets the environment variable for the Step.
+   *
+   * @param name The name of the `env` to add or set.
+   * @param valueFrom The source of the value for the variable.
+   *
+   * @see https://tekton.dev/docs/pipelines/podtemplates/
+   * @see valueFrom()
+   */
   withEnv(name: string, valueFrom: TaskEnvValueSource): TaskStepBuilder {
     if (!this._env) {
       this._env = new Array<TaskStepEnv>();
@@ -509,6 +561,10 @@ export class TaskStepBuilder {
     return this;
   }
 
+  /**
+   * When called, builds the `Step`. This will be called the `TaskBuilder`;
+   * do not call it directly.
+   */
   public buildTaskStep(): TaskStep | undefined {
     if (this._script) {
       return {
@@ -583,7 +639,7 @@ export class TaskBuilder {
    * @param value
    */
   public withLabel(key: string, value: string): TaskBuilder {
-    if (! this._labels) {
+    if (!this._labels) {
       this._labels = {};
     }
     this._labels[key] = value;
@@ -599,7 +655,7 @@ export class TaskBuilder {
    * @param value The annotation's value.
    */
   public withAnnotation(key: string, value: string): TaskBuilder {
-    if (! this._annotations) {
+    if (!this._annotations) {
       this._annotations = {};
     }
     this._annotations[key] = value;
@@ -1069,7 +1125,7 @@ export class PipelineRunBuilder {
     const workspaces: PipelineWorkspace[] = this._pipeline.workspaces;
     workspaces.forEach((ws) => {
       const pws = this._runWorkspaces.find((obj) => obj.name == ws.name);
-      if (! pws) {
+      if (!pws) {
         throw new Error(`Pipeline workspace '${ws.name}' is not defined in PipelineRun '${this._id}'`);
       }
     });
