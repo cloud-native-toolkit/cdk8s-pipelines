@@ -105,6 +105,27 @@ import { ParameterBuilder, PipelineBuilder, TaskBuilder, WorkspaceBuilder } from
 import { Construct } from 'constructs';
 ```
 
+## Testing your pipeline locally
+
+Once you have added code to create the pipeline, use the `npx projen build`
+command to compile the TypeScript code and run the `cdk8s synth` command to
+create the YAML output. The file will be written to the _dist_ folder and named
+_chart-id.yml_, where _chart-id_ the string value passed to your class
+that extends `Chart`. For example, in this code:
+
+```typescript
+const app = new App();
+new MyInstallPipeline(app, 'my-install-pipeline');
+app.synth();
+```
+
+The output file will be _dist/my-install-pipeline.yml_.
+
+Apply this file to a Kubernetes or OpenShift cluster using `oc apply -f dist/my-install-pipeline.yml`,
+substituting the name of your output file in the command. If using OpenShift
+Container Platform (OCP), you must have the OpenShift Pipelines operator installed.
+If using Kubernetes, make sure you have [Tekton installed](https://tekton.dev/docs/installation/).
+
 ## Examples
 
 Shown here is an example of using one of the primitive Tekton objects--a
