@@ -59,6 +59,54 @@ const DefaultClusterRoleBindingProps = createRoleBindingProps(
   'default');
 
 /**
+ * Resolves the `script` through different means.
+ */
+interface ValueResolver {
+  /**
+   * Gets the string value for the 
+   * @returns string The script.
+   */
+  get value(): string;
+}
+
+export class ConstantStringValueResolver implements ValueResolver {
+
+  private val: string;
+
+  constructor(val: string) {
+    this.val = val;
+  }
+  
+  public get value(): string {
+    return this.val;
+  }
+}
+
+export class PipelineParameterValueResolver implements ValueResolver {
+
+  private val: ParameterBuilder;
+
+  constructor(param: ParameterBuilder) {
+    this.val = param;
+  }
+  
+  get value(): string {
+    // TODO: Fix this... needs to return a representation that would be a link
+    // to the actual parameter
+    return "$(param.foo)"
+  }
+
+}
+
+export function constant(val: string) : ValueResolver {
+  return new ConstantStringValueResolver(val);
+}
+
+export function fromPipelineParam(param: ParameterBuilder): ValueResolver {
+  return new PipelineParameterValueResolver(param);
+}
+
+/**
  * The options for builders for the `buildXX()` methods.
  */
 export interface BuilderOptions {
@@ -147,7 +195,7 @@ export class ParameterBuilder {
   private _name?: string;
   private _description?: string;
   private _type?: string;
-  private _value?: string;
+  private _value?: ValueResolver;
   private _defaultValue?: string;
   private _requiresPipelineParam: boolean;
 
@@ -216,11 +264,13 @@ export class ParameterBuilder {
    * Sets the value for the parameter
    * @param val
    */
-  public withValue(val: string): ParameterBuilder {
+  public withValue(val: string | ValueResolver): ParameterBuilder {
     // If you are giving it a value here, then you do not
     // need the Pipeline parameter for this parameter.
     this._requiresPipelineParam = false;
-    this._value = val;
+    if (typeof(val) === 'string') {
+      this._value = constant(val);
+    }
     return this;
   }
 
@@ -228,7 +278,7 @@ export class ParameterBuilder {
    * Gets the value of the parameter
    */
   public get value(): string | undefined {
-    return this._value;
+    return this._value?.value;
   }
 
   /**
@@ -242,19 +292,6 @@ export class ParameterBuilder {
 
   public get defaultValue(): string | undefined {
     return this._defaultValue;
-  }
-
-  /**
-   * Sets the default value for the parameter.
-   * @param pipelineParamName
-   * @param defaultValue
-   */
-  public withPiplineParameter(pipelineParamName: string, defaultValue: string = ''): ParameterBuilder {
-    this._requiresPipelineParam = true;
-    this._name = pipelineParamName;
-    this._defaultValue = defaultValue;
-    this._value = usingBuildParameter(pipelineParamName);
-    return this;
   }
 
   /**
@@ -882,6 +919,8 @@ export class PipelineBuilder {
             pipelineParams.set(p.name!, {
               name: p.name,
               type: p.type,
+              // Fix: https://github.com/cloud-native-toolkit/cdk8s-pipelines/issues/43
+              default: p.defaultValue,
             });
           }
         }
