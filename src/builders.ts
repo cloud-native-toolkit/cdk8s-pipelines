@@ -59,12 +59,12 @@ const DefaultClusterRoleBindingProps = createRoleBindingProps(
   'default');
 
 /**
- * Resolves the `script` through different means.
+ * Resolves the value through different means.
  */
 interface ValueResolver {
   /**
-   * Gets the string value for the 
-   * @returns string The script.
+   * Gets the string value for a parameter
+   * @returns string The value.
    */
   get value(): string;
 }
@@ -93,7 +93,8 @@ export class PipelineParameterValueResolver implements ValueResolver {
   get value(): string {
     // TODO: Fix this... needs to return a representation that would be a link
     // to the actual parameter
-    return "$(param.foo)"
+    //return `$(params.${this.val.logicalID})`
+    return usingBuildParameter(this.val.logicalID!)
   }
 
 }
@@ -142,6 +143,7 @@ export class WorkspaceBuilder {
    */
   constructor(id: string) {
     this._logicalID = id;
+    this._name = id;
   }
 
   /**
@@ -166,6 +168,7 @@ export class WorkspaceBuilder {
   }
 
   /**
+   * @deprecated name is set by logicalID
    * Sets the name of the workspace.
    * @param name
    */
@@ -192,7 +195,7 @@ export class WorkspaceBuilder {
  */
 export class ParameterBuilder {
   private readonly _logicalID: string;
-  private _name?: string;
+  private _name: string;
   private _description?: string;
   private _type?: string;
   private _value?: ValueResolver;
@@ -201,6 +204,7 @@ export class ParameterBuilder {
 
   constructor(id: string) {
     this._logicalID = id;
+    this._name = id;
     this._requiresPipelineParam = false;
   }
 
@@ -227,6 +231,7 @@ export class ParameterBuilder {
   }
 
   /**
+   * @deprecated name is set by logicalID
    * Sets the name of the parameter.
    * @param name
    */
@@ -270,6 +275,12 @@ export class ParameterBuilder {
     this._requiresPipelineParam = false;
     if (typeof(val) === 'string') {
       this._value = constant(val);
+    }
+    else {
+      if (val instanceof PipelineParameterValueResolver) {
+        this._requiresPipelineParam = true;
+      }
+      this._value = val;
     }
     return this;
   }
@@ -658,6 +669,7 @@ export class TaskBuilder {
   public constructor(scope: Construct, id: string) {
     this._scope = scope;
     this._id = id;
+    this._name = id;
     // These are required, and it's better to just create it rather than
     // check each time.
     this._steps = new Array<TaskStepBuilder>();
@@ -707,6 +719,7 @@ export class TaskBuilder {
   }
 
   /**
+   * @deprecated name is set by id
    * Sets the name of the `Task` being built.
    * @param name
    */
@@ -851,13 +864,16 @@ export class PipelineBuilder {
   private _name?: string;
   private _description?: string;
   private _tasks?: TaskBuilder[];
+  private _params?: Map<string, ParameterBuilder>;
 
   public constructor(scope: Construct, id: string) {
     this._scope = scope;
     this._id = id;
+    this._name = id;
   }
 
   /**
+   * @deprecated name is set by id
    * Provides the name for the pipeline task and will be
    * rendered as the `name` property.
    * @param name
@@ -895,6 +911,18 @@ export class PipelineBuilder {
   }
 
   /**
+   * Add parameter of type string to the Pipeline
+   * @param param
+   */
+  public withStringParam(param: ParameterBuilder): PipelineBuilder {
+    if (!this._params) {
+      this._params = new Map<string, ParameterBuilder>();
+    }
+    this._params.set(param.logicalID!, param.ofType('string'));
+    return this;
+  }
+
+  /**
    * Returns the array of `PipelineParam` objects that represent the parameters
    * configured for the `Pipeline`.
    *
@@ -910,18 +938,23 @@ export class PipelineBuilder {
     // operation, so we only need to do it if the state of the object has not
     // changed.
     const pipelineParams = new Map<string, PipelineParam>();
+    // First, add all the user-supplied pipeline-level parameters
+    this._params?.forEach((par) => {
+      pipelineParams.set(par.logicalID!, {
+        name: par.logicalID,
+        type: par.type,
+        default: par.defaultValue
+      });
+    });
+    // Then, check if any Tasks require a missing pipeline-level parameter
     this._tasks?.forEach((t) => {
       t.parameters?.forEach(p => {
-        const pp = pipelineParams.get(p.name!);
-        if (!pp) {
-          // Do not add it to the pipeline if there is no need to add it...
-          if (p.requiresPipelineParameter) {
-            pipelineParams.set(p.name!, {
-              name: p.name,
-              type: p.type,
-              // Fix: https://github.com/cloud-native-toolkit/cdk8s-pipelines/issues/43
-              default: p.defaultValue,
-            });
+        if(p.requiresPipelineParameter) {
+          // TODO: find better way to retrieve ID of pipeline-level param referenced by task param?
+          const requiredPipelineParam = p.value!.substring(9, p.value!.length - 1);
+          const pp = pipelineParams.has(requiredPipelineParam);
+          if(!pp) {
+            throw new Error(`Parameter '${p.logicalID}' in Task '${t.name}' expects Pipeline value from parameter '${requiredPipelineParam}', which is not defined.`);
           }
         }
       });
@@ -946,10 +979,10 @@ export class PipelineBuilder {
       t.workspaces?.forEach((w) => {
         // Only add the workspace on the pipeline level if it is not already
         // there...
-        const ws = pipelineWorkspaces.get(w.name!);
+        const ws = pipelineWorkspaces.get(w.logicalID!);
         if (!ws) {
-          pipelineWorkspaces.set(w.name!, {
-            name: w.name,
+          pipelineWorkspaces.set(w.logicalID!, {
+            name: w.logicalID,
             description: w.description,
           });
         }
@@ -1022,6 +1055,10 @@ export class PipelineBuilder {
   }
 }
 
+// Side effect: since withName is deprecated and t.name = t.logicalID, the task's name and the name 
+// of its taskRef are forced to be identical. 
+// TODO: make withTaskRef function in TaskBuilder to assign taskRef['name']
+// TODO: compensate tasks with steps instead of a ref in function below
 function createOrderedPipelineTask(t: TaskBuilder, after: string, params: TaskParam[], ws: TaskWorkspace[]): PipelineTask {
   if (after) {
     return {
