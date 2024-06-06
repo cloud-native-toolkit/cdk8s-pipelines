@@ -143,7 +143,6 @@ export class WorkspaceBuilder {
    */
   constructor(id: string) {
     this._logicalID = id;
-    this._name = id;
   }
 
   /**
@@ -168,7 +167,6 @@ export class WorkspaceBuilder {
   }
 
   /**
-   * @deprecated name is set by logicalID
    * Sets the name of the workspace.
    * @param name
    */
@@ -669,7 +667,6 @@ export class TaskBuilder {
   public constructor(scope: Construct, id: string) {
     this._scope = scope;
     this._id = id;
-    this._name = id;
     // These are required, and it's better to just create it rather than
     // check each time.
     this._steps = new Array<TaskStepBuilder>();
@@ -719,7 +716,6 @@ export class TaskBuilder {
   }
 
   /**
-   * @deprecated name is set by id
    * Sets the name of the `Task` being built.
    * @param name
    */
@@ -869,11 +865,9 @@ export class PipelineBuilder {
   public constructor(scope: Construct, id: string) {
     this._scope = scope;
     this._id = id;
-    this._name = id;
   }
 
   /**
-   * @deprecated name is set by id
    * Provides the name for the pipeline task and will be
    * rendered as the `name` property.
    * @param name
@@ -979,10 +973,10 @@ export class PipelineBuilder {
       t.workspaces?.forEach((w) => {
         // Only add the workspace on the pipeline level if it is not already
         // there...
-        const ws = pipelineWorkspaces.get(w.logicalID!);
+        const ws = pipelineWorkspaces.get(w.name!);
         if (!ws) {
-          pipelineWorkspaces.set(w.logicalID!, {
-            name: w.logicalID,
+          pipelineWorkspaces.set(w.name!, {
+            name: w.name,
             description: w.description,
           });
         }
@@ -1055,10 +1049,6 @@ export class PipelineBuilder {
   }
 }
 
-// Side effect: since withName is deprecated and t.name = t.logicalID, the task's name and the name 
-// of its taskRef are forced to be identical. 
-// TODO: make withTaskRef function in TaskBuilder to assign taskRef['name']
-// TODO: compensate tasks with steps instead of a ref in function below
 function createOrderedPipelineTask(t: TaskBuilder, after: string, params: TaskParam[], ws: TaskWorkspace[]): PipelineTask {
   if (after) {
     return {

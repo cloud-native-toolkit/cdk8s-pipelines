@@ -8,6 +8,8 @@ import {
   PipelineRunBuilder,
   TaskBuilder,
   WorkspaceBuilder,
+  fromPipelineParam,
+  constant
 } from '../src';
 
 class PipelineRunTest extends Chart {
@@ -215,6 +217,31 @@ class MyTestChartWithDuplicateTasks extends Chart {
   }
 }
 
+class PipelineLevelParamTest extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const pipelineParam = new ParameterBuilder('context')
+      .withDefaultValue('/some/where/or/other')
+    
+    const taskParam = new ParameterBuilder('pathToDockerFile')
+      .withValue(constant('Dockerfile'))
+    
+    const taskParam2 = new ParameterBuilder('pathToContext')
+      .withValue(fromPipelineParam(pipelineParam))
+    
+    const myTask = new TaskBuilder(this, 'build-skaffold-web')
+      .withName('build-push')
+      .withStringParam(taskParam)
+      .withStringParam(taskParam2)
+    
+    new PipelineBuilder(this, 'pipeline-with-parameters')
+      .withStringParam(pipelineParam)
+      .withTask(myTask)
+      .buildPipeline({ includeDependencies: true });
+  }
+}
+
 describe('PipelineBuilderTest', () => {
   test('PipelineRunBuilder', () => {
     const app = Testing.app();
@@ -274,4 +301,11 @@ describe('PipelineBuilderTest', () => {
     const results = Testing.synth(chart);
     expect(results).toMatchSnapshot();
   });
+
+  // test('PipelineBuilderWithParameters', () => {
+  //   const app = Testing.app();
+  //   const chart = new PipelineLevelParamTest(app, 'test-chart');
+  //   const results = Testing.synth(chart);
+  //   expect(results).toMatchSnapshot();
+  // })
 });
