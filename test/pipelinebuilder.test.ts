@@ -9,7 +9,7 @@ import {
   TaskBuilder,
   WorkspaceBuilder,
   fromPipelineParam,
-  constant
+  constant,
 } from '../src';
 
 class PipelineRunTest extends Chart {
@@ -17,7 +17,7 @@ class PipelineRunTest extends Chart {
     super(scope, id, props);
 
     const pipelineParam = new ParameterBuilder('repo-url')
-      .withDefaultValue('')
+      .withDefaultValue('');
 
     const myTask = new TaskBuilder(this, 'fetch-source')
       .withName('git-clone')
@@ -45,7 +45,7 @@ class PipelineRunTestWithUndefinedWorkspaceError extends Chart {
     super(scope, id, props);
 
     const pipelineParam = new ParameterBuilder('repo-url')
-      .withDefaultValue('')
+      .withDefaultValue('');
 
     const myTask = new TaskBuilder(this, 'fetch-source')
       .withName('git-clone')
@@ -72,7 +72,7 @@ class PipelineRunTestWithUndefinedParamError extends Chart {
     super(scope, id, props);
 
     const pipelineParam = new ParameterBuilder('repo-url')
-      .withDefaultValue('')
+      .withDefaultValue('');
 
     const myTask = new TaskBuilder(this, 'fetch-source')
       .withName('git-clone')
@@ -100,7 +100,7 @@ class PipelineRunTestWithError extends Chart {
     super(scope, id, props);
 
     const pipelineParam = new ParameterBuilder('repo-url')
-      .withDefaultValue('')
+      .withDefaultValue('');
 
     const myTask = new TaskBuilder(this, 'fetch-source')
       .withName('git-clone')
@@ -128,13 +128,13 @@ class MySecondTestChart extends Chart {
     super(scope, id, props);
 
     const repoParam = new ParameterBuilder('repo-url')
-      .withDefaultValue('')
+      .withDefaultValue('');
     const nameParam = new ParameterBuilder('your-name')
-      .withDefaultValue('')
+      .withDefaultValue('');
     const colorParam = new ParameterBuilder('your-color')
-      .withDefaultValue('')
+      .withDefaultValue('');
     const questParam = new ParameterBuilder('your-quest')
-      .withDefaultValue('')
+      .withDefaultValue('');
 
     const myTask = new TaskBuilder(this, 'git-clone')
       .withName('fetch-source')
@@ -171,9 +171,9 @@ class MyTestChartWithDuplicateParams extends Chart {
     const myWorkspace = new WorkspaceBuilder('output')
       .withDescription('The files cloned by the task')
       .withName('shared-data');
-    
+
     const pipelineParam = new ParameterBuilder('repo-url')
-      .withDefaultValue('')
+      .withDefaultValue('');
 
     const urlParam = new ParameterBuilder('url')
       .withValue(fromPipelineParam(pipelineParam));
@@ -206,10 +206,10 @@ class MyTestChartWithStaticOverride extends Chart {
     super(scope, id, props);
 
     const pipelineParam = new ParameterBuilder('repo-url')
-      .withDefaultValue('')
-    
+      .withDefaultValue('');
+
     const urlParam = new ParameterBuilder('url')
-    .withValue(fromPipelineParam(pipelineParam));
+      .withValue(fromPipelineParam(pipelineParam));
 
     const myTask2 = new TaskBuilder(this, 'cat-readme')
       .withName('print-readme')
@@ -237,7 +237,7 @@ class MyTestChartWithDuplicateTasks extends Chart {
       .withName('shared-data');
 
     const pipelineParam = new ParameterBuilder('repo-url')
-      .withDefaultValue('')
+      .withDefaultValue('');
 
     const urlParam = new ParameterBuilder('url')
       .withValue(fromPipelineParam(pipelineParam));
@@ -263,19 +263,19 @@ class PipelineLevelParamTest extends Chart {
     super(scope, id, props);
 
     const pipelineParam = new ParameterBuilder('context')
-      .withDefaultValue('/some/where/or/other')
-    
+      .withDefaultValue('/some/where/or/other');
+
     const taskParam = new ParameterBuilder('pathToDockerFile')
-      .withValue(constant('Dockerfile'))
-    
+      .withValue(constant('Dockerfile'));
+
     const taskParam2 = new ParameterBuilder('pathToContext')
-      .withValue(fromPipelineParam(pipelineParam))
-    
+      .withValue(fromPipelineParam(pipelineParam));
+
     const myTask = new TaskBuilder(this, 'build-skaffold-web')
       .withName('build-push')
       .withStringParam(taskParam)
-      .withStringParam(taskParam2)
-    
+      .withStringParam(taskParam2);
+
     new PipelineBuilder(this, 'pipeline-with-parameters')
       .withStringParam(pipelineParam)
       .withTask(myTask)
@@ -339,6 +339,13 @@ describe('PipelineBuilderTest', () => {
   test('PipelineBuilderWithDuplicateTasks', () => {
     const app = Testing.app();
     const chart = new MyTestChartWithDuplicateTasks(app, 'test-chart');
+    const results = Testing.synth(chart);
+    expect(results).toMatchSnapshot();
+  });
+
+  test('PipelineBuilderWithParameters', () => {
+    const app = Testing.app();
+    const chart = new PipelineLevelParamTest(app, 'test-chart');
     const results = Testing.synth(chart);
     expect(results).toMatchSnapshot();
   });

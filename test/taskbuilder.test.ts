@@ -2,7 +2,7 @@ import * as path from 'path';
 import { Chart, Testing } from 'cdk8s';
 import { ChartProps } from 'cdk8s/lib/chart';
 import { Construct } from 'constructs';
-import { usingBuildParameter, usingWorkspacePath, secretKeyRef, TaskBuilder, TaskStepBuilder, valueFrom, WorkspaceBuilder, ParameterBuilder } from '../src';
+import { usingBuildParameter, usingWorkspacePath, secretKeyRef, TaskBuilder, TaskStepBuilder, valueFrom, WorkspaceBuilder, ParameterBuilder, fromPipelineParam } from '../src';
 
 /**
  * Using "ansible-runner" as the reference task that I want this test builder to
@@ -17,9 +17,11 @@ class TestBasicTaskBuild extends Chart {
     const runnerDir = new WorkspaceBuilder('runner-dir')
       .withDescription('The Ansibler runner directory');
 
+    const pipelineParam = new ParameterBuilder('project-dir');
+
     const projectDirName = new ParameterBuilder('project-dir')
       .ofType('string')
-      .withPiplineParameter('project-dir');
+      .withValue(fromPipelineParam(pipelineParam));
 
     new TaskBuilder(this, 'my-task')
       .withName('ansible-runner')
@@ -79,9 +81,11 @@ class TestBasicTaskBuildFromObject extends Chart {
     const runnerDir = new WorkspaceBuilder('runner-dir')
       .withDescription('The Ansibler runner directory');
 
+    const pipelineParam = new ParameterBuilder('project-dir');
+
     const projectDirName = new ParameterBuilder('project-dir')
       .ofType('string')
-      .withPiplineParameter('project-dir');
+      .withValue(fromPipelineParam(pipelineParam));
 
     new TaskBuilder(this, 'my-task')
       .withName('ansible-runner')
@@ -159,16 +163,16 @@ class TestPullRequestTaskBuild extends Chart {
       .withName('pull-request')
       .withDescription('This Task allows a user to interact with an SCM (source control management)\nsystem through an abstracted interface\n\nThis Task works with both public SCM instances and self-hosted/enterprise GitHub/GitLab\ninstances. In download mode, this Task will look at the state of an existing pull\nrequest and populate the pr workspace with the state of the pull request, including the\n.MANIFEST file. In upload mode, this Task will look at the contents of the pr workspace\n and compare it to the .MANIFEST file (if it exists).')
       .withStringParam(new ParameterBuilder('mode')
-        .withPiplineParameter('mode')
+        .withValue(fromPipelineParam(new ParameterBuilder('mode')))
         .withDescription('If "download", the state of the pull request at `url` will be fetched. If "upload" then the pull request at `url` will be updated.'))
       .withStringParam(new ParameterBuilder('url')
-        .withPiplineParameter('repo-url')
+        .withValue(fromPipelineParam(new ParameterBuilder('repo-url')))
         .withDescription('The URL of the Pull Reuqest, e.g. `https://github.com/bobcatfish/catservice/pull/16`'))
       .withStringParam(new ParameterBuilder('provider')
-        .withPiplineParameter('provider')
+        .withValue(fromPipelineParam(new ParameterBuilder('provider')))
         .withDescription('The type of SCM system, currently `github` or `gitlab`'))
       .withStringParam(new ParameterBuilder('secret-key-ref')
-        .withPiplineParameter('secret-key-ref')
+        .withValue(fromPipelineParam(new ParameterBuilder('secret-key-ref')))
         .withDescription('The name of an opaque secret containing a key called "token" with a base64 encoded SCM token'))
       .withStringParam(new ParameterBuilder('insecure-skip-tls-verify')
         .withDefaultValue('false')
