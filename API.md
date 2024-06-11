@@ -2652,6 +2652,53 @@ public readonly logicalID: string;
 
 ## Classes <a name="Classes" id="Classes"></a>
 
+### ConstantStringValueResolver <a name="ConstantStringValueResolver" id="cdk8s-pipelines.ConstantStringValueResolver"></a>
+
+- *Implements:* <a href="#cdk8s-pipelines.IValueResolver">IValueResolver</a>
+
+#### Initializers <a name="Initializers" id="cdk8s-pipelines.ConstantStringValueResolver.Initializer"></a>
+
+```typescript
+import { ConstantStringValueResolver } from 'cdk8s-pipelines'
+
+new ConstantStringValueResolver(val: string)
+```
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.ConstantStringValueResolver.Initializer.parameter.val">val</a></code> | <code>string</code> | *No description.* |
+
+---
+
+##### `val`<sup>Required</sup> <a name="val" id="cdk8s-pipelines.ConstantStringValueResolver.Initializer.parameter.val"></a>
+
+- *Type:* string
+
+---
+
+
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.ConstantStringValueResolver.property.value">value</a></code> | <code>string</code> | Gets the string value for a parameter. |
+
+---
+
+##### `value`<sup>Required</sup> <a name="value" id="cdk8s-pipelines.ConstantStringValueResolver.property.value"></a>
+
+```typescript
+public readonly value: string;
+```
+
+- *Type:* string
+
+Gets the string value for a parameter.
+
+---
+
+
 ### ParameterBuilder <a name="ParameterBuilder" id="cdk8s-pipelines.ParameterBuilder"></a>
 
 Builds the parameters for use by Tasks and Pipelines.
@@ -2685,8 +2732,7 @@ new ParameterBuilder(id: string)
 | <code><a href="#cdk8s-pipelines.ParameterBuilder.ofType">ofType</a></code> | Sets the type of the parameter. |
 | <code><a href="#cdk8s-pipelines.ParameterBuilder.withDefaultValue">withDefaultValue</a></code> | Sets the default value for the parameter. |
 | <code><a href="#cdk8s-pipelines.ParameterBuilder.withDescription">withDescription</a></code> | Sets the description of the parameter. |
-| <code><a href="#cdk8s-pipelines.ParameterBuilder.withName">withName</a></code> | Sets the name of the parameter. |
-| <code><a href="#cdk8s-pipelines.ParameterBuilder.withPiplineParameter">withPiplineParameter</a></code> | Sets the default value for the parameter. |
+| <code><a href="#cdk8s-pipelines.ParameterBuilder.withName">withName</a></code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.ParameterBuilder.withValue">withValue</a></code> | Sets the value for the parameter. |
 
 ---
@@ -2733,35 +2779,13 @@ Sets the description of the parameter.
 
 ---
 
-##### `withName` <a name="withName" id="cdk8s-pipelines.ParameterBuilder.withName"></a>
+##### ~~`withName`~~ <a name="withName" id="cdk8s-pipelines.ParameterBuilder.withName"></a>
 
 ```typescript
 public withName(name: string): ParameterBuilder
 ```
 
-Sets the name of the parameter.
-
 ###### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.ParameterBuilder.withName.parameter.name"></a>
-
-- *Type:* string
-
----
-
-##### `withPiplineParameter` <a name="withPiplineParameter" id="cdk8s-pipelines.ParameterBuilder.withPiplineParameter"></a>
-
-```typescript
-public withPiplineParameter(pipelineParamName: string, defaultValue?: string): ParameterBuilder
-```
-
-Sets the default value for the parameter.
-
-###### `pipelineParamName`<sup>Required</sup> <a name="pipelineParamName" id="cdk8s-pipelines.ParameterBuilder.withPiplineParameter.parameter.pipelineParamName"></a>
-
-- *Type:* string
-
----
-
-###### `defaultValue`<sup>Optional</sup> <a name="defaultValue" id="cdk8s-pipelines.ParameterBuilder.withPiplineParameter.parameter.defaultValue"></a>
 
 - *Type:* string
 
@@ -2770,14 +2794,14 @@ Sets the default value for the parameter.
 ##### `withValue` <a name="withValue" id="cdk8s-pipelines.ParameterBuilder.withValue"></a>
 
 ```typescript
-public withValue(val: string): ParameterBuilder
+public withValue(val: string | IValueResolver): ParameterBuilder
 ```
 
 Sets the value for the parameter.
 
 ###### `val`<sup>Required</sup> <a name="val" id="cdk8s-pipelines.ParameterBuilder.withValue.parameter.val"></a>
 
-- *Type:* string
+- *Type:* string | <a href="#cdk8s-pipelines.IValueResolver">IValueResolver</a>
 
 ---
 
@@ -2787,10 +2811,10 @@ Sets the value for the parameter.
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
 | <code><a href="#cdk8s-pipelines.ParameterBuilder.property.description">description</a></code> | <code>string</code> | Gets the description of the parameter. |
-| <code><a href="#cdk8s-pipelines.ParameterBuilder.property.requiresPipelineParameter">requiresPipelineParameter</a></code> | <code>boolean</code> | Returns true if this parameter expects input at the pipeline level. |
 | <code><a href="#cdk8s-pipelines.ParameterBuilder.property.defaultValue">defaultValue</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.ParameterBuilder.property.logicalID">logicalID</a></code> | <code>string</code> | Gets the logicalID for the `ParameterBuilder`, which is used by the underlying construct. |
 | <code><a href="#cdk8s-pipelines.ParameterBuilder.property.name">name</a></code> | <code>string</code> | Gets the name of the parameter. |
+| <code><a href="#cdk8s-pipelines.ParameterBuilder.property.requiresPipelineParameter">requiresPipelineParameter</a></code> | <code>string</code> | Returns the name of the input if the parameter expects one at the pipeline level, undefined otherwise. |
 | <code><a href="#cdk8s-pipelines.ParameterBuilder.property.type">type</a></code> | <code>string</code> | Gets the type of the parameter. |
 | <code><a href="#cdk8s-pipelines.ParameterBuilder.property.value">value</a></code> | <code>string</code> | Gets the value of the parameter. |
 
@@ -2805,18 +2829,6 @@ public readonly description: string;
 - *Type:* string
 
 Gets the description of the parameter.
-
----
-
-##### `requiresPipelineParameter`<sup>Required</sup> <a name="requiresPipelineParameter" id="cdk8s-pipelines.ParameterBuilder.property.requiresPipelineParameter"></a>
-
-```typescript
-public readonly requiresPipelineParameter: boolean;
-```
-
-- *Type:* boolean
-
-Returns true if this parameter expects input at the pipeline level.
 
 ---
 
@@ -2851,6 +2863,18 @@ public readonly name: string;
 - *Type:* string
 
 Gets the name of the parameter.
+
+---
+
+##### `requiresPipelineParameter`<sup>Optional</sup> <a name="requiresPipelineParameter" id="cdk8s-pipelines.ParameterBuilder.property.requiresPipelineParameter"></a>
+
+```typescript
+public readonly requiresPipelineParameter: string;
+```
+
+- *Type:* string
+
+Returns the name of the input if the parameter expects one at the pipeline level, undefined otherwise.
 
 ---
 
@@ -2915,6 +2939,7 @@ new PipelineBuilder(scope: Construct, id: string)
 | <code><a href="#cdk8s-pipelines.PipelineBuilder.buildPipeline">buildPipeline</a></code> | Builds the actual [Pipeline](https://tekton.dev/docs/getting-started/pipelines/) from the settings configured using the fluid syntax. |
 | <code><a href="#cdk8s-pipelines.PipelineBuilder.withDescription">withDescription</a></code> | Provides the name for the pipeline task and will be rendered as the `name` property. |
 | <code><a href="#cdk8s-pipelines.PipelineBuilder.withName">withName</a></code> | Provides the name for the pipeline task and will be rendered as the `name` property. |
+| <code><a href="#cdk8s-pipelines.PipelineBuilder.withStringParam">withStringParam</a></code> | Add parameter of type string to the Pipeline. |
 | <code><a href="#cdk8s-pipelines.PipelineBuilder.withTask">withTask</a></code> | *No description.* |
 
 ---
@@ -2958,6 +2983,20 @@ Provides the name for the pipeline task and will be rendered as the `name` prope
 ###### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.PipelineBuilder.withName.parameter.name"></a>
 
 - *Type:* string
+
+---
+
+##### `withStringParam` <a name="withStringParam" id="cdk8s-pipelines.PipelineBuilder.withStringParam"></a>
+
+```typescript
+public withStringParam(param: ParameterBuilder): PipelineBuilder
+```
+
+Add parameter of type string to the Pipeline.
+
+###### `param`<sup>Required</sup> <a name="param" id="cdk8s-pipelines.PipelineBuilder.withStringParam.parameter.param"></a>
+
+- *Type:* <a href="#cdk8s-pipelines.ParameterBuilder">ParameterBuilder</a>
 
 ---
 
@@ -3027,6 +3066,53 @@ This is an "expensive" get because it loops through the workspaces in the
 pipeline and checks for duplicates in the pipeline workspaces for each task
 workspace found. You should avoid calling this in a loop--instead, declare
 a local variable before the loop and reference that instead.
+
+---
+
+
+### PipelineParameterValueResolver <a name="PipelineParameterValueResolver" id="cdk8s-pipelines.PipelineParameterValueResolver"></a>
+
+- *Implements:* <a href="#cdk8s-pipelines.IValueResolver">IValueResolver</a>
+
+#### Initializers <a name="Initializers" id="cdk8s-pipelines.PipelineParameterValueResolver.Initializer"></a>
+
+```typescript
+import { PipelineParameterValueResolver } from 'cdk8s-pipelines'
+
+new PipelineParameterValueResolver(param: ParameterBuilder)
+```
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.PipelineParameterValueResolver.Initializer.parameter.param">param</a></code> | <code><a href="#cdk8s-pipelines.ParameterBuilder">ParameterBuilder</a></code> | *No description.* |
+
+---
+
+##### `param`<sup>Required</sup> <a name="param" id="cdk8s-pipelines.PipelineParameterValueResolver.Initializer.parameter.param"></a>
+
+- *Type:* <a href="#cdk8s-pipelines.ParameterBuilder">ParameterBuilder</a>
+
+---
+
+
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.PipelineParameterValueResolver.property.value">value</a></code> | <code>string</code> | Gets the string value for a parameter. |
+
+---
+
+##### `value`<sup>Required</sup> <a name="value" id="cdk8s-pipelines.PipelineParameterValueResolver.property.value"></a>
+
+```typescript
+public readonly value: string;
+```
+
+- *Type:* string
+
+Gets the string value for a parameter.
 
 ---
 
@@ -3946,4 +4032,32 @@ Gets the name of the workspace.
 ---
 
 
+## Protocols <a name="Protocols" id="Protocols"></a>
+
+### IValueResolver <a name="IValueResolver" id="cdk8s-pipelines.IValueResolver"></a>
+
+- *Implemented By:* <a href="#cdk8s-pipelines.ConstantStringValueResolver">ConstantStringValueResolver</a>, <a href="#cdk8s-pipelines.PipelineParameterValueResolver">PipelineParameterValueResolver</a>, <a href="#cdk8s-pipelines.IValueResolver">IValueResolver</a>
+
+Resolves the value through different means.
+
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.IValueResolver.property.value">value</a></code> | <code>string</code> | Gets the string value for a parameter. |
+
+---
+
+##### `value`<sup>Required</sup> <a name="value" id="cdk8s-pipelines.IValueResolver.property.value"></a>
+
+```typescript
+public readonly value: string;
+```
+
+- *Type:* string
+
+Gets the string value for a parameter.
+
+---
 

@@ -12,18 +12,22 @@ exports[`PipelineBuilderTest PipelineBuilderWithComplexTasks 1`] = `
       "description": "This pipeline closes a repository, builds a Docker image, etc.",
       "params": [
         {
+          "default": "",
           "name": "repo-url",
           "type": "string",
         },
         {
+          "default": "",
           "name": "your-name",
           "type": "string",
         },
         {
+          "default": "",
           "name": "your-color",
           "type": "string",
         },
         {
+          "default": "",
           "name": "your-quest",
           "type": "string",
         },
@@ -126,6 +130,7 @@ exports[`PipelineBuilderTest PipelineBuilderWithDuplicateTasks 1`] = `
       "description": "This pipeline closes a repository, builds a Docker image, etc.",
       "params": [
         {
+          "default": "",
           "name": "repo-url",
           "type": "string",
         },
@@ -194,6 +199,7 @@ exports[`PipelineBuilderTest PipelineBuilderWithDuplicates 1`] = `
       "description": "This pipeline closes a repository, builds a Docker image, etc.",
       "params": [
         {
+          "default": "",
           "name": "repo-url",
           "type": "string",
         },
@@ -245,6 +251,75 @@ exports[`PipelineBuilderTest PipelineBuilderWithDuplicates 1`] = `
           "name": "shared-data",
         },
       ],
+    },
+  },
+]
+`;
+
+exports[`PipelineBuilderTest PipelineBuilderWithParameters 1`] = `
+[
+  {
+    "apiVersion": "tekton.dev/v1",
+    "kind": "Task",
+    "metadata": {
+      "annotations": undefined,
+      "labels": undefined,
+      "name": "build-push",
+    },
+    "spec": {
+      "description": undefined,
+      "params": [
+        {
+          "default": "",
+          "description": "",
+          "name": "pathToDockerFile",
+        },
+        {
+          "default": "",
+          "description": "",
+          "name": "pathToContext",
+        },
+      ],
+      "results": [],
+      "steps": [],
+      "workspaces": [],
+    },
+  },
+  {
+    "apiVersion": "tekton.dev/v1",
+    "kind": "Pipeline",
+    "metadata": {
+      "name": "pipeline-with-parameters",
+    },
+    "spec": {
+      "description": undefined,
+      "params": [
+        {
+          "default": "/some/where/or/other",
+          "name": "context",
+          "type": "string",
+        },
+      ],
+      "tasks": [
+        {
+          "name": "build-skaffold-web",
+          "params": [
+            {
+              "name": "pathToDockerFile",
+              "value": "Dockerfile",
+            },
+            {
+              "name": "pathToContext",
+              "value": "$(params.context)",
+            },
+          ],
+          "taskRef": {
+            "name": "build-push",
+          },
+          "workspaces": [],
+        },
+      ],
+      "workspaces": [],
     },
   },
 ]
@@ -321,6 +396,7 @@ exports[`PipelineBuilderTest PipelineRunBuilder 1`] = `
       "description": "This pipeline closes a repository, builds a Docker image, etc.",
       "params": [
         {
+          "default": "",
           "name": "repo-url",
           "type": "string",
         },

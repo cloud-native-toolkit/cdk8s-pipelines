@@ -6,7 +6,7 @@
 import * as fs from 'fs';
 import { ApiObject, ApiObjectProps, Yaml } from 'cdk8s';
 import { Construct } from 'constructs';
-import { usingBuildParameter, usingResultsPath } from './common';
+import { invertBuildParameter, usingBuildParameter, usingResultsPath } from './common';
 import {
   Pipeline,
   PipelineParam,
@@ -57,6 +57,55 @@ const DefaultClusterRoleBindingProps = createRoleBindingProps(
   'cluster-admin',
   'pipeline',
   'default');
+
+/**
+ * Resolves the value through different means.
+ */
+export interface IValueResolver {
+  /**
+   * Gets the string value for a parameter
+   * @returns string The value.
+   */
+  get value(): string;
+}
+
+export class ConstantStringValueResolver implements IValueResolver {
+
+  private val: string;
+
+  constructor(val: string) {
+    this.val = val;
+  }
+
+  public get value(): string {
+    return this.val;
+  }
+}
+
+export class PipelineParameterValueResolver implements IValueResolver {
+
+  private val: ParameterBuilder;
+
+  constructor(param: ParameterBuilder) {
+    this.val = param;
+  }
+
+  get value(): string {
+    // TODO: Fix this... needs to return a representation that would be a link
+    // to the actual parameter
+    //return `$(params.${this.val.logicalID})`
+    return usingBuildParameter(this.val.logicalID!);
+  }
+
+}
+
+export function constant(val: string) : IValueResolver {
+  return new ConstantStringValueResolver(val);
+}
+
+export function fromPipelineParam(param: ParameterBuilder): IValueResolver {
+  return new PipelineParameterValueResolver(param);
+}
 
 /**
  * The options for builders for the `buildXX()` methods.
@@ -144,16 +193,17 @@ export class WorkspaceBuilder {
  */
 export class ParameterBuilder {
   private readonly _logicalID: string;
-  private _name?: string;
+  private _name: string;
   private _description?: string;
   private _type?: string;
-  private _value?: string;
+  private _value?: IValueResolver;
   private _defaultValue?: string;
-  private _requiresPipelineParam: boolean;
+  private _requiresPipelineParam: string | undefined;
 
   constructor(id: string) {
     this._logicalID = id;
-    this._requiresPipelineParam = false;
+    this._name = id;
+    this._requiresPipelineParam = undefined;
   }
 
   /**
@@ -179,6 +229,7 @@ export class ParameterBuilder {
   }
 
   /**
+   * @deprecated name is set by logicalID
    * Sets the name of the parameter.
    * @param name
    */
@@ -216,11 +267,18 @@ export class ParameterBuilder {
    * Sets the value for the parameter
    * @param val
    */
-  public withValue(val: string): ParameterBuilder {
+  public withValue(val: string | IValueResolver): ParameterBuilder {
     // If you are giving it a value here, then you do not
     // need the Pipeline parameter for this parameter.
-    this._requiresPipelineParam = false;
-    this._value = val;
+    this._requiresPipelineParam = undefined;
+    if (typeof(val) === 'string') {
+      this._value = constant(val);
+    } else {
+      if (val instanceof PipelineParameterValueResolver) {
+        this._requiresPipelineParam = invertBuildParameter(val.value);
+      }
+      this._value = val;
+    }
     return this;
   }
 
@@ -228,7 +286,7 @@ export class ParameterBuilder {
    * Gets the value of the parameter
    */
   public get value(): string | undefined {
-    return this._value;
+    return this._value?.value;
   }
 
   /**
@@ -245,22 +303,10 @@ export class ParameterBuilder {
   }
 
   /**
-   * Sets the default value for the parameter.
-   * @param pipelineParamName
-   * @param defaultValue
+   * Returns the name of the input if the parameter expects one at the
+   * pipeline level, undefined otherwise.
    */
-  public withPiplineParameter(pipelineParamName: string, defaultValue: string = ''): ParameterBuilder {
-    this._requiresPipelineParam = true;
-    this._name = pipelineParamName;
-    this._defaultValue = defaultValue;
-    this._value = usingBuildParameter(pipelineParamName);
-    return this;
-  }
-
-  /**
-   * Returns true if this parameter expects input at the pipeline level.
-   */
-  public get requiresPipelineParameter(): boolean {
+  public get requiresPipelineParameter(): string | undefined {
     return this._requiresPipelineParam;
   }
 }
@@ -773,7 +819,7 @@ export class TaskBuilder {
       taskParams.push({
         name: p.logicalID,
         description: p.description,
-        default: p.defaultValue,
+        default: p.defaultValue || '',
       });
     });
 
@@ -814,6 +860,7 @@ export class PipelineBuilder {
   private _name?: string;
   private _description?: string;
   private _tasks?: TaskBuilder[];
+  private _params?: Map<string, ParameterBuilder>;
 
   public constructor(scope: Construct, id: string) {
     this._scope = scope;
@@ -858,6 +905,18 @@ export class PipelineBuilder {
   }
 
   /**
+   * Add parameter of type string to the Pipeline
+   * @param param
+   */
+  public withStringParam(param: ParameterBuilder): PipelineBuilder {
+    if (!this._params) {
+      this._params = new Map<string, ParameterBuilder>();
+    }
+    this._params.set(param.logicalID!, param.ofType('string'));
+    return this;
+  }
+
+  /**
    * Returns the array of `PipelineParam` objects that represent the parameters
    * configured for the `Pipeline`.
    *
@@ -873,16 +932,22 @@ export class PipelineBuilder {
     // operation, so we only need to do it if the state of the object has not
     // changed.
     const pipelineParams = new Map<string, PipelineParam>();
+    // First, add all the user-supplied pipeline-level parameters
+    this._params?.forEach((par) => {
+      pipelineParams.set(par.logicalID!, {
+        name: par.logicalID,
+        type: par.type,
+        default: par.defaultValue || '',
+      });
+    });
+    // Then, check if any Tasks require a missing pipeline-level parameter
     this._tasks?.forEach((t) => {
       t.parameters?.forEach(p => {
-        const pp = pipelineParams.get(p.name!);
-        if (!pp) {
-          // Do not add it to the pipeline if there is no need to add it...
-          if (p.requiresPipelineParameter) {
-            pipelineParams.set(p.name!, {
-              name: p.name,
-              type: p.type,
-            });
+        if (p.requiresPipelineParameter) {
+          const requiredPipelineParam = p.requiresPipelineParameter;
+          const pp = pipelineParams.has(requiredPipelineParam);
+          if (!pp) {
+            throw new Error(`Parameter '${p.logicalID}' in Task '${t.name}' expects Pipeline value from parameter '${requiredPipelineParam}', which is not defined.`);
           }
         }
       });
