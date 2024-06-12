@@ -716,14 +716,14 @@ export class TaskBuilder {
   }
 
   /**
-   * Gets the name of the `Task` within a pipeline.
+   * Gets the name of the `Task` in the context of a pipeline.
    */
   public get name(): string | undefined {
     return this._name;
   }
 
   /**
-   * Sets the `Task`'s name within a pipeline.
+   * Sets the name of the `Task` to be used within a pipeline.
    * @param name
    */
   public withName(name: string): TaskBuilder {
@@ -864,23 +864,21 @@ export class TaskBuilder {
 export class PipelineBuilder {
   private readonly _scope: Construct;
   private readonly _id: string;
-  /**
-   * @deprecated pipeline name is given by `id`
-   */
-  private _name?: string;
+  private _name: string;
   private _description?: string;
   private _tasks?: TaskBuilder[];
   private _params?: Map<string, ParameterBuilder>;
 
   /**
    * Creates a new instance of the `PipelineBuilder` using the given `scope` and
-   * `id`.
+   * `id`. `id` also sets the pipeline's name.
    * @param scope
    * @param id
    */
   public constructor(scope: Construct, id: string) {
     this._scope = scope;
     this._id = id;
+    this._name = id;
   }
 
   /**
@@ -898,12 +896,11 @@ export class PipelineBuilder {
    * Gets the name of the pipeline
    */
   public get name(): string {
-    return this._id;
+    return this._name;
   }
 
   /**
-   * Provides the name for the pipeline task and will be
-   * rendered as the `name` property.
+   * Provides the description for the pipeline.
    * @param description
    */
   public withDescription(description: string): PipelineBuilder {
@@ -998,7 +995,7 @@ export class PipelineBuilder {
             });
           }
         } else {
-          throw new Error(`Workspace ${w.logicalID} in Task ${t.name} has no binding to a pipeline workspace.`);
+          throw new Error(`Workspace '${w.logicalID}' in Task '${t.name}' has no binding to a workspace in Pipeline '${this.name}'.`);
         }
       });
     });
@@ -1037,7 +1034,7 @@ export class PipelineBuilder {
         });
       });
 
-      const pt = createOrderedPipelineTask(t, ((i > 0) ? this._tasks![i - 1].logicalID : ''), taskParams, taskWorkspaces);
+      const pt = createOrderedPipelineTask(t, ((i > 0) ? (this._tasks![i - 1].name || this._tasks![i - 1].logicalID) : ''), taskParams, taskWorkspaces);
 
       pipelineTasks.push(pt);
 
