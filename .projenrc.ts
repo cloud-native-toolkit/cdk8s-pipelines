@@ -6,7 +6,7 @@ const project = new cdk8s.ConstructLibraryCdk8s({
   author: 'Nathan Good',
   authorAddress: 'nathan.good@ibm.com',
   cdk8sVersion: '2.68.30',
-  jsiiVersion: '~5.2.0',
+  jsiiVersion: '~5.4.0',
   workflowNodeVersion: '18.x',
   projenrcTs: true,
   peerDeps: [

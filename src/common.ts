@@ -48,6 +48,17 @@ export function usingBuildParameter(name: string): string {
 }
 
 /**
+ * Retrieves the parameter referenced by 'name' from the string outputted by
+ * usingBuildParameter(name).
+ *
+ * For example, if the input string is $(params.foo)`, the result will be `foo`.
+ * @param buildParam The reference string for the parameter.
+ */
+export function invertBuildParameter(buildParam: string): string {
+  return buildParam.substring(9, buildParam.length - 1);
+}
+
+/**
  * Builds the correct string for building a reference to the file in which the
  * result can be written during the execution of the Task. For example, if the
  * name of the result is `foo`, this function will return `$(results.foo.path)`.
