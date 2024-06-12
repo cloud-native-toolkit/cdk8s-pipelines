@@ -84,7 +84,7 @@ export const DefaultBuilderOptions: BuilderOptions = {
  */
 export class WorkspaceBuilder {
   private readonly _logicalID: string;
-  private _name?: string;
+  private _binding?: string;
   private _description?: string;
 
   /**
@@ -107,7 +107,7 @@ export class WorkspaceBuilder {
    * Gets the name of the workspace.
    */
   public get name(): string | undefined {
-    return this._name;
+    return this._logicalID;
   }
 
   /**
@@ -118,11 +118,18 @@ export class WorkspaceBuilder {
   }
 
   /**
-   * Sets the name of the workspace.
-   * @param name
+   * Gets the binding of task workspace to a pipeline workspace.
    */
-  public withName(name: string): WorkspaceBuilder {
-    this._name = name;
+  public get binding(): string | undefined {
+    return this._binding;
+  }
+
+  /**
+   * Sets the binding of a task workspace to a pipeline workspace.
+   * @param workspace
+   */
+  public withBinding(workspace: string): WorkspaceBuilder {
+    this._binding = workspace;
     return this;
   }
 
@@ -663,14 +670,14 @@ export class TaskBuilder {
   }
 
   /**
-   * Gets the name of the `Task` built by the `TaskBuilder`.
+   * Gets the name of the `Task` within a pipeline.
    */
   public get name(): string | undefined {
     return this._name;
   }
 
   /**
-   * Sets the name of the `Task` being built.
+   * Sets the `Task`'s name within a pipeline.
    * @param name
    */
   public withName(name: string): TaskBuilder {
@@ -787,7 +794,7 @@ export class TaskBuilder {
 
     const props: TaskProps = {
       metadata: {
-        name: this.name,
+        name: this.logicalID,
         labels: this._labels,
         annotations: this._annotations,
       },
@@ -811,16 +818,26 @@ export class TaskBuilder {
 export class PipelineBuilder {
   private readonly _scope: Construct;
   private readonly _id: string;
+  /**
+   * @deprecated pipeline name is given by `id`
+   */
   private _name?: string;
   private _description?: string;
   private _tasks?: TaskBuilder[];
 
+  /**
+   * Creates a new instance of the `PipelineBuilder` using the given `scope` and
+   * `id`.
+   * @param scope
+   * @param id
+   */
   public constructor(scope: Construct, id: string) {
     this._scope = scope;
     this._id = id;
   }
 
   /**
+   * @deprecated pipeline name is set by `id`
    * Provides the name for the pipeline task and will be
    * rendered as the `name` property.
    * @param name
@@ -834,7 +851,7 @@ export class PipelineBuilder {
    * Gets the name of the pipeline
    */
   public get name(): string {
-    return this._name || this._id;
+    return this._id;
   }
 
   /**
@@ -905,14 +922,18 @@ export class PipelineBuilder {
     const pipelineWorkspaces = new Map<string, PipelineWorkspace>();
     this._tasks?.forEach((t) => {
       t.workspaces?.forEach((w) => {
+        if (w.binding) {
         // Only add the workspace on the pipeline level if it is not already
         // there...
-        const ws = pipelineWorkspaces.get(w.name!);
-        if (!ws) {
-          pipelineWorkspaces.set(w.name!, {
-            name: w.name,
-            description: w.description,
-          });
+          const ws = pipelineWorkspaces.get(w.binding);
+          if (!ws) {
+            pipelineWorkspaces.set(w.binding, {
+              name: w.binding,
+              description: w.description,
+            });
+          }
+        } else {
+          throw new Error(`Workspace ${w.logicalID} in Task ${t.name} has no binding to a pipeline workspace.`);
         }
       });
     });
@@ -947,7 +968,7 @@ export class PipelineBuilder {
       t.workspaces?.forEach((w) => {
         taskWorkspaces.push({
           name: w.logicalID,
-          workspace: w.name,
+          workspace: w.binding,
         });
       });
 
@@ -960,11 +981,11 @@ export class PipelineBuilder {
         // built along with the pipeline, but only if we haven't already
         // built the task yet.
         if (!taskList.find(it => {
-          return it == t.name;
+          return it == t.logicalID;
         })) {
           t.buildTask();
         }
-        taskList.push(t.name!);
+        taskList.push(t.logicalID);
       }
     });
 
@@ -986,9 +1007,9 @@ export class PipelineBuilder {
 function createOrderedPipelineTask(t: TaskBuilder, after: string, params: TaskParam[], ws: TaskWorkspace[]): PipelineTask {
   if (after) {
     return {
-      name: t.logicalID,
+      name: t.name || t.logicalID,
       taskRef: {
-        name: t.name,
+        name: t.logicalID,
       },
       runAfter: [after],
       params: params,
@@ -996,9 +1017,9 @@ function createOrderedPipelineTask(t: TaskBuilder, after: string, params: TaskPa
     };
   }
   return {
-    name: t.logicalID,
+    name: t.name || t.logicalID,
     taskRef: {
-      name: t.name,
+      name: t.logicalID,
     },
     params: params,
     workspaces: ws,
