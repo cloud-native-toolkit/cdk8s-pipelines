@@ -221,7 +221,7 @@ class MyTestChartWithStaticOverride extends Chart {
   }
 }
 
-class MyTestChartWithDuplicateTasks extends Chart {
+class MyTestChartWithDuplicateTasksError extends Chart {
   constructor(scope: Construct, id: string, props?: ChartProps) {
     super(scope, id, props);
 
@@ -271,6 +271,40 @@ class PipelineLevelParamTest extends Chart {
     new PipelineBuilder(this, 'pipeline-with-parameters')
       .withStringParam(pipelineParam)
       .withTask(myTask)
+      .buildPipeline({ includeDependencies: true });
+  }
+}
+
+class MyTestChartWithSimilarTasks extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const myWorkspace = new WorkspaceBuilder('output')
+      .withDescription('The files cloned by the task')
+      .withBinding('shared-data');
+
+    const pipelineParam = new ParameterBuilder('repo-url')
+      .withDefaultValue('');
+
+    const urlParam = new ParameterBuilder('url')
+      .withValue(fromPipelineParam(pipelineParam));
+
+    const myTask = new TaskBuilder(this, 'fetch-source')
+      .withName('git-clone')
+      .withWorkspace(myWorkspace)
+      .withStringParam(urlParam)
+    ;
+
+    const myTask2 = new TaskBuilder(this, 'fetch-source')
+      .withName('git-clone-2')
+      .withWorkspace(myWorkspace)
+      .withStringParam(urlParam);
+
+    new PipelineBuilder(this, 'clone-build-push')
+      .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
+      .withTask(myTask)
+      .withTask(myTask2)
+      .withStringParam(pipelineParam)
       .buildPipeline({ includeDependencies: true });
   }
 }
@@ -328,16 +362,24 @@ describe('PipelineBuilderTest', () => {
     expect(results).toMatchSnapshot();
   });
 
-  test('PipelineBuilderWithDuplicateTasks', () => {
+  test('PipelineBuilderWithDuplicateTasksError', () => {
     const app = Testing.app();
-    const chart = new MyTestChartWithDuplicateTasks(app, 'test-chart');
-    const results = Testing.synth(chart);
-    expect(results).toMatchSnapshot();
+    const f = () => {
+      new MyTestChartWithDuplicateTasksError(app, 'test-chart');
+    };
+    expect(f).toThrowError('Multiple tasks found with name \'git-clone\' in Pipeline \'clone-build-push\', but task names must be unique.');
   });
 
   test('PipelineBuilderWithParameters', () => {
     const app = Testing.app();
     const chart = new PipelineLevelParamTest(app, 'test-chart');
+    const results = Testing.synth(chart);
+    expect(results).toMatchSnapshot();
+  });
+
+  test('PipelineBuilderWithSimilarTasks', () => {
+    const app = Testing.app();
+    const chart = new MyTestChartWithSimilarTasks(app, 'test-chart');
     const results = Testing.synth(chart);
     expect(results).toMatchSnapshot();
   });

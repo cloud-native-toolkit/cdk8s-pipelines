@@ -1014,8 +1014,18 @@ export class PipelineBuilder {
     // the build. Not that it really hurts anything, but it makes the multidoc
     // YAML file bigger and more complex than it needs to be.
     const taskList: string[] = new Array<string>();
+    // To ensure that all tasks in the pipeline have unique names.
+    const taskNames: string[] = new Array<string>();
 
     this._tasks?.forEach((t, i) => {
+
+      const taskName = t.name || t.logicalID;
+      if (taskNames.find(it => {
+        return it == taskName;
+      })) {
+        throw new Error(`Multiple tasks found with name '${taskName}' in Pipeline '${this.name}', but task names must be unique.`);
+      }
+      taskNames.push(taskName);
 
       const taskParams: TaskParam[] = new Array<TaskParam>();
       const taskWorkspaces: PipelineTaskWorkspace[] = new Array<TaskWorkspace>();
