@@ -23,8 +23,7 @@ class TestBasicTaskBuild extends Chart {
       .ofType('string')
       .withValue(fromPipelineParam(pipelineParam));
 
-    new TaskBuilder(this, 'my-task')
-      .withName('ansible-runner')
+    new TaskBuilder(this, 'ansible-runner')
       .withDescription('Task to run Ansible playbooks using Ansible Runner')
       .withWorkspace(runnerDir)
       .withStringParam(projectDirName)
@@ -87,8 +86,7 @@ class TestBasicTaskBuildFromObject extends Chart {
       .ofType('string')
       .withValue(fromPipelineParam(pipelineParam));
 
-    new TaskBuilder(this, 'my-task')
-      .withName('ansible-runner')
+    new TaskBuilder(this, 'ansible-runner')
       .withDescription('Task to run Ansible playbooks using Ansible Runner')
       .withWorkspace(runnerDir)
       .withStringParam(projectDirName)
@@ -109,8 +107,7 @@ class TestBasicTaskBuildFromScriptData extends Chart {
   constructor(scope: Construct, id: string, props?: ChartProps) {
     super(scope, id, props);
 
-    new TaskBuilder(this, 'my-task')
-      .withName('ansible-runner')
+    new TaskBuilder(this, 'ansible-runner')
       .withDescription('Task to run Ansible playbooks using Ansible Runner')
       .withStep(new TaskStepBuilder()
         .withName('requirements')
@@ -129,7 +126,6 @@ class TestIBMCloudSecretsManagerGet extends Chart {
     super(scope, id, props);
 
     new TaskBuilder(this, 'ibmcloud-secrets-manager-get')
-      .withName('ibmcloud-secrets-manager-get')
       .withLabel('app.kubernetes.io/version', '0.1')
       .withAnnotation('tekton.dev/categories', 'IBM Cloud')
       .withAnnotation('tekton.dev/pipelines.minVersion', '0.17.0')
@@ -160,7 +156,6 @@ class TestPullRequestTaskBuild extends Chart {
     // be nice to compare the snapshots with each other just to make sure that the
     // builder does build the exact same object as the longer, non-builder method.
     new TaskBuilder(this, 'pull-request')
-      .withName('pull-request')
       .withDescription('This Task allows a user to interact with an SCM (source control management)\nsystem through an abstracted interface\n\nThis Task works with both public SCM instances and self-hosted/enterprise GitHub/GitLab\ninstances. In download mode, this Task will look at the state of an existing pull\nrequest and populate the pr workspace with the state of the pull request, including the\n.MANIFEST file. In upload mode, this Task will look at the contents of the pr workspace\n and compare it to the .MANIFEST file (if it exists).')
       .withStringParam(new ParameterBuilder('mode')
         .withValue(fromPipelineParam(new ParameterBuilder('mode')))

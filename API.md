@@ -2937,8 +2937,8 @@ new PipelineBuilder(scope: Construct, id: string)
 | **Name** | **Description** |
 | --- | --- |
 | <code><a href="#cdk8s-pipelines.PipelineBuilder.buildPipeline">buildPipeline</a></code> | Builds the actual [Pipeline](https://tekton.dev/docs/getting-started/pipelines/) from the settings configured using the fluid syntax. |
-| <code><a href="#cdk8s-pipelines.PipelineBuilder.withDescription">withDescription</a></code> | Provides the name for the pipeline task and will be rendered as the `name` property. |
-| <code><a href="#cdk8s-pipelines.PipelineBuilder.withName">withName</a></code> | Provides the name for the pipeline task and will be rendered as the `name` property. |
+| <code><a href="#cdk8s-pipelines.PipelineBuilder.withDescription">withDescription</a></code> | Provides the description for the pipeline. |
+| <code><a href="#cdk8s-pipelines.PipelineBuilder.withName">withName</a></code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.PipelineBuilder.withStringParam">withStringParam</a></code> | Add parameter of type string to the Pipeline. |
 | <code><a href="#cdk8s-pipelines.PipelineBuilder.withTask">withTask</a></code> | *No description.* |
 
@@ -2964,7 +2964,7 @@ Builds the actual [Pipeline](https://tekton.dev/docs/getting-started/pipelines/)
 public withDescription(description: string): PipelineBuilder
 ```
 
-Provides the name for the pipeline task and will be rendered as the `name` property.
+Provides the description for the pipeline.
 
 ###### `description`<sup>Required</sup> <a name="description" id="cdk8s-pipelines.PipelineBuilder.withDescription.parameter.description"></a>
 
@@ -2972,13 +2972,11 @@ Provides the name for the pipeline task and will be rendered as the `name` prope
 
 ---
 
-##### `withName` <a name="withName" id="cdk8s-pipelines.PipelineBuilder.withName"></a>
+##### ~~`withName`~~ <a name="withName" id="cdk8s-pipelines.PipelineBuilder.withName"></a>
 
 ```typescript
 public withName(name: string): PipelineBuilder
 ```
-
-Provides the name for the pipeline task and will be rendered as the `name` property.
 
 ###### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.PipelineBuilder.withName.parameter.name"></a>
 
@@ -3326,7 +3324,7 @@ new TaskBuilder(scope: Construct, id: string)
 | <code><a href="#cdk8s-pipelines.TaskBuilder.withAnnotation">withAnnotation</a></code> | Adds an annotation to the `Task` `metadata` with the provided key and value. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.withDescription">withDescription</a></code> | Sets the `description` of the `Task` being built. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.withLabel">withLabel</a></code> | Adds a label to the `Task` with the provided label key and value. |
-| <code><a href="#cdk8s-pipelines.TaskBuilder.withName">withName</a></code> | Sets the name of the `Task` being built. |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.withName">withName</a></code> | Sets the name of the `Task` to be used within a pipeline. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.withResult">withResult</a></code> | Allows you to add a result to the Task. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.withStep">withStep</a></code> | Adds the given `step` (`TaskStepBuilder`) to the `Task`. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.withStringParam">withStringParam</a></code> | Adds a parameter of type string to the `Task`. |
@@ -3410,7 +3408,7 @@ Adds a label to the `Task` with the provided label key and value.
 public withName(name: string): TaskBuilder
 ```
 
-Sets the name of the `Task` being built.
+Sets the name of the `Task` to be used within a pipeline.
 
 ###### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.TaskBuilder.withName.parameter.name"></a>
 
@@ -3493,7 +3491,7 @@ Adds the specified workspace to the `Task`.
 | --- | --- | --- |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.logicalID">logicalID</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.description">description</a></code> | <code>string</code> | Gets the `description` of the `Task`. |
-| <code><a href="#cdk8s-pipelines.TaskBuilder.property.name">name</a></code> | <code>string</code> | Gets the name of the `Task` built by the `TaskBuilder`. |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.property.name">name</a></code> | <code>string</code> | Gets the name of the `Task` in the context of a pipeline. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.parameters">parameters</a></code> | <code><a href="#cdk8s-pipelines.ParameterBuilder">ParameterBuilder</a>[]</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.workspaces">workspaces</a></code> | <code><a href="#cdk8s-pipelines.WorkspaceBuilder">WorkspaceBuilder</a>[]</code> | Gets the workspaces for the `Task`. |
 
@@ -3529,7 +3527,7 @@ public readonly name: string;
 
 - *Type:* string
 
-Gets the name of the `Task` built by the `TaskBuilder`.
+Gets the name of the `Task` in the context of a pipeline.
 
 ---
 
@@ -3951,8 +3949,22 @@ new WorkspaceBuilder(id: string)
 
 | **Name** | **Description** |
 | --- | --- |
+| <code><a href="#cdk8s-pipelines.WorkspaceBuilder.withBinding">withBinding</a></code> | Sets the binding of a task workspace to a pipeline workspace. |
 | <code><a href="#cdk8s-pipelines.WorkspaceBuilder.withDescription">withDescription</a></code> | Sets the description of the workspace. |
-| <code><a href="#cdk8s-pipelines.WorkspaceBuilder.withName">withName</a></code> | Sets the name of the workspace. |
+
+---
+
+##### `withBinding` <a name="withBinding" id="cdk8s-pipelines.WorkspaceBuilder.withBinding"></a>
+
+```typescript
+public withBinding(workspace: string): WorkspaceBuilder
+```
+
+Sets the binding of a task workspace to a pipeline workspace.
+
+###### `workspace`<sup>Required</sup> <a name="workspace" id="cdk8s-pipelines.WorkspaceBuilder.withBinding.parameter.workspace"></a>
+
+- *Type:* string
 
 ---
 
@@ -3970,26 +3982,13 @@ Sets the description of the workspace.
 
 ---
 
-##### `withName` <a name="withName" id="cdk8s-pipelines.WorkspaceBuilder.withName"></a>
-
-```typescript
-public withName(name: string): WorkspaceBuilder
-```
-
-Sets the name of the workspace.
-
-###### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.WorkspaceBuilder.withName.parameter.name"></a>
-
-- *Type:* string
-
----
-
 
 #### Properties <a name="Properties" id="Properties"></a>
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
 | <code><a href="#cdk8s-pipelines.WorkspaceBuilder.property.description">description</a></code> | <code>string</code> | Gets the description of the workspace. |
+| <code><a href="#cdk8s-pipelines.WorkspaceBuilder.property.binding">binding</a></code> | <code>string</code> | Gets the binding of task workspace to a pipeline workspace. |
 | <code><a href="#cdk8s-pipelines.WorkspaceBuilder.property.logicalID">logicalID</a></code> | <code>string</code> | Gets the logical ID of the `Workspace`. |
 | <code><a href="#cdk8s-pipelines.WorkspaceBuilder.property.name">name</a></code> | <code>string</code> | Gets the name of the workspace. |
 
@@ -4004,6 +4003,18 @@ public readonly description: string;
 - *Type:* string
 
 Gets the description of the workspace.
+
+---
+
+##### `binding`<sup>Optional</sup> <a name="binding" id="cdk8s-pipelines.WorkspaceBuilder.property.binding"></a>
+
+```typescript
+public readonly binding: string;
+```
+
+- *Type:* string
+
+Gets the binding of task workspace to a pipeline workspace.
 
 ---
 
