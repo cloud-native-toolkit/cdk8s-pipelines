@@ -1069,7 +1069,7 @@ export class PipelineBuilder {
       if (t.runAfter != undefined) {
         t.runAfter.forEach(name => {
           if (!this._tasks?.find(it => {return (it.name) == name;})) {
-            throw new Error(`${name} supplied as value for runAfter but no such task found in pipeline.`);
+            throw new Error(`'${name}' supplied as value for runAfter but no such task found in pipeline.`);
           }
           after.push(name);
         });
