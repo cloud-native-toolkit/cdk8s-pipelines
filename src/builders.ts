@@ -718,9 +718,10 @@ export class TaskBuilder {
 
   /**
    * Gets the name of the `Task` in the context of a pipeline.
+   * If not set, the 'Task' id is used.
    */
-  public get name(): string | undefined {
-    return this._name;
+  public get name(): string {
+    return this._name || this._id;
   }
 
   /**
@@ -1039,7 +1040,7 @@ export class PipelineBuilder {
 
     this._tasks?.forEach((t, i) => {
 
-      const taskName = t.name || t.logicalID;
+      const taskName = t.name;
       if (taskNames.find(it => {
         return it == taskName;
       })) {
@@ -1067,13 +1068,13 @@ export class PipelineBuilder {
       const after = [];
       if (t.runAfter != undefined) {
         t.runAfter.forEach(name => {
-          if (!this._tasks?.find(it => {return (it.name || it.logicalID) == name;})) {
+          if (!this._tasks?.find(it => {return (it.name) == name;})) {
             throw new Error(`${name} supplied as value for runAfter but no such task found in pipeline.`);
           }
           after.push(name);
         });
       } else if (i > 0) {
-        after.push(this._tasks![i - 1].name || this._tasks![i - 1].logicalID);
+        after.push(this._tasks![i - 1].name);
       }
 
       const pt = createOrderedPipelineTask(t, after, taskParams, taskWorkspaces);
@@ -1111,7 +1112,7 @@ export class PipelineBuilder {
 function createOrderedPipelineTask(t: TaskBuilder, after: string[], params: TaskParam[], ws: TaskWorkspace[]): PipelineTask {
   if (after.length) {
     return {
-      name: t.name || t.logicalID,
+      name: t.name,
       taskRef: {
         name: t.logicalID,
       },
@@ -1121,7 +1122,7 @@ function createOrderedPipelineTask(t: TaskBuilder, after: string[], params: Task
     };
   }
   return {
-    name: t.name || t.logicalID,
+    name: t.name,
     taskRef: {
       name: t.logicalID,
     },
