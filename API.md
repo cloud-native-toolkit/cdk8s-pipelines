@@ -3321,6 +3321,7 @@ new TaskBuilder(scope: Construct, id: string)
 | **Name** | **Description** |
 | --- | --- |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.buildTask">buildTask</a></code> | Builds the `Task`. |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.specifyRunAfter">specifyRunAfter</a></code> | Allows you to specify the names of which task(s), if any, the 'Task' should run after in a pipeline. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.withAnnotation">withAnnotation</a></code> | Adds an annotation to the `Task` `metadata` with the provided key and value. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.withDescription">withDescription</a></code> | Sets the `description` of the `Task` being built. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.withLabel">withLabel</a></code> | Adds a label to the `Task` with the provided label key and value. |
@@ -3339,6 +3340,24 @@ public buildTask(): void
 ```
 
 Builds the `Task`.
+
+##### `specifyRunAfter` <a name="specifyRunAfter" id="cdk8s-pipelines.TaskBuilder.specifyRunAfter"></a>
+
+```typescript
+public specifyRunAfter(taskArray: string[]): TaskBuilder
+```
+
+Allows you to specify the names of which task(s), if any, the 'Task' should run after in a pipeline.
+
+An empty array as input indicates the 'Task' yaml
+should have no runAfter field.
+By default, the value of runAfter is set to the preceeding 'Task' in the pipeline.
+
+###### `taskArray`<sup>Required</sup> <a name="taskArray" id="cdk8s-pipelines.TaskBuilder.specifyRunAfter.parameter.taskArray"></a>
+
+- *Type:* string[]
+
+---
 
 ##### `withAnnotation` <a name="withAnnotation" id="cdk8s-pipelines.TaskBuilder.withAnnotation"></a>
 
@@ -3490,9 +3509,10 @@ Adds the specified workspace to the `Task`.
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.logicalID">logicalID</a></code> | <code>string</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.TaskBuilder.property.description">description</a></code> | <code>string</code> | Gets the `description` of the `Task`. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.name">name</a></code> | <code>string</code> | Gets the name of the `Task` in the context of a pipeline. |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.property.description">description</a></code> | <code>string</code> | Gets the `description` of the `Task`. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.parameters">parameters</a></code> | <code><a href="#cdk8s-pipelines.ParameterBuilder">ParameterBuilder</a>[]</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.property.runAfter">runAfter</a></code> | <code>string[]</code> | Gets the list of task names for the runAfter value of the `Task`. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.workspaces">workspaces</a></code> | <code><a href="#cdk8s-pipelines.WorkspaceBuilder">WorkspaceBuilder</a>[]</code> | Gets the workspaces for the `Task`. |
 
 ---
@@ -3504,6 +3524,20 @@ public readonly logicalID: string;
 ```
 
 - *Type:* string
+
+---
+
+##### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.TaskBuilder.property.name"></a>
+
+```typescript
+public readonly name: string;
+```
+
+- *Type:* string
+
+Gets the name of the `Task` in the context of a pipeline.
+
+If not set, the 'Task' id is used.
 
 ---
 
@@ -3519,18 +3553,6 @@ Gets the `description` of the `Task`.
 
 ---
 
-##### `name`<sup>Optional</sup> <a name="name" id="cdk8s-pipelines.TaskBuilder.property.name"></a>
-
-```typescript
-public readonly name: string;
-```
-
-- *Type:* string
-
-Gets the name of the `Task` in the context of a pipeline.
-
----
-
 ##### `parameters`<sup>Optional</sup> <a name="parameters" id="cdk8s-pipelines.TaskBuilder.property.parameters"></a>
 
 ```typescript
@@ -3538,6 +3560,18 @@ public readonly parameters: ParameterBuilder[];
 ```
 
 - *Type:* <a href="#cdk8s-pipelines.ParameterBuilder">ParameterBuilder</a>[]
+
+---
+
+##### `runAfter`<sup>Optional</sup> <a name="runAfter" id="cdk8s-pipelines.TaskBuilder.property.runAfter"></a>
+
+```typescript
+public readonly runAfter: string[];
+```
+
+- *Type:* string[]
+
+Gets the list of task names for the runAfter value of the `Task`.
 
 ---
 
