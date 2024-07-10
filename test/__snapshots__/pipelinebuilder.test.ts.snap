@@ -229,6 +229,87 @@ exports[`PipelineBuilderTest PipelineBuilderWithParameters 1`] = `
 ]
 `;
 
+exports[`PipelineBuilderTest PipelineBuilderWithRunAfter 1`] = `
+[
+  {
+    "apiVersion": "tekton.dev/v1",
+    "kind": "Task",
+    "metadata": {
+      "annotations": undefined,
+      "labels": undefined,
+      "name": "print-readme",
+    },
+    "spec": {
+      "description": undefined,
+      "params": [],
+      "results": [],
+      "steps": [],
+      "workspaces": [],
+    },
+  },
+  {
+    "apiVersion": "tekton.dev/v1",
+    "kind": "Task",
+    "metadata": {
+      "annotations": undefined,
+      "labels": undefined,
+      "name": "git-clone",
+    },
+    "spec": {
+      "description": undefined,
+      "params": [],
+      "results": [],
+      "steps": [],
+      "workspaces": [],
+    },
+  },
+  {
+    "apiVersion": "tekton.dev/v1",
+    "kind": "Pipeline",
+    "metadata": {
+      "name": "clone-read",
+    },
+    "spec": {
+      "description": undefined,
+      "params": [],
+      "tasks": [
+        {
+          "name": "cat-readme",
+          "params": [],
+          "runAfter": [
+            "fetch-again",
+          ],
+          "taskRef": {
+            "name": "print-readme",
+          },
+          "workspaces": [],
+        },
+        {
+          "name": "fetch-source",
+          "params": [],
+          "taskRef": {
+            "name": "git-clone",
+          },
+          "workspaces": [],
+        },
+        {
+          "name": "fetch-again",
+          "params": [],
+          "runAfter": [
+            "fetch-source",
+          ],
+          "taskRef": {
+            "name": "git-clone",
+          },
+          "workspaces": [],
+        },
+      ],
+      "workspaces": [],
+    },
+  },
+]
+`;
+
 exports[`PipelineBuilderTest PipelineBuilderWithSimilarTasks 1`] = `
 [
   {

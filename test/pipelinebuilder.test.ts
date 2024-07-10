@@ -309,6 +309,43 @@ class MyTestChartWithSimilarTasks extends Chart {
   }
 }
 
+class MyTestChartWithRunAfter extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const firstTask = new TaskBuilder(this, 'git-clone')
+      .withName('fetch-source')
+      .specifyRunAfter([]);
+
+    const secondTask = new TaskBuilder(this, 'git-clone')
+      .withName('fetch-again');
+
+    const thirdTask = new TaskBuilder(this, 'print-readme')
+      .withName('cat-readme')
+      .specifyRunAfter(['fetch-again']);
+
+    new PipelineBuilder(this, 'clone-read')
+      .withTask(thirdTask)
+      .withTask(firstTask)
+      .withTask(secondTask)
+      .buildPipeline({ includeDependencies: true });
+  }
+}
+
+class MyTestChartWithRunAfterError extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const myTask = new TaskBuilder(this, 'print-readme')
+      .withName('cat-readme')
+      .specifyRunAfter(['fetch-source']);
+
+    new PipelineBuilder(this, 'clone-read')
+      .withTask(myTask)
+      .buildPipeline({ includeDependencies: true });
+  }
+}
+
 describe('PipelineBuilderTest', () => {
   test('PipelineRunBuilder', () => {
     const app = Testing.app();
@@ -382,5 +419,20 @@ describe('PipelineBuilderTest', () => {
     const chart = new MyTestChartWithSimilarTasks(app, 'test-chart');
     const results = Testing.synth(chart);
     expect(results).toMatchSnapshot();
+  });
+
+  test('PipelineBuilderWithRunAfter', () => {
+    const app = Testing.app();
+    const chart = new MyTestChartWithRunAfter(app, 'test-chart');
+    const results = Testing.synth(chart);
+    expect(results).toMatchSnapshot();
+  });
+
+  test('PipelineBuilderWithRunAfterError', () => {
+    const app = Testing.app();
+    const f = () => {
+      new MyTestChartWithRunAfterError(app, 'test-chart');
+    };
+    expect(f).toThrowError('\'fetch-source\' supplied as value for runAfter but no such task found in pipeline.');
   });
 });

@@ -664,6 +664,7 @@ export class TaskBuilder {
   private _labels?: {
     [key: string]: string;
   };
+  private _runafter?: string[];
 
   /**
    * Creates a new instance of the `TaskBuilder` using the given `scope` and
@@ -717,9 +718,10 @@ export class TaskBuilder {
 
   /**
    * Gets the name of the `Task` in the context of a pipeline.
+   * If not set, the 'Task' id is used.
    */
-  public get name(): string | undefined {
-    return this._name;
+  public get name(): string {
+    return this._name || this._id;
   }
 
   /**
@@ -805,6 +807,25 @@ export class TaskBuilder {
   public withStep(step: TaskStepBuilder): TaskBuilder {
     this._steps!.push(step);
     return this;
+  }
+
+  /**
+   * Allows you to specify the names of which task(s), if any, the 'Task' should
+   * run after in a pipeline. An empty array as input indicates the 'Task' yaml
+   * should have no runAfter field.
+   * By default, the value of runAfter is set to the preceeding 'Task' in the pipeline.
+   * @param taskArray
+   */
+  public specifyRunAfter(taskArray: string[]): TaskBuilder {
+    this._runafter = taskArray;
+    return this;
+  }
+
+  /**
+   * Gets the list of task names for the runAfter value of the `Task`.
+   */
+  public get runAfter(): string[] | undefined {
+    return this._runafter;
   }
 
   /**
@@ -1019,7 +1040,7 @@ export class PipelineBuilder {
 
     this._tasks?.forEach((t, i) => {
 
-      const taskName = t.name || t.logicalID;
+      const taskName = t.name;
       if (taskNames.find(it => {
         return it == taskName;
       })) {
@@ -1044,7 +1065,19 @@ export class PipelineBuilder {
         });
       });
 
-      const pt = createOrderedPipelineTask(t, ((i > 0) ? (this._tasks![i - 1].name || this._tasks![i - 1].logicalID) : ''), taskParams, taskWorkspaces);
+      const after = [];
+      if (t.runAfter != undefined) {
+        t.runAfter.forEach(name => {
+          if (!this._tasks?.find(it => {return (it.name) == name;})) {
+            throw new Error(`'${name}' supplied as value for runAfter but no such task found in pipeline.`);
+          }
+          after.push(name);
+        });
+      } else if (i > 0) {
+        after.push(this._tasks![i - 1].name);
+      }
+
+      const pt = createOrderedPipelineTask(t, after, taskParams, taskWorkspaces);
 
       pipelineTasks.push(pt);
 
@@ -1076,20 +1109,20 @@ export class PipelineBuilder {
   }
 }
 
-function createOrderedPipelineTask(t: TaskBuilder, after: string, params: TaskParam[], ws: TaskWorkspace[]): PipelineTask {
-  if (after) {
+function createOrderedPipelineTask(t: TaskBuilder, after: string[], params: TaskParam[], ws: TaskWorkspace[]): PipelineTask {
+  if (after.length) {
     return {
-      name: t.name || t.logicalID,
+      name: t.name,
       taskRef: {
         name: t.logicalID,
       },
-      runAfter: [after],
+      runAfter: after,
       params: params,
       workspaces: ws,
     };
   }
   return {
-    name: t.name || t.logicalID,
+    name: t.name,
     taskRef: {
       name: t.logicalID,
     },
