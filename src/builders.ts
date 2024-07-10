@@ -653,6 +653,7 @@ export class TaskBuilder {
   private _steps?: TaskStepBuilder[];
   private _name?: string;
   private _description?: string;
+  private _taskref?: string;
   // These were initially arrays, but converted them to maps so that if
   // multiple values are added that the last one will win.
   private _workspaces = new Map<string, WorkspaceBuilder>;
@@ -829,6 +830,24 @@ export class TaskBuilder {
   }
 
   /**
+   * Sets the taskRef field of the 'Task'. Use only for tasks within pipelines:
+   * overrides logicalID as the name of the 'Task' in its individual yaml.
+   * @param taskRef
+   */
+  public referencingTask(taskRef: string): TaskBuilder {
+    this._taskref = taskRef;
+    return this;
+  }
+
+  /**
+   * Gets the taskRef field of the `Task` for use within a pipeline.
+   * If not set, the 'Task' id is used.
+   */
+  public get taskRef(): string {
+    return this._taskref || this._id;
+  }
+
+  /**
    * Builds the `Task`.
    */
   public buildTask(): void {
@@ -861,7 +880,7 @@ export class TaskBuilder {
 
     const props: TaskProps = {
       metadata: {
-        name: this.logicalID,
+        name: this.taskRef,
         labels: this._labels,
         annotations: this._annotations,
       },
@@ -1084,13 +1103,13 @@ export class PipelineBuilder {
       if (opts.includeDependencies) {
         // Build the task if the user has asked for the dependencies to be
         // built along with the pipeline, but only if we haven't already
-        // built the task yet.
+        // built the taskRef yet.
         if (!taskList.find(it => {
-          return it == t.logicalID;
+          return it == t.taskRef;
         })) {
           t.buildTask();
         }
-        taskList.push(t.logicalID);
+        taskList.push(t.taskRef);
       }
     });
 
@@ -1114,7 +1133,7 @@ function createOrderedPipelineTask(t: TaskBuilder, after: string[], params: Task
     return {
       name: t.name,
       taskRef: {
-        name: t.logicalID,
+        name: t.taskRef,
       },
       runAfter: after,
       params: params,
@@ -1124,7 +1143,7 @@ function createOrderedPipelineTask(t: TaskBuilder, after: string[], params: Task
   return {
     name: t.name,
     taskRef: {
-      name: t.logicalID,
+      name: t.taskRef,
     },
     params: params,
     workspaces: ws,
