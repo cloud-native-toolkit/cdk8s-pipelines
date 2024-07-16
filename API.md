@@ -3321,6 +3321,7 @@ new TaskBuilder(scope: Construct, id: string)
 | **Name** | **Description** |
 | --- | --- |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.buildTask">buildTask</a></code> | Builds the `Task`. |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.referencingTask">referencingTask</a></code> | Sets the taskRef field of the 'Task'. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.specifyRunAfter">specifyRunAfter</a></code> | Allows you to specify the names of which task(s), if any, the 'Task' should run after in a pipeline. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.withAnnotation">withAnnotation</a></code> | Adds an annotation to the `Task` `metadata` with the provided key and value. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.withDescription">withDescription</a></code> | Sets the `description` of the `Task` being built. |
@@ -3340,6 +3341,23 @@ public buildTask(): void
 ```
 
 Builds the `Task`.
+
+##### `referencingTask` <a name="referencingTask" id="cdk8s-pipelines.TaskBuilder.referencingTask"></a>
+
+```typescript
+public referencingTask(taskRef: string): TaskBuilder
+```
+
+Sets the taskRef field of the 'Task'.
+
+Use only for tasks within pipelines:
+overrides logicalID as the name of the 'Task' in its individual yaml.
+
+###### `taskRef`<sup>Required</sup> <a name="taskRef" id="cdk8s-pipelines.TaskBuilder.referencingTask.parameter.taskRef"></a>
+
+- *Type:* string
+
+---
 
 ##### `specifyRunAfter` <a name="specifyRunAfter" id="cdk8s-pipelines.TaskBuilder.specifyRunAfter"></a>
 
@@ -3510,6 +3528,7 @@ Adds the specified workspace to the `Task`.
 | --- | --- | --- |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.logicalID">logicalID</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.name">name</a></code> | <code>string</code> | Gets the name of the `Task` in the context of a pipeline. |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.property.taskRef">taskRef</a></code> | <code>string</code> | Gets the taskRef field of the `Task` for use within a pipeline. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.description">description</a></code> | <code>string</code> | Gets the `description` of the `Task`. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.parameters">parameters</a></code> | <code><a href="#cdk8s-pipelines.ParameterBuilder">ParameterBuilder</a>[]</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.runAfter">runAfter</a></code> | <code>string[]</code> | Gets the list of task names for the runAfter value of the `Task`. |
@@ -3536,6 +3555,20 @@ public readonly name: string;
 - *Type:* string
 
 Gets the name of the `Task` in the context of a pipeline.
+
+If not set, the 'Task' id is used.
+
+---
+
+##### `taskRef`<sup>Required</sup> <a name="taskRef" id="cdk8s-pipelines.TaskBuilder.property.taskRef"></a>
+
+```typescript
+public readonly taskRef: string;
+```
+
+- *Type:* string
+
+Gets the taskRef field of the `Task` for use within a pipeline.
 
 If not set, the 'Task' id is used.
 

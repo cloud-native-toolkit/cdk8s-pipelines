@@ -290,12 +290,14 @@ class MyTestChartWithSimilarTasks extends Chart {
       .withValue(fromPipelineParam(pipelineParam));
 
     const myTask = new TaskBuilder(this, 'fetch-source')
+      .referencingTask('fetch-source')
       .withName('git-clone')
       .withWorkspace(myWorkspace)
       .withStringParam(urlParam)
     ;
 
-    const myTask2 = new TaskBuilder(this, 'fetch-source')
+    const myTask2 = new TaskBuilder(this, 'fetch-source-2')
+      .referencingTask('fetch-source')
       .withName('git-clone-2')
       .withWorkspace(myWorkspace)
       .withStringParam(urlParam);
@@ -317,7 +319,8 @@ class MyTestChartWithRunAfter extends Chart {
       .withName('fetch-source')
       .specifyRunAfter([]);
 
-    const secondTask = new TaskBuilder(this, 'git-clone')
+    const secondTask = new TaskBuilder(this, 'git-clone-2')
+      .referencingTask('git-clone')
       .withName('fetch-again');
 
     const thirdTask = new TaskBuilder(this, 'print-readme')
