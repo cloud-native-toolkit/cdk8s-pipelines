@@ -229,6 +229,68 @@ exports[`PipelineBuilderTest PipelineBuilderWithParameters 1`] = `
 ]
 `;
 
+exports[`PipelineBuilderTest PipelineBuilderWithResolver 1`] = `
+[
+  {
+    "apiVersion": "tekton.dev/v1",
+    "kind": "Pipeline",
+    "metadata": {
+      "name": "clone-build-push",
+    },
+    "spec": {
+      "description": "This pipeline closes a repository, builds a Docker image, etc.",
+      "params": [
+        {
+          "default": "",
+          "name": "repo-url",
+          "type": "string",
+        },
+      ],
+      "tasks": [
+        {
+          "name": "fetch-source",
+          "params": [
+            {
+              "name": "url",
+              "value": "$(params.repo-url)",
+            },
+          ],
+          "taskRef": {
+            "params": [
+              {
+                "name": "name",
+                "value": "git-clone",
+              },
+              {
+                "name": "namespace",
+                "value": "default",
+              },
+              {
+                "name": "kind",
+                "value": "task",
+              },
+            ],
+            "resolver": "cluster",
+          },
+          "workspaces": [
+            {
+              "name": "output",
+              "workspace": "shared-data",
+            },
+          ],
+        },
+      ],
+      "workspaces": [
+        {
+          "description": "The files cloned by the task",
+          "name": "shared-data",
+        },
+      ],
+    },
+  },
+]
+`;
+
 exports[`PipelineBuilderTest PipelineBuilderWithRunAfter 1`] = `
 [
   {
