@@ -3511,7 +3511,7 @@ new TaskBuilder(scope: Construct, id: string)
 | **Name** | **Description** |
 | --- | --- |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.buildTask">buildTask</a></code> | Builds the `Task`. |
-| <code><a href="#cdk8s-pipelines.TaskBuilder.referencingTask">referencingTask</a></code> | TODO. |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.referencingTask">referencingTask</a></code> | Sets the taskRef field of the `Task`. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.specifyRunAfter">specifyRunAfter</a></code> | Allows you to specify the names of which task(s), if any, the 'Task' should run after in a pipeline. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.withAnnotation">withAnnotation</a></code> | Adds an annotation to the `Task` `metadata` with the provided key and value. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.withDescription">withDescription</a></code> | Sets the `description` of the `Task` being built. |
@@ -3538,13 +3538,16 @@ Builds the `Task`.
 public referencingTask(task: string | IRemoteTaskResolver): TaskBuilder
 ```
 
-TODO.
+Sets the taskRef field of the `Task`.
+
+Use only for tasks within pipelines:
+overrides `logicalID  as the name of the `Task` in its individual yaml.
 
 ###### `task`<sup>Required</sup> <a name="task" id="cdk8s-pipelines.TaskBuilder.referencingTask.parameter.task"></a>
 
 - *Type:* string | <a href="#cdk8s-pipelines.IRemoteTaskResolver">IRemoteTaskResolver</a>
 
-TODO.
+as string: name of the local task being referenced as IRemoteTaskResolver: resolver for a task in remote location.
 
 ---
 
@@ -3717,7 +3720,7 @@ Adds the specified workspace to the `Task`.
 | --- | --- | --- |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.logicalID">logicalID</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.name">name</a></code> | <code>string</code> | Gets the name of the `Task` in the context of a pipeline. |
-| <code><a href="#cdk8s-pipelines.TaskBuilder.property.taskRef">taskRef</a></code> | <code><a href="#cdk8s-pipelines.TaskRef">TaskRef</a> \| <a href="#cdk8s-pipelines.RemoteTaskRef">RemoteTaskRef</a></code> | TODO. |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.property.taskRef">taskRef</a></code> | <code><a href="#cdk8s-pipelines.TaskRef">TaskRef</a> \| <a href="#cdk8s-pipelines.RemoteTaskRef">RemoteTaskRef</a></code> | Gets the taskRef field of the `Task` for use within a pipeline. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.description">description</a></code> | <code>string</code> | Gets the `description` of the `Task`. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.parameters">parameters</a></code> | <code><a href="#cdk8s-pipelines.ParameterBuilder">ParameterBuilder</a>[]</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.runAfter">runAfter</a></code> | <code>string[]</code> | Gets the list of task names for the runAfter value of the `Task`. |
@@ -3757,7 +3760,9 @@ public readonly taskRef: TaskRef | RemoteTaskRef;
 
 - *Type:* <a href="#cdk8s-pipelines.TaskRef">TaskRef</a> | <a href="#cdk8s-pipelines.RemoteTaskRef">RemoteTaskRef</a>
 
-TODO.
+Gets the taskRef field of the `Task` for use within a pipeline.
+
+If not set, a locally-scoped task named with the `logicalID` is used.
 
 ---
 

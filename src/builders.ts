@@ -893,8 +893,10 @@ export class TaskBuilder {
   }
 
   /**
-   * TODO
-   * @param task TODO
+   * Sets the taskRef field of the `Task`. Use only for tasks within pipelines:
+   * overrides `logicalID  as the name of the `Task` in its individual yaml.
+   * @param task as string: name of the local task being referenced
+   *             as IRemoteTaskResolver: resolver for a task in remote location
    */
   public referencingTask(task: string | IRemoteTaskResolver): TaskBuilder {
     if (typeof(task) == 'string') {
@@ -906,7 +908,8 @@ export class TaskBuilder {
   }
 
   /**
-   * TODO
+   * Gets the taskRef field of the `Task` for use within a pipeline.
+   * If not set, a locally-scoped task named with the `logicalID` is used.
    */
   public get taskRef(): TaskRef | RemoteTaskRef {
     return this._taskref || { name: this._id };
@@ -943,7 +946,8 @@ export class TaskBuilder {
       });
     });
 
-    // Note: buildTask called for this TaskBuilder object only if this.taskRef is a TaskRef
+    // Note: buildTask called for this TaskBuilder object only if this.taskRef is a TaskRef,
+    // not if it is a RemoteTaskRef
     const taskName = ('name' in this.taskRef) ? this.taskRef.name : this.logicalID;
 
     const props: TaskProps = {
