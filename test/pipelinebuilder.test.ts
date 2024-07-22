@@ -10,6 +10,7 @@ import {
   WorkspaceBuilder,
   fromPipelineParam,
   constant,
+  createRoleBindingProps,
 } from '../src';
 
 class PipelineRunTest extends Chart {
@@ -35,6 +36,40 @@ class PipelineRunTest extends Chart {
     new PipelineRunBuilder(this, 'my-pipeline-run', pipeline)
       .withRunParam('repo-url', 'https://github.com/exmaple/my-repo')
       .withWorkspace('shared-data', 'dataPVC', 'my-shared-data')
+      .buildPipelineRun({ includeDependencies: true });
+  }
+}
+
+class PipelineRunTestCustom extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const pipelineParam = new ParameterBuilder('repo-url')
+      .withDefaultValue('');
+
+    const myTask = new TaskBuilder(this, 'git-clone')
+      .withName('fetch-source')
+      .withStringParam(new ParameterBuilder('url').withValue(fromPipelineParam(pipelineParam)));
+
+    const pipeline = new PipelineBuilder(this, 'clone-build-push')
+      .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
+      .withTask(myTask)
+      .withStringParam(pipelineParam);
+    pipeline.buildPipeline({ includeDependencies: true });
+
+    const CRB = createRoleBindingProps(
+      'pipeline-admin-default-crb',
+      'default',
+      'cluster-admin',
+      'pipeline',
+      'default');
+
+    const serviceAccount = 'default:pipeline';
+
+    new PipelineRunBuilder(this, 'my-pipeline-run', pipeline)
+      .withRunParam('repo-url', 'https://github.com/exmaple/my-repo')
+      .withClusterRoleBindingProps(CRB)
+      .withServiceAccount(serviceAccount)
       .buildPipelineRun({ includeDependencies: true });
   }
 }
@@ -190,6 +225,61 @@ class MyTestChartWithDuplicateParams extends Chart {
       .withTask(myTask)
       .withTask(myTask2)
       .withStringParam(pipelineParam)
+      .buildPipeline();
+  }
+}
+
+class MyTestChartWithPipelineParamError extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const pipelineParam = new ParameterBuilder('repo-url')
+      .withDefaultValue('');
+
+    const urlParam = new ParameterBuilder('url')
+      .withValue(fromPipelineParam(pipelineParam));
+
+    const myTask = new TaskBuilder(this, 'fetch-source')
+      .withName('git-clone')
+      .withStringParam(urlParam);
+
+    new PipelineBuilder(this, 'clone-build-push')
+      .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
+      .withTask(myTask)
+      .buildPipeline();
+  }
+}
+
+class MyTestChartWithDuplicateResultError extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const myTask = new TaskBuilder(this, 'fetch-source')
+      .withName('git-clone')
+      .withResult('result', 'The original result')
+      .withResult('result', 'The duplicate result');
+
+    new PipelineBuilder(this, 'clone-build-push')
+      .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
+      .withTask(myTask)
+      .buildPipeline();
+  }
+}
+
+class MyTestChartWithWorkspaceError extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const myWorkspace = new WorkspaceBuilder('output')
+      .withDescription('The files cloned by the task');
+
+    const myTask = new TaskBuilder(this, 'fetch-source')
+      .withName('git-clone')
+      .withWorkspace(myWorkspace);
+
+    new PipelineBuilder(this, 'clone-build-push')
+      .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
+      .withTask(myTask)
       .buildPipeline();
   }
 }
@@ -357,6 +447,13 @@ describe('PipelineBuilderTest', () => {
     expect(results).toMatchSnapshot();
   });
 
+  test('PipelineRunBuilderCustom', () => {
+    const app = Testing.app();
+    const chart = new PipelineRunTestCustom(app, 'test-chart');
+    const results = Testing.synth(chart);
+    expect(results).toMatchSnapshot();
+  });
+
   test('PipelineRunBuilderWithError', () => {
     const app = Testing.app();
     const f = () => {
@@ -393,6 +490,30 @@ describe('PipelineBuilderTest', () => {
     const chart = new MyTestChartWithDuplicateParams(app, 'test-chart');
     const results = Testing.synth(chart);
     expect(results).toMatchSnapshot();
+  });
+
+  test('PipelineBuilderWithPipelineParamError', () => {
+    const app = Testing.app();
+    const f = () => {
+      new MyTestChartWithPipelineParamError(app, 'test-chart');
+    };
+    expect(f).toThrowError('Parameter \'url\' in Task \'git-clone\' expects Pipeline value from parameter \'repo-url\', which is not defined.');
+  });
+
+  test('PipelineBuilderWithDuplicateResults', () => {
+    const app = Testing.app();
+    const f = () => {
+      new MyTestChartWithDuplicateResultError(app, 'test-chart');
+    };
+    expect(f).toThrowError('Cannot add result \'result\', as it already exists.');
+  });
+
+  test('PipelineBuilderWithWorkspaceError', () => {
+    const app = Testing.app();
+    const f = () => {
+      new MyTestChartWithWorkspaceError(app, 'test-chart');
+    };
+    expect(f).toThrowError('Workspace \'output\' in Task \'git-clone\' has no binding to a workspace in Pipeline \'clone-build-push\'.');
   });
 
   test('PipelineBuilderWithStaticOverride', () => {
