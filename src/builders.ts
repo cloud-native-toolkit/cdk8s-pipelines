@@ -17,7 +17,20 @@ import {
   PipelineTaskWorkspace,
   PipelineWorkspace,
 } from './pipelines';
-import { Task, TaskEnvValueSource, TaskParam, TaskProps, TaskSpecParam, TaskSpecResult, TaskStep, TaskStepEnv, TaskWorkspace } from './tasks';
+import {
+  Task,
+  TaskEnvValueSource,
+  TaskParam,
+  TaskProps,
+  TaskSpecParam,
+  TaskSpecResult,
+  TaskStep,
+  TaskStepEnv,
+  TaskWorkspace,
+  ResolverParam,
+  RemoteTaskRef,
+  TaskRef,
+} from './tasks';
 
 const DefaultPipelineServiceAccountName = 'default:pipeline';
 
@@ -640,6 +653,56 @@ export class TaskStepBuilder {
   }
 }
 
+export interface IRemoteTaskResolver {
+  resolver?: string;
+  params?: ResolverParam[];
+  /**
+   * Gets the taskRef yaml for a remote Task
+   * @returns RemoteTaskRef The yaml as an API Object
+   */
+  get taskRef(): RemoteTaskRef;
+}
+
+/**
+ * Resolves the provided cluster-scoped task into yaml for the taskRef field.
+ */
+export class ClusterTaskResolver implements IRemoteTaskResolver {
+  resolver?: string;
+  params?: ResolverParam[];
+
+  /**
+   * Creates an instance of the `ClusterTaskResolver`.
+   * @param name The name of the cluster-scoped task.
+   * @param namespace The namespace of the cluster-scoped task.
+   */
+  constructor(name: string, namespace: string) {
+    this.resolver = 'cluster';
+    this.params = new Array<ResolverParam>();
+    this.params.push({
+      name: 'name',
+      value: name,
+    });
+    this.params.push({
+      name: 'namespace',
+      value: namespace,
+    });
+    this.params.push({
+      name: 'kind',
+      value: 'task',
+    });
+  }
+
+  /**
+   * Gets the YAML representation of cluster-scoped task.
+   */
+  get taskRef(): RemoteTaskRef {
+    return {
+      resolver: this.resolver,
+      params: this.params,
+    };
+  }
+}
+
 /**
  * Builds Tekton `Task` objects that are independent of a `Pipeline`.
  *
@@ -653,7 +716,7 @@ export class TaskBuilder {
   private _steps?: TaskStepBuilder[];
   private _name?: string;
   private _description?: string;
-  private _taskref?: string;
+  private _taskref?: TaskRef | RemoteTaskRef;
   // These were initially arrays, but converted them to maps so that if
   // multiple values are added that the last one will win.
   private _workspaces = new Map<string, WorkspaceBuilder>;
@@ -830,21 +893,26 @@ export class TaskBuilder {
   }
 
   /**
-   * Sets the taskRef field of the 'Task'. Use only for tasks within pipelines:
-   * overrides logicalID as the name of the 'Task' in its individual yaml.
-   * @param taskRef
+   * Sets the taskRef field of the `Task`. Use only for tasks within pipelines:
+   * overrides `logicalID  as the name of the `Task` in its individual yaml.
+   * @param task as string: name of the local task being referenced
+   *             as IRemoteTaskResolver: resolver for a task in remote location
    */
-  public referencingTask(taskRef: string): TaskBuilder {
-    this._taskref = taskRef;
+  public referencingTask(task: string | IRemoteTaskResolver): TaskBuilder {
+    if (typeof(task) == 'string') {
+      this._taskref = { name: task };
+    } else {
+      this._taskref = task.taskRef;
+    }
     return this;
   }
 
   /**
    * Gets the taskRef field of the `Task` for use within a pipeline.
-   * If not set, the 'Task' id is used.
+   * If not set, a locally-scoped task named with the `logicalID` is used.
    */
-  public get taskRef(): string {
-    return this._taskref || this._id;
+  public get taskRef(): TaskRef | RemoteTaskRef {
+    return this._taskref || { name: this._id };
   }
 
   /**
@@ -878,9 +946,13 @@ export class TaskBuilder {
       });
     });
 
+    // Note: buildTask called for this TaskBuilder object only if this.taskRef is a TaskRef,
+    // not if it is a RemoteTaskRef
+    const taskName = ('name' in this.taskRef) ? this.taskRef.name : this.logicalID;
+
     const props: TaskProps = {
       metadata: {
-        name: this.taskRef,
+        name: taskName,
         labels: this._labels,
         annotations: this._annotations,
       },
@@ -1100,16 +1172,17 @@ export class PipelineBuilder {
 
       pipelineTasks.push(pt);
 
-      if (opts.includeDependencies) {
+      if (opts.includeDependencies && 'name' in t.taskRef) {
         // Build the task if the user has asked for the dependencies to be
-        // built along with the pipeline, but only if we haven't already
-        // built the taskRef yet.
+        // built along with the pipeline, but only if the task does not
+        // reference a remote location and we haven't already built the taskRef.
+        const buildName = t.taskRef.name!;
         if (!taskList.find(it => {
-          return it == t.taskRef;
+          return it == buildName;
         })) {
           t.buildTask();
         }
-        taskList.push(t.taskRef);
+        taskList.push(buildName);
       }
     });
 
@@ -1132,9 +1205,7 @@ function createOrderedPipelineTask(t: TaskBuilder, after: string[], params: Task
   if (after.length) {
     return {
       name: t.name,
-      taskRef: {
-        name: t.taskRef,
-      },
+      taskRef: t.taskRef,
       runAfter: after,
       params: params,
       workspaces: ws,
@@ -1142,9 +1213,7 @@ function createOrderedPipelineTask(t: TaskBuilder, after: string[], params: Task
   }
   return {
     name: t.name,
-    taskRef: {
-      name: t.taskRef,
-    },
+    taskRef: t.taskRef,
     params: params,
     workspaces: ws,
   };
