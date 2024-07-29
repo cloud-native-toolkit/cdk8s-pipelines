@@ -42,7 +42,7 @@ const DefaultPipelineServiceAccountName = 'default:pipeline';
  * @param sa
  * @param saNamespace
  */
-function createRoleBindingProps(bindingName: string, bindingNs: string, rolename: string, sa: string, saNamespace: string): ApiObjectProps {
+export function createRoleBindingProps(bindingName: string, bindingNs: string, rolename: string, sa: string, saNamespace: string): ApiObjectProps {
   return {
     apiVersion: 'rbac.authorization.k8s.io/v1',
     kind: 'ClusterRoleBinding',
@@ -855,7 +855,7 @@ export class TaskBuilder {
     // First, check to see if there is already a result with this name
     const existing = this._results.find((obj) => obj.name === name);
     if (existing) {
-      throw new Error(`Cannot add result ${name}, as it already exists.`);
+      throw new Error(`Cannot add result '${name}', as it already exists.`);
     }
     this._results.push({
       name: name,
