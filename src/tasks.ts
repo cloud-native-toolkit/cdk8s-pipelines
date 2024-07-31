@@ -69,29 +69,6 @@ export class TaskRef {
 }
 
 /**
- * A Resolver parameter value.
- */
-export interface ResolverParam extends NamedResource {
-  /**
-   * The value of the resolver parameter.
-   */
-  readonly value?: string;
-}
-
-/**
- * A remote `Task` reference. Will be generated as a `taskRef`.
- */
-export class RemoteTaskRef {
-  resolver?: string;
-  params?: ResolverParam[];
-
-  constructor(resolver: string, params: ResolverParam[]) {
-    this.resolver = resolver;
-    this.params = params;
-  }
-}
-
-/**
  * A Task parameter value.
  */
 export interface TaskParam extends NamedResource {

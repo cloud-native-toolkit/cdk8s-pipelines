@@ -21,6 +21,29 @@ export interface NameKeyPair extends NamedResource {
   readonly key?: string;
 }
 
+/**
+ * A Resolver parameter value.
+ */
+export interface ResolverParam extends NamedResource {
+  /**
+   * The value of the resolver parameter.
+   */
+  readonly value?: string;
+}
+
+/**
+ * A remote `Task` or `Pipeline` reference. Generated as `taskRef` or `pipelineRef`, respectively.
+ */
+export class RemoteRef {
+  resolver?: string;
+  params?: ResolverParam[];
+
+  constructor(resolver: string, params: ResolverParam[]) {
+    this.resolver = resolver;
+    this.params = params;
+  }
+}
+
 export function secretKeyRef(name: string, key: string): NameKeyPair {
   return {
     name: name,

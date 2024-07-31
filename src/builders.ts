@@ -6,7 +6,7 @@
 import * as fs from 'fs';
 import { ApiObject, ApiObjectProps, Yaml } from 'cdk8s';
 import { Construct } from 'constructs';
-import { invertBuildParameter, usingBuildParameter, usingResultsPath } from './common';
+import { invertBuildParameter, usingBuildParameter, usingResultsPath, ResolverParam, RemoteRef } from './common';
 import {
   Pipeline,
   PipelineParam,
@@ -27,8 +27,6 @@ import {
   TaskStep,
   TaskStepEnv,
   TaskWorkspace,
-  ResolverParam,
-  RemoteTaskRef,
   TaskRef,
 } from './tasks';
 
@@ -653,30 +651,34 @@ export class TaskStepBuilder {
   }
 }
 
-export interface IRemoteTaskResolver {
+export interface IRemoteResolver {
   resolver?: string;
   params?: ResolverParam[];
+  kind?: string;
   /**
    * Gets the taskRef yaml for a remote Task
    * @returns RemoteTaskRef The yaml as an API Object
    */
-  get taskRef(): RemoteTaskRef;
+  get remoteRef(): RemoteRef;
 }
 
 /**
  * Resolves the provided cluster-scoped task into yaml for the taskRef field.
  */
-export class ClusterTaskResolver implements IRemoteTaskResolver {
+export class ClusterRemoteResolver implements IRemoteResolver {
   resolver?: string;
   params?: ResolverParam[];
+  kind?: string;
 
   /**
-   * Creates an instance of the `ClusterTaskResolver`.
-   * @param name The name of the cluster-scoped task.
-   * @param namespace The namespace of the cluster-scoped task.
+   * Creates an instance of the `ClusterRemoteResolver`.
+   * @param kind task | pipeline
+   * @param name The name of the cluster-scoped object.
+   * @param namespace The namespace of the cluster-scoped object.
    */
-  constructor(name: string, namespace: string) {
+  constructor(kind: string, name: string, namespace: string) {
     this.resolver = 'cluster';
+    this.kind = kind;
     this.params = new Array<ResolverParam>();
     this.params.push({
       name: 'name',
@@ -688,14 +690,14 @@ export class ClusterTaskResolver implements IRemoteTaskResolver {
     });
     this.params.push({
       name: 'kind',
-      value: 'task',
+      value: kind,
     });
   }
 
   /**
-   * Gets the YAML representation of cluster-scoped task.
+   * Gets the YAML reference to the cluster-scoped object.
    */
-  get taskRef(): RemoteTaskRef {
+  get remoteRef(): RemoteRef {
     return {
       resolver: this.resolver,
       params: this.params,
@@ -716,7 +718,7 @@ export class TaskBuilder {
   private _steps?: TaskStepBuilder[];
   private _name?: string;
   private _description?: string;
-  private _taskref?: TaskRef | RemoteTaskRef;
+  private _taskref?: TaskRef | RemoteRef;
   // These were initially arrays, but converted them to maps so that if
   // multiple values are added that the last one will win.
   private _workspaces = new Map<string, WorkspaceBuilder>;
@@ -898,11 +900,14 @@ export class TaskBuilder {
    * @param task as string: name of the local task being referenced
    *             as IRemoteTaskResolver: resolver for a task in remote location
    */
-  public referencingTask(task: string | IRemoteTaskResolver): TaskBuilder {
+  public referencingTask(task: string | IRemoteResolver): TaskBuilder {
     if (typeof(task) == 'string') {
       this._taskref = { name: task };
     } else {
-      this._taskref = task.taskRef;
+      if (task.kind != 'task') {
+        throw new Error(`Remote resource be of kind 'task' in taskRef of Task ${this.name}.`);
+      }
+      this._taskref = task.remoteRef;
     }
     return this;
   }
@@ -911,7 +916,7 @@ export class TaskBuilder {
    * Gets the taskRef field of the `Task` for use within a pipeline.
    * If not set, a locally-scoped task named with the `logicalID` is used.
    */
-  public get taskRef(): TaskRef | RemoteTaskRef {
+  public get taskRef(): TaskRef | RemoteRef {
     return this._taskref || { name: this._id };
   }
 
@@ -1227,7 +1232,7 @@ function createOrderedPipelineTask(t: TaskBuilder, after: string[], params: Task
 export class PipelineRunBuilder {
   private readonly _scope: Construct;
   private readonly _id: string;
-  private readonly _pipeline: PipelineBuilder;
+  private readonly _pipeline: PipelineBuilder | IRemoteResolver;
   private readonly _runParams: PipelineRunParam[];
   private readonly _runWorkspaces: PipelineRunWorkspace[];
   private _sa: string;
@@ -1243,9 +1248,10 @@ export class PipelineRunBuilder {
    *
    * @param scope The `Construct` in which to create the `PipelineRun`.
    * @param id The logical ID of the `PipelineRun` construct.
-   * @param pipeline The `Pipeline` for which to create this run, using the `PipelineBuilder`.
+   * @param pipeline The `Pipeline` for which to create this run, using the `PipelineBuilder` or
+   *                 `IRemoteResolver` for a remote `Pipeline`.
    */
-  public constructor(scope: Construct, id: string, pipeline: PipelineBuilder) {
+  public constructor(scope: Construct, id: string, pipeline: PipelineBuilder | IRemoteResolver) {
     this._scope = scope;
     this._id = id;
     this._pipeline = pipeline;
@@ -1258,20 +1264,28 @@ export class PipelineRunBuilder {
   /**
    * Adds a run parameter to the `PipelineRun`. It will throw an error if you try
    * to add a parameter that does not exist on the pipeline.
+   * If the `PipelineRun` references a remote pipeline, consistency checks are omitted.
    *
    * @param name The name of the parameter added to the pipeline run.
    * @param value The value of the parameter added to the pipeline run.
    */
   public withRunParam(name: string, value: string): PipelineRunBuilder {
-    const params = this._pipeline.params;
-    const p = params.find((obj) => obj.name === name);
-    if (p) {
+    if (this._pipeline instanceof PipelineBuilder) {
+      const params = this._pipeline.params;
+      const p = params.find((obj) => obj.name === name);
+      if (p) {
+        this._runParams.push({
+          name: name,
+          value: value,
+        });
+      } else {
+        throw new Error(`PipelineRun parameter '${name}' does not exist in pipeline '${this._pipeline.name}'`);
+      }
+    } else {
       this._runParams.push({
         name: name,
         value: value,
       });
-    } else {
-      throw new Error(`PipelineRun parameter '${name}' does not exist in pipeline '${this._pipeline.name}'`);
     }
     return this;
   }
@@ -1316,6 +1330,8 @@ export class PipelineRunBuilder {
 
   /**
    * Builds the `PipelineRun` for the configured `Pipeline` used in the constructor.
+   * If the `PipelineRun` references a remote pipeline, consistency checks for parameters
+   * and workspaces expected by the pipeline are omitted.
    * @param opts
    */
   public buildPipelineRun(opts: BuilderOptions = DefaultBuilderOptions): void {
@@ -1324,38 +1340,53 @@ export class PipelineRunBuilder {
       new ApiObject(this._scope, this._crbProps.metadata?.name!, this._crbProps);
     }
 
-    // Throw an error here if the parameters are not defined that are required
-    // by the Pipeline, because there is really no point in going any further.
-    const params = this._pipeline.params;
-    params.forEach((p) => {
-      const prp = this._runParams.find((obj) => obj.name == p.name);
-      if (!prp) {
-        throw new Error(`Pipeline parameter '${p.name}' is not defined in PipelineRun '${this._id}'`);
-      }
-    });
+    if (this._pipeline instanceof PipelineBuilder) {
+      // Throw an error here if the parameters are not defined that are required
+      // by the Pipeline, because there is really no point in going any further.
+      const params = this._pipeline.params;
+      params.forEach((p) => {
+        const prp = this._runParams.find((obj) => obj.name == p.name);
+        if (!prp) {
+          throw new Error(`Pipeline parameter '${p.name}' is not defined in PipelineRun '${this._id}'`);
+        }
+      });
 
-    // Do the same thing for workspaces. Check to make sure that the workspaces
-    // expected by the Pipeline are defined in the PipelineRun.
-    const workspaces: PipelineWorkspace[] = this._pipeline.workspaces;
-    workspaces.forEach((ws) => {
-      const pws = this._runWorkspaces.find((obj) => obj.name == ws.name);
-      if (!pws) {
-        throw new Error(`Pipeline workspace '${ws.name}' is not defined in PipelineRun '${this._id}'`);
-      }
-    });
+      // Do the same thing for workspaces. Check to make sure that the workspaces
+      // expected by the Pipeline are defined in the PipelineRun.
+      const workspaces: PipelineWorkspace[] = this._pipeline.workspaces;
+      workspaces.forEach((ws) => {
+        const pws = this._runWorkspaces.find((obj) => obj.name == ws.name);
+        if (!pws) {
+          throw new Error(`Pipeline workspace '${ws.name}' is not defined in PipelineRun '${this._id}'`);
+        }
+      });
 
-    new PipelineRun(this._scope, this._id, {
-      metadata: {
-        name: this._id,
-      },
-      serviceAccountName: this._sa,
-      spec: {
-        pipelineRef: {
-          name: this._pipeline.name,
+      new PipelineRun(this._scope, this._id, {
+        metadata: {
+          name: this._id,
         },
-        params: this._runParams,
-        workspaces: this._runWorkspaces,
-      },
-    });
+        serviceAccountName: this._sa,
+        spec: {
+          pipelineRef: {
+            name: this._pipeline.name,
+          },
+          params: this._runParams,
+          workspaces: this._runWorkspaces,
+        },
+      });
+
+    } else {
+      new PipelineRun(this._scope, this._id, {
+        metadata: {
+          name: this._id,
+        },
+        serviceAccountName: this._sa,
+        spec: {
+          pipelineRef: this._pipeline.remoteRef,
+          params: this._runParams,
+          workspaces: this._runWorkspaces,
+        },
+      });
+    }
   }
 }
