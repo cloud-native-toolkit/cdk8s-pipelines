@@ -718,3 +718,68 @@ exports[`PipelineBuilderTest PipelineRunBuilderCustom 1`] = `
   },
 ]
 `;
+
+exports[`PipelineBuilderTest PipelineRunBuilderWithResolver 1`] = `
+[
+  {
+    "apiVersion": "rbac.authorization.k8s.io/v1",
+    "kind": "ClusterRoleBinding",
+    "metadata": {
+      "name": "pipeline-admin-default-crb",
+      "namespace": "default",
+    },
+    "roleRef": {
+      "kind": "ClusterRole",
+      "name": "cluster-admin",
+    },
+    "subjects": [
+      {
+        "kind": "ServiceAccount",
+        "name": "pipeline",
+        "namespace": "default",
+      },
+    ],
+  },
+  {
+    "apiVersion": "tekton.dev/v1",
+    "kind": "PipelineRun",
+    "metadata": {
+      "name": "my-pipeline-run",
+    },
+    "spec": {
+      "params": [
+        {
+          "name": "repo-url",
+          "value": "https://github.com/exmaple/my-repo",
+        },
+      ],
+      "pipelineRef": {
+        "params": [
+          {
+            "name": "name",
+            "value": "clone-build-push",
+          },
+          {
+            "name": "namespace",
+            "value": "default",
+          },
+          {
+            "name": "kind",
+            "value": "pipeline",
+          },
+        ],
+        "resolver": "cluster",
+      },
+      "workspaces": [
+        {
+          "name": "shared-data",
+          "persistentVolumeClaim": {
+            "claimName": "dataPVC",
+          },
+          "subPath": "my-shared-data",
+        },
+      ],
+    },
+  },
+]
+`;

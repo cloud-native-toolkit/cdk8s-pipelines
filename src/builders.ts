@@ -905,7 +905,7 @@ export class TaskBuilder {
       this._taskref = { name: task };
     } else {
       if (task.kind != 'task') {
-        throw new Error(`Remote resource be of kind 'task' in taskRef of Task ${this.name}.`);
+        throw new Error(`Remote resource must be of kind 'task' in taskRef of Task '${this.name}'.`);
       }
       this._taskref = task.remoteRef;
     }
@@ -1376,6 +1376,10 @@ export class PipelineRunBuilder {
       });
 
     } else {
+      if (this._pipeline.kind != 'pipeline') {
+        throw new Error(`Remote resource must be of kind 'pipeline' in pipelineRef of PipelineRun '${this._id}'.`);
+      }
+
       new PipelineRun(this._scope, this._id, {
         metadata: {
           name: this._id,
