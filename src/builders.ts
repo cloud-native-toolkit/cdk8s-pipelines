@@ -30,6 +30,9 @@ import {
   ResolverParam,
   RemoteTaskRef,
   TaskRef,
+  TaskRunWorkspace,
+  TaskRun,
+  TaskRunParam,
 } from './tasks';
 
 const DefaultPipelineServiceAccountName = 'default:pipeline';
@@ -967,6 +970,120 @@ export class TaskBuilder {
 
     new Task(this._scope!, this._id!, props);
 
+  }
+}
+
+/**
+ * Builds a `TaskRun` using the supplied configuration.
+ *
+ * @see https://tekton.dev/docs/pipelines/taskruns/
+ */
+export class TaskRunBuilder {
+  private readonly _scope: Construct;
+  private readonly _id: string;
+  private readonly _task: TaskBuilder;
+  private readonly _runParams: TaskRunParam[];
+  private readonly _runWorkspaces: TaskRunWorkspace[];
+  // private _sa: string;
+  // private _crbProps: ApiObjectProps;
+
+  /**
+   * Creates a new instance of the `TaskRunBuilder` for the specified
+   * `Task` that is built by the `TaskBuilder` supplied here.
+   *
+   * A pipeline run is configured only for a specific task, so it did not
+   * make any sense here to allow the run to be created without the task
+   * specified.
+   *
+   * @param scope The `Construct` in which to create the `TaskRun`.
+   * @param id The logical ID of the `TaskRun` construct.
+   * @param pipeline The `Task` for which to create this run, using the `TaskBuilder`.
+   */
+  public constructor(scope: Construct, id: string, task: TaskBuilder) {
+    this._scope = scope;
+    this._id = id;
+    this._task = task;
+    // this._sa = DefaultPipelineServiceAccountName;
+    // this._crbProps = DefaultClusterRoleBindingProps;
+    this._runParams = new Array<TaskRunParam>();
+    this._runWorkspaces = new Array<TaskRunWorkspace>();
+  }
+
+  /**
+   * Adds a run parameter to the `TaskRun`. It will throw an error if you try
+   * to add a parameter that does not exist on the task.
+   *
+   * @param name The name of the parameter added to the task run.
+   * @param value The value of the parameter added to the task run.
+   */
+  public withRunParam(name: string, value: string): TaskRunBuilder {
+    const params = this._task.parameters!;
+    const p = params.find((obj) => obj.name === name);
+    if (p) {
+      this._runParams.push({
+        name: name,
+        value: value,
+      });
+    } else {
+      throw new Error(`TaskRun parameter '${name}' does not exist in task '${this._task.logicalID}'`);
+    }
+    return this;
+  }
+
+  /**
+   * Allows you to specify the name of a `PersistentVolumeClaim` but does not
+   * do any compile-time validation on the volume claim's name or existence.
+   *
+   * @see https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/#create-a-persistentvolumeclaim
+   *
+   * @param name The name of the workspace in the `TaskRun` that will be used by the `Task`.
+   * @param claimName The name of the `PersistentVolumeClaim` to use for the `workspace`.
+   * @param subPath The sub path on the `persistentVolumeClaim` to use for the `workspace`.
+   */
+  public withWorkspace(name: string, claimName: string, subPath: string): TaskRunBuilder {
+    this._runWorkspaces.push({
+      name: name,
+      persistentVolumeClaim: {
+        claimName: claimName,
+      },
+      subPath: subPath,
+    });
+    return this;
+  }
+
+  /**
+   * Builds the `TaskRun` for the configured `Task` used in the constructor.
+   * @param opts
+   */
+  public buildTaskRun(opts: BuilderOptions = DefaultBuilderOptions): void {
+    const params = this._task.parameters!;
+    params.forEach((p) => {
+      const prp = this._runParams.find((obj) => obj.name == p.name);
+      if (!prp) {
+        throw new Error(`Task parameter '${p.name}' is not defined in TaskRun '${this._id}'`);
+      }
+    });
+
+    const workspaces: TaskWorkspace[] = this._task.workspaces!;
+    workspaces.forEach((ws) => {
+      const pws = this._runWorkspaces.find((obj) => obj.name == ws.name);
+      if (!pws) {
+        throw new Error(`Task workspace '${ws.name}' is not defined in TaskRun '${this._id}'`);
+      }
+    });
+
+    new TaskRun(this._scope, this._id, {
+      metadata: {
+        name: this._id,
+      },
+      spec: {
+        taskRef: {
+          name: this._task.logicalID,
+        },
+        params: this._runParams,
+        workspaces: this._runWorkspaces,
+      },
+    });
   }
 }
 
