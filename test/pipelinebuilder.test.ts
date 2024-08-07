@@ -11,7 +11,7 @@ import {
   fromPipelineParam,
   constant,
   createRoleBindingProps,
-  ClusterTaskResolver,
+  ClusterRemoteResolver,
 } from '../src';
 
 class PipelineRunTest extends Chart {
@@ -454,7 +454,7 @@ class PipelineTestWithResolver extends Chart {
     const urlParam = new ParameterBuilder('url')
       .withValue(fromPipelineParam(pipelineParam));
 
-    const resolver = new ClusterTaskResolver('git-clone', 'default');
+    const resolver = new ClusterRemoteResolver('task', 'git-clone', 'default');
 
     const myTask = new TaskBuilder(this, 'fetch-source')
       .referencingTask(resolver)
@@ -467,6 +467,49 @@ class PipelineTestWithResolver extends Chart {
       .withTask(myTask)
       .withStringParam(pipelineParam)
       .buildPipeline({ includeDependencies: true });
+  }
+}
+
+class PipelineTestWithResolverError extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const resolver = new ClusterRemoteResolver('pipeline', 'git-clone', 'default');
+
+    const myTask = new TaskBuilder(this, 'fetch-source')
+      .referencingTask(resolver);
+
+    new PipelineBuilder(this, 'clone-build-push')
+      .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
+      .withTask(myTask)
+      .buildPipeline({ includeDependencies: true });
+  }
+}
+
+
+class PipelineRunTestWithResolver extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const resolver = new ClusterRemoteResolver('pipeline', 'clone-build-push', 'default');
+
+    new PipelineRunBuilder(this, 'my-pipeline-run', resolver)
+      .withRunParam('repo-url', 'https://github.com/exmaple/my-repo')
+      .withWorkspace('shared-data', 'dataPVC', 'my-shared-data')
+      .buildPipelineRun({ includeDependencies: true });
+  }
+}
+
+class PipelineRunTestWithResolverError extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const resolver = new ClusterRemoteResolver('task', 'clone-build-push', 'default');
+
+    new PipelineRunBuilder(this, 'my-pipeline-run', resolver)
+      .withRunParam('repo-url', 'https://github.com/exmaple/my-repo')
+      .withWorkspace('shared-data', 'dataPVC', 'my-shared-data')
+      .buildPipelineRun({ includeDependencies: true });
   }
 }
 
@@ -596,5 +639,28 @@ describe('PipelineBuilderTest', () => {
     const chart = new PipelineTestWithResolver(app, 'test-chart');
     const results = Testing.synth(chart);
     expect(results).toMatchSnapshot();
+  });
+
+  test('PipelineBuilderWithResolverError', () => {
+    const app = Testing.app();
+    const f = () => {
+      new PipelineTestWithResolverError(app, 'test-chart');
+    };
+    expect(f).toThrowError('Remote resource must be of kind \'task\' in taskRef of Task \'fetch-source\'.');
+  });
+
+  test('PipelineRunBuilderWithResolver', () => {
+    const app = Testing.app();
+    const chart = new PipelineRunTestWithResolver(app, 'test-chart');
+    const results = Testing.synth(chart);
+    expect(results).toMatchSnapshot();
+  });
+
+  test('PipelineRunBuilderWithResolverError', () => {
+    const app = Testing.app();
+    const f = () => {
+      new PipelineRunTestWithResolverError(app, 'test-chart');
+    };
+    expect(f).toThrowError('Remote resource must be of kind \'pipeline\' in pipelineRef of PipelineRun \'my-pipeline-run\'.');
   });
 });
