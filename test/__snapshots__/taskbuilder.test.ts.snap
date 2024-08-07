@@ -70,7 +70,7 @@ echo $(params.input)",
           "value": "Hello World!",
         },
       ],
-      "serviceAccountName": "default:default",
+      "serviceAccountName": "default",
       "taskRef": {
         "name": "echo-input",
       },
@@ -379,7 +379,7 @@ echo $(params.input)",
           "value": "Hello World!",
         },
       ],
-      "serviceAccountName": "default:pipeline",
+      "serviceAccountName": "default",
       "taskRef": {
         "name": "echo-input",
       },
@@ -407,7 +407,7 @@ exports[`TaskBuilderTest TaskRunResolver 1`] = `
     },
     "spec": {
       "params": [],
-      "serviceAccountName": "default:pipeline",
+      "serviceAccountName": "default",
       "taskRef": {
         "params": [
           {

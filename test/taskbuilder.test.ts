@@ -237,7 +237,7 @@ class TestCustomTaskRunBuilder extends Chart {
       'default',
       'default');
 
-    const serviceAccount = 'default:default';
+    const serviceAccount = 'default';
 
     new TaskRunBuilder(this, 'echo-input-run', myTask)
       .withRunParam('input', 'Hello World!')

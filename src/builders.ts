@@ -34,6 +34,7 @@ import {
 } from './tasks';
 
 const DefaultPipelineServiceAccountName = 'default:pipeline';
+const DefaultTaskServiceAccountName = 'default';
 
 /**
  * Creates the properties for a `ClusterRoleBinding`
@@ -1009,7 +1010,7 @@ export class TaskRunBuilder {
     this._scope = scope;
     this._id = id;
     this._task = task;
-    this._sa = DefaultPipelineServiceAccountName;
+    this._sa = DefaultTaskServiceAccountName;
     this._crbProps = DefaultClusterRoleBindingProps;
     this._runParams = new Array<TaskRunParam>();
     this._runWorkspaces = new Array<TaskRunWorkspace>();
