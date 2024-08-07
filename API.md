@@ -1616,7 +1616,7 @@ const pipelineRunSpec: PipelineRunSpec = { ... }
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#cdk8s-pipelines.PipelineRunSpec.property.pipelineRef">pipelineRef</a></code> | <code><a href="#cdk8s-pipelines.PipelineRef">PipelineRef</a></code> | Required `Pipeline` reference. |
+| <code><a href="#cdk8s-pipelines.PipelineRunSpec.property.pipelineRef">pipelineRef</a></code> | <code><a href="#cdk8s-pipelines.RemoteRef">RemoteRef</a> \| <a href="#cdk8s-pipelines.PipelineRef">PipelineRef</a></code> | Required `Pipeline` reference. |
 | <code><a href="#cdk8s-pipelines.PipelineRunSpec.property.params">params</a></code> | <code><a href="#cdk8s-pipelines.PipelineRunParam">PipelineRunParam</a>[]</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.PipelineRunSpec.property.workspaces">workspaces</a></code> | <code><a href="#cdk8s-pipelines.PipelineRunWorkspace">PipelineRunWorkspace</a>[]</code> | *No description.* |
 
@@ -1625,10 +1625,10 @@ const pipelineRunSpec: PipelineRunSpec = { ... }
 ##### `pipelineRef`<sup>Required</sup> <a name="pipelineRef" id="cdk8s-pipelines.PipelineRunSpec.property.pipelineRef"></a>
 
 ```typescript
-public readonly pipelineRef: PipelineRef;
+public readonly pipelineRef: RemoteRef | PipelineRef;
 ```
 
-- *Type:* <a href="#cdk8s-pipelines.PipelineRef">PipelineRef</a>
+- *Type:* <a href="#cdk8s-pipelines.RemoteRef">RemoteRef</a> | <a href="#cdk8s-pipelines.PipelineRef">PipelineRef</a>
 
 Required `Pipeline` reference.
 
@@ -1806,7 +1806,7 @@ const pipelineTask: PipelineTask = { ... }
 | <code><a href="#cdk8s-pipelines.PipelineTask.property.name">name</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.PipelineTask.property.params">params</a></code> | <code><a href="#cdk8s-pipelines.TaskParam">TaskParam</a>[]</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.PipelineTask.property.runAfter">runAfter</a></code> | <code>string[]</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.PipelineTask.property.taskRef">taskRef</a></code> | <code><a href="#cdk8s-pipelines.TaskRef">TaskRef</a> \| <a href="#cdk8s-pipelines.RemoteTaskRef">RemoteTaskRef</a></code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.PipelineTask.property.taskRef">taskRef</a></code> | <code><a href="#cdk8s-pipelines.RemoteRef">RemoteRef</a> \| <a href="#cdk8s-pipelines.TaskRef">TaskRef</a></code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.PipelineTask.property.workspaces">workspaces</a></code> | <code><a href="#cdk8s-pipelines.PipelineTaskWorkspace">PipelineTaskWorkspace</a>[]</code> | *No description.* |
 
 ---
@@ -1844,10 +1844,10 @@ public readonly runAfter: string[];
 ##### `taskRef`<sup>Optional</sup> <a name="taskRef" id="cdk8s-pipelines.PipelineTask.property.taskRef"></a>
 
 ```typescript
-public readonly taskRef: TaskRef | RemoteTaskRef;
+public readonly taskRef: RemoteRef | TaskRef;
 ```
 
-- *Type:* <a href="#cdk8s-pipelines.TaskRef">TaskRef</a> | <a href="#cdk8s-pipelines.RemoteTaskRef">RemoteTaskRef</a>
+- *Type:* <a href="#cdk8s-pipelines.RemoteRef">RemoteRef</a> | <a href="#cdk8s-pipelines.TaskRef">TaskRef</a>
 
 ---
 
@@ -1880,7 +1880,7 @@ const pipelineTaskDef: PipelineTaskDef = { ... }
 | <code><a href="#cdk8s-pipelines.PipelineTaskDef.property.name">name</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.PipelineTaskDef.property.params">params</a></code> | <code><a href="#cdk8s-pipelines.TaskParam">TaskParam</a>[]</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.PipelineTaskDef.property.runAfter">runAfter</a></code> | <code>string[]</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.PipelineTaskDef.property.taskRef">taskRef</a></code> | <code><a href="#cdk8s-pipelines.TaskRef">TaskRef</a> \| <a href="#cdk8s-pipelines.RemoteTaskRef">RemoteTaskRef</a></code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.PipelineTaskDef.property.taskRef">taskRef</a></code> | <code><a href="#cdk8s-pipelines.RemoteRef">RemoteRef</a> \| <a href="#cdk8s-pipelines.TaskRef">TaskRef</a></code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.PipelineTaskDef.property.workspaces">workspaces</a></code> | <code><a href="#cdk8s-pipelines.PipelineTaskWorkspace">PipelineTaskWorkspace</a>[]</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.PipelineTaskDef.property.refParams">refParams</a></code> | <code><a href="#cdk8s-pipelines.PipelineParam">PipelineParam</a>[]</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.PipelineTaskDef.property.refWorkspaces">refWorkspaces</a></code> | <code><a href="#cdk8s-pipelines.PipelineTaskWorkspace">PipelineTaskWorkspace</a>[]</code> | *No description.* |
@@ -1920,10 +1920,10 @@ public readonly runAfter: string[];
 ##### `taskRef`<sup>Optional</sup> <a name="taskRef" id="cdk8s-pipelines.PipelineTaskDef.property.taskRef"></a>
 
 ```typescript
-public readonly taskRef: TaskRef | RemoteTaskRef;
+public readonly taskRef: RemoteRef | TaskRef;
 ```
 
-- *Type:* <a href="#cdk8s-pipelines.TaskRef">TaskRef</a> | <a href="#cdk8s-pipelines.RemoteTaskRef">RemoteTaskRef</a>
+- *Type:* <a href="#cdk8s-pipelines.RemoteRef">RemoteRef</a> | <a href="#cdk8s-pipelines.TaskRef">TaskRef</a>
 
 ---
 
@@ -2695,40 +2695,49 @@ public readonly logicalID: string;
 
 ## Classes <a name="Classes" id="Classes"></a>
 
-### ClusterTaskResolver <a name="ClusterTaskResolver" id="cdk8s-pipelines.ClusterTaskResolver"></a>
+### ClusterRemoteResolver <a name="ClusterRemoteResolver" id="cdk8s-pipelines.ClusterRemoteResolver"></a>
 
-- *Implements:* <a href="#cdk8s-pipelines.IRemoteTaskResolver">IRemoteTaskResolver</a>
+- *Implements:* <a href="#cdk8s-pipelines.IRemoteResolver">IRemoteResolver</a>
 
 Resolves the provided cluster-scoped task into yaml for the taskRef field.
 
-#### Initializers <a name="Initializers" id="cdk8s-pipelines.ClusterTaskResolver.Initializer"></a>
+#### Initializers <a name="Initializers" id="cdk8s-pipelines.ClusterRemoteResolver.Initializer"></a>
 
 ```typescript
-import { ClusterTaskResolver } from 'cdk8s-pipelines'
+import { ClusterRemoteResolver } from 'cdk8s-pipelines'
 
-new ClusterTaskResolver(name: string, namespace: string)
+new ClusterRemoteResolver(kind: string, name: string, namespace: string)
 ```
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#cdk8s-pipelines.ClusterTaskResolver.Initializer.parameter.name">name</a></code> | <code>string</code> | The name of the cluster-scoped task. |
-| <code><a href="#cdk8s-pipelines.ClusterTaskResolver.Initializer.parameter.namespace">namespace</a></code> | <code>string</code> | The namespace of the cluster-scoped task. |
+| <code><a href="#cdk8s-pipelines.ClusterRemoteResolver.Initializer.parameter.kind">kind</a></code> | <code>string</code> | task \| pipeline. |
+| <code><a href="#cdk8s-pipelines.ClusterRemoteResolver.Initializer.parameter.name">name</a></code> | <code>string</code> | The name of the cluster-scoped object. |
+| <code><a href="#cdk8s-pipelines.ClusterRemoteResolver.Initializer.parameter.namespace">namespace</a></code> | <code>string</code> | The namespace of the cluster-scoped object. |
 
 ---
 
-##### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.ClusterTaskResolver.Initializer.parameter.name"></a>
+##### `kind`<sup>Required</sup> <a name="kind" id="cdk8s-pipelines.ClusterRemoteResolver.Initializer.parameter.kind"></a>
 
 - *Type:* string
 
-The name of the cluster-scoped task.
+task | pipeline.
 
 ---
 
-##### `namespace`<sup>Required</sup> <a name="namespace" id="cdk8s-pipelines.ClusterTaskResolver.Initializer.parameter.namespace"></a>
+##### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.ClusterRemoteResolver.Initializer.parameter.name"></a>
 
 - *Type:* string
 
-The namespace of the cluster-scoped task.
+The name of the cluster-scoped object.
+
+---
+
+##### `namespace`<sup>Required</sup> <a name="namespace" id="cdk8s-pipelines.ClusterRemoteResolver.Initializer.parameter.namespace"></a>
+
+- *Type:* string
+
+The namespace of the cluster-scoped object.
 
 ---
 
@@ -2738,25 +2747,36 @@ The namespace of the cluster-scoped task.
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#cdk8s-pipelines.ClusterTaskResolver.property.taskRef">taskRef</a></code> | <code><a href="#cdk8s-pipelines.RemoteTaskRef">RemoteTaskRef</a></code> | Gets the YAML representation of cluster-scoped task. |
-| <code><a href="#cdk8s-pipelines.ClusterTaskResolver.property.params">params</a></code> | <code><a href="#cdk8s-pipelines.ResolverParam">ResolverParam</a>[]</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.ClusterTaskResolver.property.resolver">resolver</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.ClusterRemoteResolver.property.remoteRef">remoteRef</a></code> | <code><a href="#cdk8s-pipelines.RemoteRef">RemoteRef</a></code> | Gets the YAML reference to the cluster-scoped object. |
+| <code><a href="#cdk8s-pipelines.ClusterRemoteResolver.property.kind">kind</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.ClusterRemoteResolver.property.params">params</a></code> | <code><a href="#cdk8s-pipelines.ResolverParam">ResolverParam</a>[]</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.ClusterRemoteResolver.property.resolver">resolver</a></code> | <code>string</code> | *No description.* |
 
 ---
 
-##### `taskRef`<sup>Required</sup> <a name="taskRef" id="cdk8s-pipelines.ClusterTaskResolver.property.taskRef"></a>
+##### `remoteRef`<sup>Required</sup> <a name="remoteRef" id="cdk8s-pipelines.ClusterRemoteResolver.property.remoteRef"></a>
 
 ```typescript
-public readonly taskRef: RemoteTaskRef;
+public readonly remoteRef: RemoteRef;
 ```
 
-- *Type:* <a href="#cdk8s-pipelines.RemoteTaskRef">RemoteTaskRef</a>
+- *Type:* <a href="#cdk8s-pipelines.RemoteRef">RemoteRef</a>
 
-Gets the YAML representation of cluster-scoped task.
+Gets the YAML reference to the cluster-scoped object.
 
 ---
 
-##### `params`<sup>Optional</sup> <a name="params" id="cdk8s-pipelines.ClusterTaskResolver.property.params"></a>
+##### `kind`<sup>Optional</sup> <a name="kind" id="cdk8s-pipelines.ClusterRemoteResolver.property.kind"></a>
+
+```typescript
+public readonly kind: string;
+```
+
+- *Type:* string
+
+---
+
+##### `params`<sup>Optional</sup> <a name="params" id="cdk8s-pipelines.ClusterRemoteResolver.property.params"></a>
 
 ```typescript
 public readonly params: ResolverParam[];
@@ -2766,7 +2786,7 @@ public readonly params: ResolverParam[];
 
 ---
 
-##### `resolver`<sup>Optional</sup> <a name="resolver" id="cdk8s-pipelines.ClusterTaskResolver.property.resolver"></a>
+##### `resolver`<sup>Optional</sup> <a name="resolver" id="cdk8s-pipelines.ClusterRemoteResolver.property.resolver"></a>
 
 ```typescript
 public readonly resolver: string;
@@ -3251,14 +3271,14 @@ Builds a `PipelineRun` using the supplied configuration.
 ```typescript
 import { PipelineRunBuilder } from 'cdk8s-pipelines'
 
-new PipelineRunBuilder(scope: Construct, id: string, pipeline: PipelineBuilder)
+new PipelineRunBuilder(scope: Construct, id: string, pipeline: IRemoteResolver | PipelineBuilder)
 ```
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
 | <code><a href="#cdk8s-pipelines.PipelineRunBuilder.Initializer.parameter.scope">scope</a></code> | <code>constructs.Construct</code> | The `Construct` in which to create the `PipelineRun`. |
 | <code><a href="#cdk8s-pipelines.PipelineRunBuilder.Initializer.parameter.id">id</a></code> | <code>string</code> | The logical ID of the `PipelineRun` construct. |
-| <code><a href="#cdk8s-pipelines.PipelineRunBuilder.Initializer.parameter.pipeline">pipeline</a></code> | <code><a href="#cdk8s-pipelines.PipelineBuilder">PipelineBuilder</a></code> | The `Pipeline` for which to create this run, using the `PipelineBuilder`. |
+| <code><a href="#cdk8s-pipelines.PipelineRunBuilder.Initializer.parameter.pipeline">pipeline</a></code> | <code><a href="#cdk8s-pipelines.IRemoteResolver">IRemoteResolver</a> \| <a href="#cdk8s-pipelines.PipelineBuilder">PipelineBuilder</a></code> | The `Pipeline` for which to create this run, using the `PipelineBuilder` or `IRemoteResolver` for a remote `Pipeline`. |
 
 ---
 
@@ -3280,9 +3300,9 @@ The logical ID of the `PipelineRun` construct.
 
 ##### `pipeline`<sup>Required</sup> <a name="pipeline" id="cdk8s-pipelines.PipelineRunBuilder.Initializer.parameter.pipeline"></a>
 
-- *Type:* <a href="#cdk8s-pipelines.PipelineBuilder">PipelineBuilder</a>
+- *Type:* <a href="#cdk8s-pipelines.IRemoteResolver">IRemoteResolver</a> | <a href="#cdk8s-pipelines.PipelineBuilder">PipelineBuilder</a>
 
-The `Pipeline` for which to create this run, using the `PipelineBuilder`.
+The `Pipeline` for which to create this run, using the `PipelineBuilder` or `IRemoteResolver` for a remote `Pipeline`.
 
 ---
 
@@ -3305,6 +3325,9 @@ public buildPipelineRun(opts?: BuilderOptions): void
 ```
 
 Builds the `PipelineRun` for the configured `Pipeline` used in the constructor.
+
+If the `PipelineRun` references a remote pipeline, consistency checks for parameters
+and workspaces expected by the pipeline are omitted.
 
 ###### `opts`<sup>Optional</sup> <a name="opts" id="cdk8s-pipelines.PipelineRunBuilder.buildPipelineRun.parameter.opts"></a>
 
@@ -3334,6 +3357,7 @@ Adds a run parameter to the `PipelineRun`.
 
 It will throw an error if you try
 to add a parameter that does not exist on the pipeline.
+If the `PipelineRun` references a remote pipeline, consistency checks are omitted.
 
 ###### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.PipelineRunBuilder.withRunParam.parameter.name"></a>
 
@@ -3407,34 +3431,34 @@ The sub path on the `persistentVolumeClaim` to use for the `workspace`.
 
 
 
-### RemoteTaskRef <a name="RemoteTaskRef" id="cdk8s-pipelines.RemoteTaskRef"></a>
+### RemoteRef <a name="RemoteRef" id="cdk8s-pipelines.RemoteRef"></a>
 
-A remote `Task` reference.
+A remote `Task` or `Pipeline` reference.
 
-Will be generated as a `taskRef`.
+Generated as `taskRef` or `pipelineRef`, respectively.
 
-#### Initializers <a name="Initializers" id="cdk8s-pipelines.RemoteTaskRef.Initializer"></a>
+#### Initializers <a name="Initializers" id="cdk8s-pipelines.RemoteRef.Initializer"></a>
 
 ```typescript
-import { RemoteTaskRef } from 'cdk8s-pipelines'
+import { RemoteRef } from 'cdk8s-pipelines'
 
-new RemoteTaskRef(resolver: string, params: ResolverParam[])
+new RemoteRef(resolver: string, params: ResolverParam[])
 ```
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#cdk8s-pipelines.RemoteTaskRef.Initializer.parameter.resolver">resolver</a></code> | <code>string</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.RemoteTaskRef.Initializer.parameter.params">params</a></code> | <code><a href="#cdk8s-pipelines.ResolverParam">ResolverParam</a>[]</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.RemoteRef.Initializer.parameter.resolver">resolver</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.RemoteRef.Initializer.parameter.params">params</a></code> | <code><a href="#cdk8s-pipelines.ResolverParam">ResolverParam</a>[]</code> | *No description.* |
 
 ---
 
-##### `resolver`<sup>Required</sup> <a name="resolver" id="cdk8s-pipelines.RemoteTaskRef.Initializer.parameter.resolver"></a>
+##### `resolver`<sup>Required</sup> <a name="resolver" id="cdk8s-pipelines.RemoteRef.Initializer.parameter.resolver"></a>
 
 - *Type:* string
 
 ---
 
-##### `params`<sup>Required</sup> <a name="params" id="cdk8s-pipelines.RemoteTaskRef.Initializer.parameter.params"></a>
+##### `params`<sup>Required</sup> <a name="params" id="cdk8s-pipelines.RemoteRef.Initializer.parameter.params"></a>
 
 - *Type:* <a href="#cdk8s-pipelines.ResolverParam">ResolverParam</a>[]
 
@@ -3446,12 +3470,12 @@ new RemoteTaskRef(resolver: string, params: ResolverParam[])
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#cdk8s-pipelines.RemoteTaskRef.property.params">params</a></code> | <code><a href="#cdk8s-pipelines.ResolverParam">ResolverParam</a>[]</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.RemoteTaskRef.property.resolver">resolver</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.RemoteRef.property.params">params</a></code> | <code><a href="#cdk8s-pipelines.ResolverParam">ResolverParam</a>[]</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.RemoteRef.property.resolver">resolver</a></code> | <code>string</code> | *No description.* |
 
 ---
 
-##### `params`<sup>Optional</sup> <a name="params" id="cdk8s-pipelines.RemoteTaskRef.property.params"></a>
+##### `params`<sup>Optional</sup> <a name="params" id="cdk8s-pipelines.RemoteRef.property.params"></a>
 
 ```typescript
 public readonly params: ResolverParam[];
@@ -3461,7 +3485,7 @@ public readonly params: ResolverParam[];
 
 ---
 
-##### `resolver`<sup>Optional</sup> <a name="resolver" id="cdk8s-pipelines.RemoteTaskRef.property.resolver"></a>
+##### `resolver`<sup>Optional</sup> <a name="resolver" id="cdk8s-pipelines.RemoteRef.property.resolver"></a>
 
 ```typescript
 public readonly resolver: string;
@@ -3535,7 +3559,7 @@ Builds the `Task`.
 ##### `referencingTask` <a name="referencingTask" id="cdk8s-pipelines.TaskBuilder.referencingTask"></a>
 
 ```typescript
-public referencingTask(task: string | IRemoteTaskResolver): TaskBuilder
+public referencingTask(task: string | IRemoteResolver): TaskBuilder
 ```
 
 Sets the taskRef field of the `Task`.
@@ -3545,7 +3569,7 @@ overrides `logicalID  as the name of the `Task` in its individual yaml.
 
 ###### `task`<sup>Required</sup> <a name="task" id="cdk8s-pipelines.TaskBuilder.referencingTask.parameter.task"></a>
 
-- *Type:* string | <a href="#cdk8s-pipelines.IRemoteTaskResolver">IRemoteTaskResolver</a>
+- *Type:* string | <a href="#cdk8s-pipelines.IRemoteResolver">IRemoteResolver</a>
 
 as string: name of the local task being referenced as IRemoteTaskResolver: resolver for a task in remote location.
 
@@ -3720,7 +3744,7 @@ Adds the specified workspace to the `Task`.
 | --- | --- | --- |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.logicalID">logicalID</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.name">name</a></code> | <code>string</code> | Gets the name of the `Task` in the context of a pipeline. |
-| <code><a href="#cdk8s-pipelines.TaskBuilder.property.taskRef">taskRef</a></code> | <code><a href="#cdk8s-pipelines.TaskRef">TaskRef</a> \| <a href="#cdk8s-pipelines.RemoteTaskRef">RemoteTaskRef</a></code> | Gets the taskRef field of the `Task` for use within a pipeline. |
+| <code><a href="#cdk8s-pipelines.TaskBuilder.property.taskRef">taskRef</a></code> | <code><a href="#cdk8s-pipelines.RemoteRef">RemoteRef</a> \| <a href="#cdk8s-pipelines.TaskRef">TaskRef</a></code> | Gets the taskRef field of the `Task` for use within a pipeline. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.description">description</a></code> | <code>string</code> | Gets the `description` of the `Task`. |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.parameters">parameters</a></code> | <code><a href="#cdk8s-pipelines.ParameterBuilder">ParameterBuilder</a>[]</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.TaskBuilder.property.runAfter">runAfter</a></code> | <code>string[]</code> | Gets the list of task names for the runAfter value of the `Task`. |
@@ -3755,10 +3779,10 @@ If not set, the 'Task' id is used.
 ##### `taskRef`<sup>Required</sup> <a name="taskRef" id="cdk8s-pipelines.TaskBuilder.property.taskRef"></a>
 
 ```typescript
-public readonly taskRef: TaskRef | RemoteTaskRef;
+public readonly taskRef: RemoteRef | TaskRef;
 ```
 
-- *Type:* <a href="#cdk8s-pipelines.TaskRef">TaskRef</a> | <a href="#cdk8s-pipelines.RemoteTaskRef">RemoteTaskRef</a>
+- *Type:* <a href="#cdk8s-pipelines.RemoteRef">RemoteRef</a> | <a href="#cdk8s-pipelines.TaskRef">TaskRef</a>
 
 Gets the taskRef field of the `Task` for use within a pipeline.
 
@@ -4304,34 +4328,45 @@ Gets the name of the workspace.
 
 ## Protocols <a name="Protocols" id="Protocols"></a>
 
-### IRemoteTaskResolver <a name="IRemoteTaskResolver" id="cdk8s-pipelines.IRemoteTaskResolver"></a>
+### IRemoteResolver <a name="IRemoteResolver" id="cdk8s-pipelines.IRemoteResolver"></a>
 
-- *Implemented By:* <a href="#cdk8s-pipelines.ClusterTaskResolver">ClusterTaskResolver</a>, <a href="#cdk8s-pipelines.IRemoteTaskResolver">IRemoteTaskResolver</a>
+- *Implemented By:* <a href="#cdk8s-pipelines.ClusterRemoteResolver">ClusterRemoteResolver</a>, <a href="#cdk8s-pipelines.IRemoteResolver">IRemoteResolver</a>
 
 
 #### Properties <a name="Properties" id="Properties"></a>
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#cdk8s-pipelines.IRemoteTaskResolver.property.taskRef">taskRef</a></code> | <code><a href="#cdk8s-pipelines.RemoteTaskRef">RemoteTaskRef</a></code> | Gets the taskRef yaml for a remote Task. |
-| <code><a href="#cdk8s-pipelines.IRemoteTaskResolver.property.params">params</a></code> | <code><a href="#cdk8s-pipelines.ResolverParam">ResolverParam</a>[]</code> | *No description.* |
-| <code><a href="#cdk8s-pipelines.IRemoteTaskResolver.property.resolver">resolver</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.IRemoteResolver.property.remoteRef">remoteRef</a></code> | <code><a href="#cdk8s-pipelines.RemoteRef">RemoteRef</a></code> | Gets the taskRef yaml for a remote Task. |
+| <code><a href="#cdk8s-pipelines.IRemoteResolver.property.kind">kind</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.IRemoteResolver.property.params">params</a></code> | <code><a href="#cdk8s-pipelines.ResolverParam">ResolverParam</a>[]</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.IRemoteResolver.property.resolver">resolver</a></code> | <code>string</code> | *No description.* |
 
 ---
 
-##### `taskRef`<sup>Required</sup> <a name="taskRef" id="cdk8s-pipelines.IRemoteTaskResolver.property.taskRef"></a>
+##### `remoteRef`<sup>Required</sup> <a name="remoteRef" id="cdk8s-pipelines.IRemoteResolver.property.remoteRef"></a>
 
 ```typescript
-public readonly taskRef: RemoteTaskRef;
+public readonly remoteRef: RemoteRef;
 ```
 
-- *Type:* <a href="#cdk8s-pipelines.RemoteTaskRef">RemoteTaskRef</a>
+- *Type:* <a href="#cdk8s-pipelines.RemoteRef">RemoteRef</a>
 
 Gets the taskRef yaml for a remote Task.
 
 ---
 
-##### `params`<sup>Optional</sup> <a name="params" id="cdk8s-pipelines.IRemoteTaskResolver.property.params"></a>
+##### `kind`<sup>Optional</sup> <a name="kind" id="cdk8s-pipelines.IRemoteResolver.property.kind"></a>
+
+```typescript
+public readonly kind: string;
+```
+
+- *Type:* string
+
+---
+
+##### `params`<sup>Optional</sup> <a name="params" id="cdk8s-pipelines.IRemoteResolver.property.params"></a>
 
 ```typescript
 public readonly params: ResolverParam[];
@@ -4341,7 +4376,7 @@ public readonly params: ResolverParam[];
 
 ---
 
-##### `resolver`<sup>Optional</sup> <a name="resolver" id="cdk8s-pipelines.IRemoteTaskResolver.property.resolver"></a>
+##### `resolver`<sup>Optional</sup> <a name="resolver" id="cdk8s-pipelines.IRemoteResolver.property.resolver"></a>
 
 ```typescript
 public readonly resolver: string;
