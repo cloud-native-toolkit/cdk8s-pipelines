@@ -19,7 +19,7 @@
  */
 import { ApiObject, ApiObjectMetadata, GroupVersionKind } from 'cdk8s';
 import { Construct } from 'constructs';
-import { NamedResource, NameKeyPair, TektonV1ApiVersion } from './common';
+import { NamedResource, NameKeyPair, TektonV1ApiVersion, RemoteRef } from './common';
 import { PersistentVolumeClaimRef } from './pipelines';
 
 
@@ -309,9 +309,14 @@ export interface TaskRunSpec {
   /**
    * Required `Task` reference.
    */
-  readonly taskRef: TaskRef;
+  readonly taskRef: TaskRef | RemoteRef;
   readonly params?: TaskRunParam[];
   readonly workspaces?: TaskRunWorkspace[];
+  /**
+   * Specifies a `ServiceAccount` object that supplies specific execution
+   * credentials for the `Task`.
+   */
+  readonly serviceAccountName?: string;
 }
 
 export interface TaskRunProps {
@@ -320,11 +325,6 @@ export interface TaskRunProps {
    * Specifies the configuration information for this `TaskRun` object.
    */
   readonly spec?: TaskRunSpec;
-  /**
-   * Specifies a `ServiceAccount` object that supplies specific execution
-   * credentials for the `Task`.
-   */
-  readonly serviceAccountName?: string; //NOTE should be 'default' if unspecified
 }
 
 /**

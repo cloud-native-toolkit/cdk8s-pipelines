@@ -986,11 +986,11 @@ export class TaskBuilder {
 export class TaskRunBuilder {
   private readonly _scope: Construct;
   private readonly _id: string;
-  private readonly _task: TaskBuilder;
+  private readonly _task: TaskBuilder | IRemoteResolver;
   private readonly _runParams: TaskRunParam[];
   private readonly _runWorkspaces: TaskRunWorkspace[];
-  // private _sa: string;
-  // private _crbProps: ApiObjectProps;
+  private _sa: string;
+  private _crbProps: ApiObjectProps;
 
   /**
    * Creates a new instance of the `TaskRunBuilder` for the specified
@@ -1002,14 +1002,15 @@ export class TaskRunBuilder {
    *
    * @param scope The `Construct` in which to create the `TaskRun`.
    * @param id The logical ID of the `TaskRun` construct.
-   * @param pipeline The `Task` for which to create this run, using the `TaskBuilder`.
+   * @param pipeline The `Task` for which to create this run, using the `TaskBuilder` or
+   *                 `IRemoteResolver` for a remote `Task`.
    */
-  public constructor(scope: Construct, id: string, task: TaskBuilder) {
+  public constructor(scope: Construct, id: string, task: TaskBuilder | IRemoteResolver) {
     this._scope = scope;
     this._id = id;
     this._task = task;
-    // this._sa = DefaultPipelineServiceAccountName;
-    // this._crbProps = DefaultClusterRoleBindingProps;
+    this._sa = DefaultPipelineServiceAccountName;
+    this._crbProps = DefaultClusterRoleBindingProps;
     this._runParams = new Array<TaskRunParam>();
     this._runWorkspaces = new Array<TaskRunWorkspace>();
   }
@@ -1017,20 +1018,28 @@ export class TaskRunBuilder {
   /**
    * Adds a run parameter to the `TaskRun`. It will throw an error if you try
    * to add a parameter that does not exist on the task.
+   * If the `TaskRun` references a remote task, consistency checks are omitted.
    *
    * @param name The name of the parameter added to the task run.
    * @param value The value of the parameter added to the task run.
    */
   public withRunParam(name: string, value: string): TaskRunBuilder {
-    const params = this._task.parameters!;
-    const p = params.find((obj) => obj.name === name);
-    if (p) {
+    if (this._task instanceof TaskBuilder) {
+      const params = this._task.parameters!;
+      const p = params.find((obj) => obj.name === name);
+      if (p) {
+        this._runParams.push({
+          name: name,
+          value: value,
+        });
+      } else {
+        throw new Error(`TaskRun parameter '${name}' does not exist in task '${this._task.logicalID}'`);
+      }
+    } else {
       this._runParams.push({
         name: name,
         value: value,
       });
-    } else {
-      throw new Error(`TaskRun parameter '${name}' does not exist in task '${this._task.logicalID}'`);
     }
     return this;
   }
@@ -1056,39 +1065,82 @@ export class TaskRunBuilder {
     return this;
   }
 
+  public withClusterRoleBindingProps(props: ApiObjectProps): TaskRunBuilder {
+    this._crbProps = props;
+    return this;
+  }
+
+  /**
+   * Uses the provided role name for the `serviceAccountName` on the
+   * `TaskRun`. If this method is not called prior to `buildTaskRun()`,
+   * then the default service account will be used, which is _default:pipeline_.
+   *
+   * @param sa The name of the service account (`serviceAccountName`) to use.
+   */
+  public withServiceAccount(sa: string): TaskRunBuilder {
+    this._sa = sa;
+    return this;
+  }
+
   /**
    * Builds the `TaskRun` for the configured `Task` used in the constructor.
+   * If the `TaskRun` references a remote task, consistency checks for parameters
+   * and workspaces expected by the pipeline are omitted.
    * @param opts
    */
   public buildTaskRun(opts: BuilderOptions = DefaultBuilderOptions): void {
-    const params = this._task.parameters!;
-    params.forEach((p) => {
-      const prp = this._runParams.find((obj) => obj.name == p.name);
-      if (!prp) {
-        throw new Error(`Task parameter '${p.name}' is not defined in TaskRun '${this._id}'`);
-      }
-    });
+    if (opts && opts.includeDependencies) {
+      // Generate the ClusterRoleBinding document, if configured to do so.
+      new ApiObject(this._scope, this._crbProps.metadata?.name!, this._crbProps);
+    }
 
-    const workspaces: TaskWorkspace[] = this._task.workspaces!;
-    workspaces.forEach((ws) => {
-      const pws = this._runWorkspaces.find((obj) => obj.name == ws.name);
-      if (!pws) {
-        throw new Error(`Task workspace '${ws.name}' is not defined in TaskRun '${this._id}'`);
-      }
-    });
+    if (this._task instanceof TaskBuilder) {
+      const params = this._task.parameters!;
+      params.forEach((p) => {
+        const prp = this._runParams.find((obj) => obj.name == p.name);
+        if (!prp) {
+          throw new Error(`Task parameter '${p.name}' is not defined in TaskRun '${this._id}'`);
+        }
+      });
 
-    new TaskRun(this._scope, this._id, {
-      metadata: {
-        name: this._id,
-      },
-      spec: {
-        taskRef: {
-          name: this._task.logicalID,
+      const workspaces: TaskWorkspace[] = this._task.workspaces!;
+      workspaces.forEach((ws) => {
+        const pws = this._runWorkspaces.find((obj) => obj.name == ws.name);
+        if (!pws) {
+          throw new Error(`Task workspace '${ws.name}' is not defined in TaskRun '${this._id}'`);
+        }
+      });
+
+      new TaskRun(this._scope, this._id, {
+        metadata: {
+          name: this._id,
         },
-        params: this._runParams,
-        workspaces: this._runWorkspaces,
-      },
-    });
+        spec: {
+          serviceAccountName: this._sa,
+          taskRef: {
+            name: this._task.logicalID,
+          },
+          params: this._runParams,
+          workspaces: this._runWorkspaces,
+        },
+      });
+    } else {
+      if (this._task.kind != 'task') {
+        throw new Error(`Remote resource must be of kind 'task' in taskRef of TaskRun '${this._id}'.`);
+      }
+
+      new TaskRun(this._scope, this._id, {
+        metadata: {
+          name: this._id,
+        },
+        spec: {
+          serviceAccountName: this._sa,
+          taskRef: this._task.remoteRef,
+          params: this._runParams,
+          workspaces: this._runWorkspaces,
+        },
+      });
+    }
   }
 }
 
