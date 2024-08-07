@@ -1,5 +1,93 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`TaskBuilderTest CustomTaskRunBuilder 1`] = `
+[
+  {
+    "apiVersion": "tekton.dev/v1",
+    "kind": "Task",
+    "metadata": {
+      "annotations": undefined,
+      "labels": undefined,
+      "name": "echo-input",
+    },
+    "spec": {
+      "description": undefined,
+      "params": [
+        {
+          "default": "",
+          "description": "",
+          "name": "input",
+        },
+      ],
+      "results": [],
+      "steps": [
+        {
+          "env": undefined,
+          "image": "ubuntu",
+          "name": "step",
+          "script": "#!/usr/bin/env bash
+echo $(params.input)",
+          "workingDir": undefined,
+        },
+      ],
+      "workspaces": [
+        {
+          "description": "The files cloned by the task",
+          "name": "output",
+        },
+      ],
+    },
+  },
+  {
+    "apiVersion": "rbac.authorization.k8s.io/v1",
+    "kind": "ClusterRoleBinding",
+    "metadata": {
+      "name": "task-admin-default-crb",
+      "namespace": "default",
+    },
+    "roleRef": {
+      "kind": "ClusterRole",
+      "name": "cluster-admin",
+    },
+    "subjects": [
+      {
+        "kind": "ServiceAccount",
+        "name": "default",
+        "namespace": "default",
+      },
+    ],
+  },
+  {
+    "apiVersion": "tekton.dev/v1",
+    "kind": "TaskRun",
+    "metadata": {
+      "name": "echo-input-run",
+    },
+    "spec": {
+      "params": [
+        {
+          "name": "input",
+          "value": "Hello World!",
+        },
+      ],
+      "serviceAccountName": "default:default",
+      "taskRef": {
+        "name": "echo-input",
+      },
+      "workspaces": [
+        {
+          "name": "output",
+          "persistentVolumeClaim": {
+            "claimName": "myPVC",
+          },
+          "subPath": "",
+        },
+      ],
+    },
+  },
+]
+`;
+
 exports[`TaskBuilderTest ObjectTaskBuilder 1`] = `
 [
   {
@@ -233,6 +321,117 @@ exports[`TaskBuilderTest TaskBuilderBasic 1`] = `
         {
           "description": "The Ansibler runner directory",
           "name": "runner-dir",
+        },
+      ],
+    },
+  },
+]
+`;
+
+exports[`TaskBuilderTest TaskRunBuilder 1`] = `
+[
+  {
+    "apiVersion": "tekton.dev/v1",
+    "kind": "Task",
+    "metadata": {
+      "annotations": undefined,
+      "labels": undefined,
+      "name": "echo-input",
+    },
+    "spec": {
+      "description": undefined,
+      "params": [
+        {
+          "default": "",
+          "description": "",
+          "name": "input",
+        },
+      ],
+      "results": [],
+      "steps": [
+        {
+          "env": undefined,
+          "image": "ubuntu",
+          "name": "step",
+          "script": "#!/usr/bin/env bash
+echo $(params.input)",
+          "workingDir": undefined,
+        },
+      ],
+      "workspaces": [
+        {
+          "description": "The files cloned by the task",
+          "name": "output",
+        },
+      ],
+    },
+  },
+  {
+    "apiVersion": "tekton.dev/v1",
+    "kind": "TaskRun",
+    "metadata": {
+      "name": "echo-input-run",
+    },
+    "spec": {
+      "params": [
+        {
+          "name": "input",
+          "value": "Hello World!",
+        },
+      ],
+      "serviceAccountName": "default:pipeline",
+      "taskRef": {
+        "name": "echo-input",
+      },
+      "workspaces": [
+        {
+          "name": "output",
+          "persistentVolumeClaim": {
+            "claimName": "myPVC",
+          },
+          "subPath": "",
+        },
+      ],
+    },
+  },
+]
+`;
+
+exports[`TaskBuilderTest TaskRunResolver 1`] = `
+[
+  {
+    "apiVersion": "tekton.dev/v1",
+    "kind": "TaskRun",
+    "metadata": {
+      "name": "git-clone-run",
+    },
+    "spec": {
+      "params": [],
+      "serviceAccountName": "default:pipeline",
+      "taskRef": {
+        "params": [
+          {
+            "name": "name",
+            "value": "git-clone",
+          },
+          {
+            "name": "namespace",
+            "value": "default",
+          },
+          {
+            "name": "kind",
+            "value": "task",
+          },
+        ],
+        "resolver": "cluster",
+      },
+      "workspaces": [
+        {
+          "name": "output",
+          "persistentVolumeClaim": {
+            "claimName": "myPVC",
+          },
+          "subPath": "",
         },
       ],
     },
