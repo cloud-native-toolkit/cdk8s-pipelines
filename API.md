@@ -89,6 +89,7 @@ export class MyChart extends Chart {
 
     new PipelineBuilder(this, 'clone-build-push')
       .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
+      .withStringParam(pipelineParam)
       .withTask(new TaskBuilder(this, 'git-clone')
         .withName('fetch-source')
         .withWorkspace(new WorkspaceBuilder('output').withBinding('task-output'))
@@ -118,7 +119,7 @@ that extends `Chart`. For example, in this code:
 
 ```typescript
 const app = new App();
-new MyInstallPipeline(app, 'my-install-pipeline');
+new MyChart(app, 'my-install-pipeline');
 app.synth();
 ```
 
