@@ -1237,6 +1237,334 @@ Returns the apiVersion and kind for "Task".
 
 ---
 
+### TaskRun <a name="TaskRun" id="cdk8s-pipelines.TaskRun"></a>
+
+The TaskRun allows you to specify how you want to execute a `Task`.
+
+> [https://tekton.dev/docs/pipelines/taskruns/](https://tekton.dev/docs/pipelines/taskruns/)
+
+#### Initializers <a name="Initializers" id="cdk8s-pipelines.TaskRun.Initializer"></a>
+
+```typescript
+import { TaskRun } from 'cdk8s-pipelines'
+
+new TaskRun(scope: Construct, id: string, props?: TaskRunProps)
+```
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.TaskRun.Initializer.parameter.scope">scope</a></code> | <code>constructs.Construct</code> | the scope in which to define this object. |
+| <code><a href="#cdk8s-pipelines.TaskRun.Initializer.parameter.id">id</a></code> | <code>string</code> | a scope-local name for the object. |
+| <code><a href="#cdk8s-pipelines.TaskRun.Initializer.parameter.props">props</a></code> | <code><a href="#cdk8s-pipelines.TaskRunProps">TaskRunProps</a></code> | initialization props. |
+
+---
+
+##### `scope`<sup>Required</sup> <a name="scope" id="cdk8s-pipelines.TaskRun.Initializer.parameter.scope"></a>
+
+- *Type:* constructs.Construct
+
+the scope in which to define this object.
+
+---
+
+##### `id`<sup>Required</sup> <a name="id" id="cdk8s-pipelines.TaskRun.Initializer.parameter.id"></a>
+
+- *Type:* string
+
+a scope-local name for the object.
+
+---
+
+##### `props`<sup>Optional</sup> <a name="props" id="cdk8s-pipelines.TaskRun.Initializer.parameter.props"></a>
+
+- *Type:* <a href="#cdk8s-pipelines.TaskRunProps">TaskRunProps</a>
+
+initialization props.
+
+---
+
+#### Methods <a name="Methods" id="Methods"></a>
+
+| **Name** | **Description** |
+| --- | --- |
+| <code><a href="#cdk8s-pipelines.TaskRun.toString">toString</a></code> | Returns a string representation of this construct. |
+| <code><a href="#cdk8s-pipelines.TaskRun.addDependency">addDependency</a></code> | Create a dependency between this ApiObject and other constructs. |
+| <code><a href="#cdk8s-pipelines.TaskRun.addJsonPatch">addJsonPatch</a></code> | Applies a set of RFC-6902 JSON-Patch operations to the manifest synthesized for this API object. |
+| <code><a href="#cdk8s-pipelines.TaskRun.toJson">toJson</a></code> | Renders the object to Kubernetes JSON. |
+
+---
+
+##### `toString` <a name="toString" id="cdk8s-pipelines.TaskRun.toString"></a>
+
+```typescript
+public toString(): string
+```
+
+Returns a string representation of this construct.
+
+##### `addDependency` <a name="addDependency" id="cdk8s-pipelines.TaskRun.addDependency"></a>
+
+```typescript
+public addDependency(dependencies: IConstruct): void
+```
+
+Create a dependency between this ApiObject and other constructs.
+
+These can be other ApiObjects, Charts, or custom.
+
+###### `dependencies`<sup>Required</sup> <a name="dependencies" id="cdk8s-pipelines.TaskRun.addDependency.parameter.dependencies"></a>
+
+- *Type:* constructs.IConstruct
+
+the dependencies to add.
+
+---
+
+##### `addJsonPatch` <a name="addJsonPatch" id="cdk8s-pipelines.TaskRun.addJsonPatch"></a>
+
+```typescript
+public addJsonPatch(ops: JsonPatch): void
+```
+
+Applies a set of RFC-6902 JSON-Patch operations to the manifest synthesized for this API object.
+
+*Example*
+
+```typescript
+  kubePod.addJsonPatch(JsonPatch.replace('/spec/enableServiceLinks', true));
+```
+
+
+###### `ops`<sup>Required</sup> <a name="ops" id="cdk8s-pipelines.TaskRun.addJsonPatch.parameter.ops"></a>
+
+- *Type:* cdk8s.JsonPatch
+
+The JSON-Patch operations to apply.
+
+---
+
+##### `toJson` <a name="toJson" id="cdk8s-pipelines.TaskRun.toJson"></a>
+
+```typescript
+public toJson(): any
+```
+
+Renders the object to Kubernetes JSON.
+
+#### Static Functions <a name="Static Functions" id="Static Functions"></a>
+
+| **Name** | **Description** |
+| --- | --- |
+| <code><a href="#cdk8s-pipelines.TaskRun.isConstruct">isConstruct</a></code> | Checks if `x` is a construct. |
+| <code><a href="#cdk8s-pipelines.TaskRun.isApiObject">isApiObject</a></code> | Return whether the given object is an `ApiObject`. |
+| <code><a href="#cdk8s-pipelines.TaskRun.of">of</a></code> | Returns the `ApiObject` named `Resource` which is a child of the given construct. |
+| <code><a href="#cdk8s-pipelines.TaskRun.manifest">manifest</a></code> | Renders a Kubernetes manifest for `TaskRun`. |
+
+---
+
+##### ~~`isConstruct`~~ <a name="isConstruct" id="cdk8s-pipelines.TaskRun.isConstruct"></a>
+
+```typescript
+import { TaskRun } from 'cdk8s-pipelines'
+
+TaskRun.isConstruct(x: any)
+```
+
+Checks if `x` is a construct.
+
+###### `x`<sup>Required</sup> <a name="x" id="cdk8s-pipelines.TaskRun.isConstruct.parameter.x"></a>
+
+- *Type:* any
+
+Any object.
+
+---
+
+##### `isApiObject` <a name="isApiObject" id="cdk8s-pipelines.TaskRun.isApiObject"></a>
+
+```typescript
+import { TaskRun } from 'cdk8s-pipelines'
+
+TaskRun.isApiObject(o: any)
+```
+
+Return whether the given object is an `ApiObject`.
+
+We do attribute detection since we can't reliably use 'instanceof'.
+
+###### `o`<sup>Required</sup> <a name="o" id="cdk8s-pipelines.TaskRun.isApiObject.parameter.o"></a>
+
+- *Type:* any
+
+The object to check.
+
+---
+
+##### `of` <a name="of" id="cdk8s-pipelines.TaskRun.of"></a>
+
+```typescript
+import { TaskRun } from 'cdk8s-pipelines'
+
+TaskRun.of(c: IConstruct)
+```
+
+Returns the `ApiObject` named `Resource` which is a child of the given construct.
+
+If `c` is an `ApiObject`, it is returned directly. Throws an
+exception if the construct does not have a child named `Default` _or_ if
+this child is not an `ApiObject`.
+
+###### `c`<sup>Required</sup> <a name="c" id="cdk8s-pipelines.TaskRun.of.parameter.c"></a>
+
+- *Type:* constructs.IConstruct
+
+The higher-level construct.
+
+---
+
+##### `manifest` <a name="manifest" id="cdk8s-pipelines.TaskRun.manifest"></a>
+
+```typescript
+import { TaskRun } from 'cdk8s-pipelines'
+
+TaskRun.manifest(props?: TaskProps)
+```
+
+Renders a Kubernetes manifest for `TaskRun`.
+
+This can be used to inline resource manifests inside other objects (e.g. as templates).
+
+###### `props`<sup>Optional</sup> <a name="props" id="cdk8s-pipelines.TaskRun.manifest.parameter.props"></a>
+
+- *Type:* <a href="#cdk8s-pipelines.TaskProps">TaskProps</a>
+
+initialization props.
+
+---
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.TaskRun.property.node">node</a></code> | <code>constructs.Node</code> | The tree node. |
+| <code><a href="#cdk8s-pipelines.TaskRun.property.apiGroup">apiGroup</a></code> | <code>string</code> | The group portion of the API version (e.g. `authorization.k8s.io`). |
+| <code><a href="#cdk8s-pipelines.TaskRun.property.apiVersion">apiVersion</a></code> | <code>string</code> | The object's API version (e.g. `authorization.k8s.io/v1`). |
+| <code><a href="#cdk8s-pipelines.TaskRun.property.chart">chart</a></code> | <code>cdk8s.Chart</code> | The chart in which this object is defined. |
+| <code><a href="#cdk8s-pipelines.TaskRun.property.kind">kind</a></code> | <code>string</code> | The object kind. |
+| <code><a href="#cdk8s-pipelines.TaskRun.property.metadata">metadata</a></code> | <code>cdk8s.ApiObjectMetadataDefinition</code> | Metadata associated with this API object. |
+| <code><a href="#cdk8s-pipelines.TaskRun.property.name">name</a></code> | <code>string</code> | The name of the API object. |
+
+---
+
+##### `node`<sup>Required</sup> <a name="node" id="cdk8s-pipelines.TaskRun.property.node"></a>
+
+```typescript
+public readonly node: Node;
+```
+
+- *Type:* constructs.Node
+
+The tree node.
+
+---
+
+##### `apiGroup`<sup>Required</sup> <a name="apiGroup" id="cdk8s-pipelines.TaskRun.property.apiGroup"></a>
+
+```typescript
+public readonly apiGroup: string;
+```
+
+- *Type:* string
+
+The group portion of the API version (e.g. `authorization.k8s.io`).
+
+---
+
+##### `apiVersion`<sup>Required</sup> <a name="apiVersion" id="cdk8s-pipelines.TaskRun.property.apiVersion"></a>
+
+```typescript
+public readonly apiVersion: string;
+```
+
+- *Type:* string
+
+The object's API version (e.g. `authorization.k8s.io/v1`).
+
+---
+
+##### `chart`<sup>Required</sup> <a name="chart" id="cdk8s-pipelines.TaskRun.property.chart"></a>
+
+```typescript
+public readonly chart: Chart;
+```
+
+- *Type:* cdk8s.Chart
+
+The chart in which this object is defined.
+
+---
+
+##### `kind`<sup>Required</sup> <a name="kind" id="cdk8s-pipelines.TaskRun.property.kind"></a>
+
+```typescript
+public readonly kind: string;
+```
+
+- *Type:* string
+
+The object kind.
+
+---
+
+##### `metadata`<sup>Required</sup> <a name="metadata" id="cdk8s-pipelines.TaskRun.property.metadata"></a>
+
+```typescript
+public readonly metadata: ApiObjectMetadataDefinition;
+```
+
+- *Type:* cdk8s.ApiObjectMetadataDefinition
+
+Metadata associated with this API object.
+
+---
+
+##### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.TaskRun.property.name"></a>
+
+```typescript
+public readonly name: string;
+```
+
+- *Type:* string
+
+The name of the API object.
+
+If a name is specified in `metadata.name` this will be the name returned.
+Otherwise, a name will be generated by calling
+`Chart.of(this).generatedObjectName(this)`, which by default uses the
+construct path to generate a DNS-compatible name for the resource.
+
+---
+
+#### Constants <a name="Constants" id="Constants"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.TaskRun.property.GVK">GVK</a></code> | <code>cdk8s.GroupVersionKind</code> | Returns the apiVersion and kind for "TaskRun". |
+
+---
+
+##### `GVK`<sup>Required</sup> <a name="GVK" id="cdk8s-pipelines.TaskRun.property.GVK"></a>
+
+```typescript
+public readonly GVK: GroupVersionKind;
+```
+
+- *Type:* cdk8s.GroupVersionKind
+
+Returns the apiVersion and kind for "TaskRun".
+
+---
+
 ## Structs <a name="Structs" id="Structs"></a>
 
 ### BuilderOptions <a name="BuilderOptions" id="cdk8s-pipelines.BuilderOptions"></a>
@@ -2200,6 +2528,213 @@ public readonly spec: TaskSpec;
 - *Type:* <a href="#cdk8s-pipelines.TaskSpec">TaskSpec</a>
 
 The `spec` is the configuration of the `Task` object.
+
+---
+
+### TaskRunParam <a name="TaskRunParam" id="cdk8s-pipelines.TaskRunParam"></a>
+
+The parameters for a particular `TaskRun`.
+
+#### Initializer <a name="Initializer" id="cdk8s-pipelines.TaskRunParam.Initializer"></a>
+
+```typescript
+import { TaskRunParam } from 'cdk8s-pipelines'
+
+const taskRunParam: TaskRunParam = { ... }
+```
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.TaskRunParam.property.name">name</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskRunParam.property.value">value</a></code> | <code>string</code> | The value of the parameter in this `TaskRun`. |
+
+---
+
+##### `name`<sup>Optional</sup> <a name="name" id="cdk8s-pipelines.TaskRunParam.property.name"></a>
+
+```typescript
+public readonly name: string;
+```
+
+- *Type:* string
+
+---
+
+##### `value`<sup>Required</sup> <a name="value" id="cdk8s-pipelines.TaskRunParam.property.value"></a>
+
+```typescript
+public readonly value: string;
+```
+
+- *Type:* string
+
+The value of the parameter in this `TaskRun`.
+
+---
+
+### TaskRunProps <a name="TaskRunProps" id="cdk8s-pipelines.TaskRunProps"></a>
+
+#### Initializer <a name="Initializer" id="cdk8s-pipelines.TaskRunProps.Initializer"></a>
+
+```typescript
+import { TaskRunProps } from 'cdk8s-pipelines'
+
+const taskRunProps: TaskRunProps = { ... }
+```
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.TaskRunProps.property.metadata">metadata</a></code> | <code>cdk8s.ApiObjectMetadata</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskRunProps.property.spec">spec</a></code> | <code><a href="#cdk8s-pipelines.TaskRunSpec">TaskRunSpec</a></code> | Specifies the configuration information for this `TaskRun` object. |
+
+---
+
+##### `metadata`<sup>Optional</sup> <a name="metadata" id="cdk8s-pipelines.TaskRunProps.property.metadata"></a>
+
+```typescript
+public readonly metadata: ApiObjectMetadata;
+```
+
+- *Type:* cdk8s.ApiObjectMetadata
+
+---
+
+##### `spec`<sup>Optional</sup> <a name="spec" id="cdk8s-pipelines.TaskRunProps.property.spec"></a>
+
+```typescript
+public readonly spec: TaskRunSpec;
+```
+
+- *Type:* <a href="#cdk8s-pipelines.TaskRunSpec">TaskRunSpec</a>
+
+Specifies the configuration information for this `TaskRun` object.
+
+---
+
+### TaskRunSpec <a name="TaskRunSpec" id="cdk8s-pipelines.TaskRunSpec"></a>
+
+The details for the `TaskRun`.
+
+> [https://tekton.dev/docs/pipelines/taskruns/#configuring-a-taskrun](https://tekton.dev/docs/pipelines/taskruns/#configuring-a-taskrun)
+
+#### Initializer <a name="Initializer" id="cdk8s-pipelines.TaskRunSpec.Initializer"></a>
+
+```typescript
+import { TaskRunSpec } from 'cdk8s-pipelines'
+
+const taskRunSpec: TaskRunSpec = { ... }
+```
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.TaskRunSpec.property.taskRef">taskRef</a></code> | <code><a href="#cdk8s-pipelines.RemoteRef">RemoteRef</a> \| <a href="#cdk8s-pipelines.TaskRef">TaskRef</a></code> | Required `Task` reference. |
+| <code><a href="#cdk8s-pipelines.TaskRunSpec.property.params">params</a></code> | <code><a href="#cdk8s-pipelines.TaskRunParam">TaskRunParam</a>[]</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskRunSpec.property.serviceAccountName">serviceAccountName</a></code> | <code>string</code> | Specifies a `ServiceAccount` object that supplies specific execution credentials for the `Task`. |
+| <code><a href="#cdk8s-pipelines.TaskRunSpec.property.workspaces">workspaces</a></code> | <code><a href="#cdk8s-pipelines.TaskRunWorkspace">TaskRunWorkspace</a>[]</code> | *No description.* |
+
+---
+
+##### `taskRef`<sup>Required</sup> <a name="taskRef" id="cdk8s-pipelines.TaskRunSpec.property.taskRef"></a>
+
+```typescript
+public readonly taskRef: RemoteRef | TaskRef;
+```
+
+- *Type:* <a href="#cdk8s-pipelines.RemoteRef">RemoteRef</a> | <a href="#cdk8s-pipelines.TaskRef">TaskRef</a>
+
+Required `Task` reference.
+
+---
+
+##### `params`<sup>Optional</sup> <a name="params" id="cdk8s-pipelines.TaskRunSpec.property.params"></a>
+
+```typescript
+public readonly params: TaskRunParam[];
+```
+
+- *Type:* <a href="#cdk8s-pipelines.TaskRunParam">TaskRunParam</a>[]
+
+---
+
+##### `serviceAccountName`<sup>Optional</sup> <a name="serviceAccountName" id="cdk8s-pipelines.TaskRunSpec.property.serviceAccountName"></a>
+
+```typescript
+public readonly serviceAccountName: string;
+```
+
+- *Type:* string
+
+Specifies a `ServiceAccount` object that supplies specific execution credentials for the `Task`.
+
+---
+
+##### `workspaces`<sup>Optional</sup> <a name="workspaces" id="cdk8s-pipelines.TaskRunSpec.property.workspaces"></a>
+
+```typescript
+public readonly workspaces: TaskRunWorkspace[];
+```
+
+- *Type:* <a href="#cdk8s-pipelines.TaskRunWorkspace">TaskRunWorkspace</a>[]
+
+---
+
+### TaskRunWorkspace <a name="TaskRunWorkspace" id="cdk8s-pipelines.TaskRunWorkspace"></a>
+
+The `Workspace` configuration for a `TaskRun`.
+
+> [https://tekton.dev/docs/pipelines/taskruns/#specifying-workspaces](https://tekton.dev/docs/pipelines/taskruns/#specifying-workspaces)
+
+#### Initializer <a name="Initializer" id="cdk8s-pipelines.TaskRunWorkspace.Initializer"></a>
+
+```typescript
+import { TaskRunWorkspace } from 'cdk8s-pipelines'
+
+const taskRunWorkspace: TaskRunWorkspace = { ... }
+```
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.TaskRunWorkspace.property.name">name</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskRunWorkspace.property.persistentVolumeClaim">persistentVolumeClaim</a></code> | <code><a href="#cdk8s-pipelines.PersistentVolumeClaimRef">PersistentVolumeClaimRef</a></code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskRunWorkspace.property.subPath">subPath</a></code> | <code>string</code> | *No description.* |
+
+---
+
+##### `name`<sup>Optional</sup> <a name="name" id="cdk8s-pipelines.TaskRunWorkspace.property.name"></a>
+
+```typescript
+public readonly name: string;
+```
+
+- *Type:* string
+
+---
+
+##### `persistentVolumeClaim`<sup>Required</sup> <a name="persistentVolumeClaim" id="cdk8s-pipelines.TaskRunWorkspace.property.persistentVolumeClaim"></a>
+
+```typescript
+public readonly persistentVolumeClaim: PersistentVolumeClaimRef;
+```
+
+- *Type:* <a href="#cdk8s-pipelines.PersistentVolumeClaimRef">PersistentVolumeClaimRef</a>
+
+---
+
+##### `subPath`<sup>Required</sup> <a name="subPath" id="cdk8s-pipelines.TaskRunWorkspace.property.subPath"></a>
+
+```typescript
+public readonly subPath: string;
+```
+
+- *Type:* string
 
 ---
 
@@ -3882,6 +4417,175 @@ public readonly name: string;
 - *Type:* string
 
 ---
+
+
+### TaskRunBuilder <a name="TaskRunBuilder" id="cdk8s-pipelines.TaskRunBuilder"></a>
+
+Builds a `TaskRun` using the supplied configuration.
+
+> [https://tekton.dev/docs/pipelines/taskruns/](https://tekton.dev/docs/pipelines/taskruns/)
+
+#### Initializers <a name="Initializers" id="cdk8s-pipelines.TaskRunBuilder.Initializer"></a>
+
+```typescript
+import { TaskRunBuilder } from 'cdk8s-pipelines'
+
+new TaskRunBuilder(scope: Construct, id: string, task: IRemoteResolver | TaskBuilder)
+```
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk8s-pipelines.TaskRunBuilder.Initializer.parameter.scope">scope</a></code> | <code>constructs.Construct</code> | The `Construct` in which to create the `TaskRun`. |
+| <code><a href="#cdk8s-pipelines.TaskRunBuilder.Initializer.parameter.id">id</a></code> | <code>string</code> | The logical ID of the `TaskRun` construct. |
+| <code><a href="#cdk8s-pipelines.TaskRunBuilder.Initializer.parameter.task">task</a></code> | <code><a href="#cdk8s-pipelines.IRemoteResolver">IRemoteResolver</a> \| <a href="#cdk8s-pipelines.TaskBuilder">TaskBuilder</a></code> | *No description.* |
+
+---
+
+##### `scope`<sup>Required</sup> <a name="scope" id="cdk8s-pipelines.TaskRunBuilder.Initializer.parameter.scope"></a>
+
+- *Type:* constructs.Construct
+
+The `Construct` in which to create the `TaskRun`.
+
+---
+
+##### `id`<sup>Required</sup> <a name="id" id="cdk8s-pipelines.TaskRunBuilder.Initializer.parameter.id"></a>
+
+- *Type:* string
+
+The logical ID of the `TaskRun` construct.
+
+---
+
+##### `task`<sup>Required</sup> <a name="task" id="cdk8s-pipelines.TaskRunBuilder.Initializer.parameter.task"></a>
+
+- *Type:* <a href="#cdk8s-pipelines.IRemoteResolver">IRemoteResolver</a> | <a href="#cdk8s-pipelines.TaskBuilder">TaskBuilder</a>
+
+---
+
+#### Methods <a name="Methods" id="Methods"></a>
+
+| **Name** | **Description** |
+| --- | --- |
+| <code><a href="#cdk8s-pipelines.TaskRunBuilder.buildTaskRun">buildTaskRun</a></code> | Builds the `TaskRun` for the configured `Task` used in the constructor. |
+| <code><a href="#cdk8s-pipelines.TaskRunBuilder.withClusterRoleBindingProps">withClusterRoleBindingProps</a></code> | *No description.* |
+| <code><a href="#cdk8s-pipelines.TaskRunBuilder.withRunParam">withRunParam</a></code> | Adds a run parameter to the `TaskRun`. |
+| <code><a href="#cdk8s-pipelines.TaskRunBuilder.withServiceAccount">withServiceAccount</a></code> | Uses the provided role name for the `serviceAccountName` on the `TaskRun`. |
+| <code><a href="#cdk8s-pipelines.TaskRunBuilder.withWorkspace">withWorkspace</a></code> | Allows you to specify the name of a `PersistentVolumeClaim` but does not do any compile-time validation on the volume claim's name or existence. |
+
+---
+
+##### `buildTaskRun` <a name="buildTaskRun" id="cdk8s-pipelines.TaskRunBuilder.buildTaskRun"></a>
+
+```typescript
+public buildTaskRun(opts?: BuilderOptions): void
+```
+
+Builds the `TaskRun` for the configured `Task` used in the constructor.
+
+If the `TaskRun` references a remote task, consistency checks for parameters
+and workspaces expected by the pipeline are omitted.
+
+###### `opts`<sup>Optional</sup> <a name="opts" id="cdk8s-pipelines.TaskRunBuilder.buildTaskRun.parameter.opts"></a>
+
+- *Type:* <a href="#cdk8s-pipelines.BuilderOptions">BuilderOptions</a>
+
+---
+
+##### `withClusterRoleBindingProps` <a name="withClusterRoleBindingProps" id="cdk8s-pipelines.TaskRunBuilder.withClusterRoleBindingProps"></a>
+
+```typescript
+public withClusterRoleBindingProps(props: ApiObjectProps): TaskRunBuilder
+```
+
+###### `props`<sup>Required</sup> <a name="props" id="cdk8s-pipelines.TaskRunBuilder.withClusterRoleBindingProps.parameter.props"></a>
+
+- *Type:* cdk8s.ApiObjectProps
+
+---
+
+##### `withRunParam` <a name="withRunParam" id="cdk8s-pipelines.TaskRunBuilder.withRunParam"></a>
+
+```typescript
+public withRunParam(name: string, value: string): TaskRunBuilder
+```
+
+Adds a run parameter to the `TaskRun`.
+
+It will throw an error if you try
+to add a parameter that does not exist on the task.
+If the `TaskRun` references a remote task, consistency checks are omitted.
+
+###### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.TaskRunBuilder.withRunParam.parameter.name"></a>
+
+- *Type:* string
+
+The name of the parameter added to the task run.
+
+---
+
+###### `value`<sup>Required</sup> <a name="value" id="cdk8s-pipelines.TaskRunBuilder.withRunParam.parameter.value"></a>
+
+- *Type:* string
+
+The value of the parameter added to the task run.
+
+---
+
+##### `withServiceAccount` <a name="withServiceAccount" id="cdk8s-pipelines.TaskRunBuilder.withServiceAccount"></a>
+
+```typescript
+public withServiceAccount(sa: string): TaskRunBuilder
+```
+
+Uses the provided role name for the `serviceAccountName` on the `TaskRun`.
+
+If this method is not called prior to `buildTaskRun()`,
+then the default service account will be used, which is _default:pipeline_.
+
+###### `sa`<sup>Required</sup> <a name="sa" id="cdk8s-pipelines.TaskRunBuilder.withServiceAccount.parameter.sa"></a>
+
+- *Type:* string
+
+The name of the service account (`serviceAccountName`) to use.
+
+---
+
+##### `withWorkspace` <a name="withWorkspace" id="cdk8s-pipelines.TaskRunBuilder.withWorkspace"></a>
+
+```typescript
+public withWorkspace(name: string, claimName: string, subPath: string): TaskRunBuilder
+```
+
+Allows you to specify the name of a `PersistentVolumeClaim` but does not do any compile-time validation on the volume claim's name or existence.
+
+> [https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/#create-a-persistentvolumeclaim](https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/#create-a-persistentvolumeclaim)
+
+###### `name`<sup>Required</sup> <a name="name" id="cdk8s-pipelines.TaskRunBuilder.withWorkspace.parameter.name"></a>
+
+- *Type:* string
+
+The name of the workspace in the `TaskRun` that will be used by the `Task`.
+
+---
+
+###### `claimName`<sup>Required</sup> <a name="claimName" id="cdk8s-pipelines.TaskRunBuilder.withWorkspace.parameter.claimName"></a>
+
+- *Type:* string
+
+The name of the `PersistentVolumeClaim` to use for the `workspace`.
+
+---
+
+###### `subPath`<sup>Required</sup> <a name="subPath" id="cdk8s-pipelines.TaskRunBuilder.withWorkspace.parameter.subPath"></a>
+
+- *Type:* string
+
+The sub path on the `persistentVolumeClaim` to use for the `workspace`.
+
+---
+
+
 
 
 ### TaskStepBuilder <a name="TaskStepBuilder" id="cdk8s-pipelines.TaskStepBuilder"></a>

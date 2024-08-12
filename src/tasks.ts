@@ -19,7 +19,8 @@
  */
 import { ApiObject, ApiObjectMetadata, GroupVersionKind } from 'cdk8s';
 import { Construct } from 'constructs';
-import { NamedResource, NameKeyPair, TektonV1ApiVersion } from './common';
+import { NamedResource, NameKeyPair, TektonV1ApiVersion, RemoteRef } from './common';
+import { PersistentVolumeClaimRef } from './pipelines';
 
 
 /**
@@ -268,6 +269,117 @@ export class Task extends ApiObject {
   public toJson(): any {
     const result = {
       ...Task.GVK,
+      ...{
+        metadata: this._metadata,
+        spec: this._spec,
+      },
+    };
+    return Object.entries(result).reduce((r, i) => (i[1] === undefined) ? r : ({
+      ...r,
+      [i[0]]: i[1],
+    }), {});
+  }
+}
+
+/**
+ * The parameters for a particular `TaskRun`.
+ */
+export interface TaskRunParam extends NamedResource {
+  /**
+   * The value of the parameter in this `TaskRun`.
+   */
+  readonly value: string;
+}
+
+/**
+ * The `Workspace` configuration for a `TaskRun`.
+ *
+ * @see https://tekton.dev/docs/pipelines/taskruns/#specifying-workspaces
+ */
+export interface TaskRunWorkspace extends NamedResource {
+  readonly persistentVolumeClaim: PersistentVolumeClaimRef;
+  readonly subPath: string;
+}
+
+/**
+ * The details for the `TaskRun`.
+ * @see https://tekton.dev/docs/pipelines/taskruns/#configuring-a-taskrun
+ */
+export interface TaskRunSpec {
+  /**
+   * Required `Task` reference.
+   */
+  readonly taskRef: TaskRef | RemoteRef;
+  readonly params?: TaskRunParam[];
+  readonly workspaces?: TaskRunWorkspace[];
+  /**
+   * Specifies a `ServiceAccount` object that supplies specific execution
+   * credentials for the `Task`.
+   */
+  readonly serviceAccountName?: string;
+}
+
+export interface TaskRunProps {
+  readonly metadata?: ApiObjectMetadata;
+  /**
+   * Specifies the configuration information for this `TaskRun` object.
+   */
+  readonly spec?: TaskRunSpec;
+}
+
+/**
+ * The TaskRun allows you to specify how you want to execute a `Task`.
+ *
+ * @see https://tekton.dev/docs/pipelines/taskruns/
+ * @schema TaskRun
+ */
+export class TaskRun extends ApiObject {
+
+  /**
+   * Returns the apiVersion and kind for "TaskRun"
+   */
+  public static readonly GVK: GroupVersionKind = {
+    apiVersion: TektonV1ApiVersion,
+    kind: 'TaskRun',
+  };
+
+  /**
+   * Renders a Kubernetes manifest for `TaskRun`.
+   *
+   * This can be used to inline resource manifests inside other objects (e.g. as templates).
+   *
+   * @param props initialization props
+   */
+  public static manifest(props: TaskProps = {}): any {
+    return {
+      ...TaskRun.GVK,
+      ...props,
+    };
+  }
+
+  private readonly _metadata?: ApiObjectMetadata;
+  private readonly _spec?: TaskRunSpec;
+
+  /**
+   * Defines a `TaskRun` API object
+   * @param scope the scope in which to define this object
+   * @param id a scope-local name for the object
+   * @param props initialization props
+   */
+  public constructor(scope: Construct, id: string, props: TaskRunProps = {}) {
+    super(scope, id, {
+      ...TaskRun.GVK,
+    });
+    this._metadata = props.metadata;
+    this._spec = props.spec;
+  }
+
+  /**
+   * Renders the object to Kubernetes JSON.
+   */
+  public toJson(): any {
+    const result = {
+      ...TaskRun.GVK,
       ...{
         metadata: this._metadata,
         spec: this._spec,
