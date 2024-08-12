@@ -85,13 +85,17 @@ export class MyChart extends Chart {
   constructor(scope: Construct, id: string, props: ChartProps = { }) {
     super(scope, id, props);
 
-    new PipelineBuilder(this, 'my-pipeline')
-      .withName('clone-build-push')
+    const pipelineParam = new ParameterBuilder('repo-url');
+
+    new PipelineBuilder(this, 'clone-build-push')
       .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
-      .withTask(new TaskBuilder(this, 'fetch-source')
-        .withName('git-clone')
-        .withWorkspace(new WorkspaceBuilder('output').withName('task-output'))
-        .withStringParam(new ParameterBuilder('url').withPiplineParameter('url').withDescription('the URL for the thing')))
+      .withStringParam(pipelineParam)
+      .withTask(new TaskBuilder(this, 'git-clone')
+        .withName('fetch-source')
+        .withWorkspace(new WorkspaceBuilder('output').withBinding('task-output'))
+        .withStringParam(new ParameterBuilder('url')
+          .withValue(fromPipelineParam(pipelineParam))
+          .withDescription('the URL for the thing')))
       .buildPipeline();
   }
 }
@@ -115,7 +119,7 @@ that extends `Chart`. For example, in this code:
 
 ```typescript
 const app = new App();
-new MyInstallPipeline(app, 'my-install-pipeline');
+new MyChart(app, 'my-install-pipeline');
 app.synth();
 ```
 
@@ -157,7 +161,7 @@ resources to create a Pipeline that closely matches the
 [example here](https://tekton.dev/docs/how-to-guides/kaniko-build-push/):
 
 ```typescript
-new Pipeline(this, 'test-pipeline', {
+new Pipeline(this, 'clone-build-push', {
   metadata: {
     name: 'clone-build-push',
   },
@@ -204,14 +208,16 @@ made for you automatically. Here is the same construct, but defined using the
 `PipelineBuilder`.
 
 ```typescript
-new PipelineBuilder(this, 'my-pipeline')
-    .withName('clone-build-push')
+const param = new ParameterBuilder('repo-url');
+
+new PipelineBuilder(this, 'clone-build-push')
     .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
-    .withTask(new PipelineTaskBuilder()
-            .withName('fetch-source')
-            .withTaskReference('git-clone')
-            .withWorkspace('output', 'shared-data', 'The files cloned by the task')
-            .withStringParam('url', 'repo-url', '$(params.repo-url)'))
+    .withStringParam(param)
+    .withTask(new TaskBuilder(this, 'task-id')
+        .withName('fetch-source')
+        .referencingTask('git-clone')
+        .withWorkspace(new WorkspaceBuilder('output').withBinding('shared-data'))
+        .withStringParam(new ParameterBuilder('url').withValue(fromPipelineParam(param))))
     .buildPipeline();
 ```
 
@@ -219,7 +225,7 @@ The `build` method on the builders will validate the parameters and, if the
 object is valid, will create the construct, making sure to add `workspace`
 and `param` resources to the Task as well as the
 
-Any resources that the `task` requires that needs to be defined at the `pipeline`
+Any resources that the `task` requires that needs to be defined at the `pipeline` level.
 
 ## Related projects
 
@@ -3234,7 +3240,7 @@ public readonly logicalID: string;
 
 - *Implements:* <a href="#cdk8s-pipelines.IRemoteResolver">IRemoteResolver</a>
 
-Resolves the provided cluster-scoped task into yaml for the taskRef field.
+Resolves the provided cluster-scoped `Task` or `Pipeline` into yaml for the taskRef or pipelineRef field, respectively.
 
 #### Initializers <a name="Initializers" id="cdk8s-pipelines.ClusterRemoteResolver.Initializer"></a>
 
@@ -3482,6 +3488,8 @@ Sets the value for the parameter.
 ###### `val`<sup>Required</sup> <a name="val" id="cdk8s-pipelines.ParameterBuilder.withValue.parameter.val"></a>
 
 - *Type:* string | <a href="#cdk8s-pipelines.IValueResolver">IValueResolver</a>
+
+string value or ValueResolver for pipeline-level parameter.
 
 ---
 
@@ -5036,12 +5044,16 @@ Gets the name of the workspace.
 
 - *Implemented By:* <a href="#cdk8s-pipelines.ClusterRemoteResolver">ClusterRemoteResolver</a>, <a href="#cdk8s-pipelines.IRemoteResolver">IRemoteResolver</a>
 
+Resolves remote tasks or pipelines through different means.
+
+Can be implemented by user for git, hub, bundle, etc resolvers.
+
 
 #### Properties <a name="Properties" id="Properties"></a>
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#cdk8s-pipelines.IRemoteResolver.property.remoteRef">remoteRef</a></code> | <code><a href="#cdk8s-pipelines.RemoteRef">RemoteRef</a></code> | Gets the taskRef yaml for a remote Task. |
+| <code><a href="#cdk8s-pipelines.IRemoteResolver.property.remoteRef">remoteRef</a></code> | <code><a href="#cdk8s-pipelines.RemoteRef">RemoteRef</a></code> | Gets the yaml reference for a remote object. |
 | <code><a href="#cdk8s-pipelines.IRemoteResolver.property.kind">kind</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.IRemoteResolver.property.params">params</a></code> | <code><a href="#cdk8s-pipelines.ResolverParam">ResolverParam</a>[]</code> | *No description.* |
 | <code><a href="#cdk8s-pipelines.IRemoteResolver.property.resolver">resolver</a></code> | <code>string</code> | *No description.* |
@@ -5056,7 +5068,7 @@ public readonly remoteRef: RemoteRef;
 
 - *Type:* <a href="#cdk8s-pipelines.RemoteRef">RemoteRef</a>
 
-Gets the taskRef yaml for a remote Task.
+Gets the yaml reference for a remote object.
 
 ---
 

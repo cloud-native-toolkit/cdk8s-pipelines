@@ -85,13 +85,17 @@ export class MyChart extends Chart {
   constructor(scope: Construct, id: string, props: ChartProps = { }) {
     super(scope, id, props);
 
-    new PipelineBuilder(this, 'my-pipeline')
-      .withName('clone-build-push')
+    const pipelineParam = new ParameterBuilder('repo-url');
+
+    new PipelineBuilder(this, 'clone-build-push')
       .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
-      .withTask(new TaskBuilder(this, 'fetch-source')
-        .withName('git-clone')
-        .withWorkspace(new WorkspaceBuilder('output').withName('task-output'))
-        .withStringParam(new ParameterBuilder('url').withPiplineParameter('url').withDescription('the URL for the thing')))
+      .withStringParam(pipelineParam)
+      .withTask(new TaskBuilder(this, 'git-clone')
+        .withName('fetch-source')
+        .withWorkspace(new WorkspaceBuilder('output').withBinding('task-output'))
+        .withStringParam(new ParameterBuilder('url')
+          .withValue(fromPipelineParam(pipelineParam))
+          .withDescription('the URL for the thing')))
       .buildPipeline();
   }
 }
@@ -115,7 +119,7 @@ that extends `Chart`. For example, in this code:
 
 ```typescript
 const app = new App();
-new MyInstallPipeline(app, 'my-install-pipeline');
+new MyChart(app, 'my-install-pipeline');
 app.synth();
 ```
 
@@ -157,7 +161,7 @@ resources to create a Pipeline that closely matches the
 [example here](https://tekton.dev/docs/how-to-guides/kaniko-build-push/):
 
 ```typescript
-new Pipeline(this, 'test-pipeline', {
+new Pipeline(this, 'clone-build-push', {
   metadata: {
     name: 'clone-build-push',
   },
@@ -204,14 +208,16 @@ made for you automatically. Here is the same construct, but defined using the
 `PipelineBuilder`.
 
 ```typescript
-new PipelineBuilder(this, 'my-pipeline')
-    .withName('clone-build-push')
+const param = new ParameterBuilder('repo-url');
+
+new PipelineBuilder(this, 'clone-build-push')
     .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
-    .withTask(new PipelineTaskBuilder()
-            .withName('fetch-source')
-            .withTaskReference('git-clone')
-            .withWorkspace('output', 'shared-data', 'The files cloned by the task')
-            .withStringParam('url', 'repo-url', '$(params.repo-url)'))
+    .withStringParam(param)
+    .withTask(new TaskBuilder(this, 'task-id')
+        .withName('fetch-source')
+        .referencingTask('git-clone')
+        .withWorkspace(new WorkspaceBuilder('output').withBinding('shared-data'))
+        .withStringParam(new ParameterBuilder('url').withValue(fromPipelineParam(param))))
     .buildPipeline();
 ```
 
@@ -219,7 +225,7 @@ The `build` method on the builders will validate the parameters and, if the
 object is valid, will create the construct, making sure to add `workspace`
 and `param` resources to the Task as well as the 
 
-Any resources that the `task` requires that needs to be defined at the `pipeline`
+Any resources that the `task` requires that needs to be defined at the `pipeline` level.
 
 ## Related projects
 

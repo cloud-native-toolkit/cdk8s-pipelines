@@ -287,7 +287,7 @@ export class ParameterBuilder {
 
   /**
    * Sets the value for the parameter
-   * @param val
+   * @param val string value or ValueResolver for pipeline-level parameter
    */
   public withValue(val: string | IValueResolver): ParameterBuilder {
     // If you are giving it a value here, then you do not
@@ -655,19 +655,24 @@ export class TaskStepBuilder {
   }
 }
 
+/**
+ * Resolves remote tasks or pipelines through different means.
+ * Can be implemented by user for git, hub, bundle, etc resolvers.
+ */
 export interface IRemoteResolver {
   resolver?: string;
   params?: ResolverParam[];
   kind?: string;
   /**
-   * Gets the taskRef yaml for a remote Task
-   * @returns RemoteTaskRef The yaml as an API Object
+   * Gets the yaml reference for a remote object
+   * @returns RemoteRef The yaml as an API Object
    */
   get remoteRef(): RemoteRef;
 }
 
 /**
- * Resolves the provided cluster-scoped task into yaml for the taskRef field.
+ * Resolves the provided cluster-scoped `Task` or `Pipeline` into yaml
+ * for the taskRef or pipelineRef field, respectively.
  */
 export class ClusterRemoteResolver implements IRemoteResolver {
   resolver?: string;
