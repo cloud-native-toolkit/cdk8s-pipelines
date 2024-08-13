@@ -1,6 +1,6 @@
 import { ApiObject, ApiObjectMetadata, GroupVersionKind } from 'cdk8s';
 import { Construct } from 'constructs';
-import { NamedResource, TektonV1ApiVersion } from './common';
+import { NamedResource, TektonV1ApiVersion, RemoteRef } from './common';
 import { TaskParam, TaskRef } from './tasks';
 
 // The following interfaces and classes are strictly for generating the YAML or
@@ -23,7 +23,7 @@ export interface PipelineTaskWorkspace extends NamedResource {
  * A task in a pipeline. See https://tekton.dev/docs/pipelines/pipelines/#adding-tasks-to-the-pipeline
  */
 export interface PipelineTask extends NamedResource {
-  readonly taskRef?: TaskRef;
+  readonly taskRef?: TaskRef | RemoteRef;
   readonly params?: TaskParam[];
   readonly runAfter?: string[];
   readonly workspaces?: PipelineTaskWorkspace[];
@@ -197,7 +197,7 @@ export interface PipelineRunSpec {
   /**
    * Required `Pipeline` reference.
    */
-  readonly pipelineRef: PipelineRef;
+  readonly pipelineRef: PipelineRef | RemoteRef;
   readonly params?: PipelineRunParam[];
   readonly workspaces?: PipelineRunWorkspace[];
 }

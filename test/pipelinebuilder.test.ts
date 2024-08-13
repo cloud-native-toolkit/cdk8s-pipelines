@@ -8,23 +8,30 @@ import {
   PipelineRunBuilder,
   TaskBuilder,
   WorkspaceBuilder,
+  fromPipelineParam,
+  constant,
+  createRoleBindingProps,
+  ClusterRemoteResolver,
 } from '../src';
 
 class PipelineRunTest extends Chart {
   constructor(scope: Construct, id: string, props?: ChartProps) {
     super(scope, id, props);
 
-    const myTask = new TaskBuilder(this, 'fetch-source')
-      .withName('git-clone')
-      .withWorkspace(new WorkspaceBuilder('output')
-        .withName('shared-data')
-        .withDescription('The files cloned by the task'))
-      .withStringParam(new ParameterBuilder('url').withPiplineParameter('repo-url', ''));
+    const pipelineParam = new ParameterBuilder('repo-url')
+      .withDefaultValue('');
 
-    const pipeline = new PipelineBuilder(this, 'my-pipeline')
-      .withName('clone-build-push')
+    const myTask = new TaskBuilder(this, 'git-clone')
+      .withName('fetch-source')
+      .withWorkspace(new WorkspaceBuilder('output')
+        .withBinding('shared-data')
+        .withDescription('The files cloned by the task'))
+      .withStringParam(new ParameterBuilder('url').withValue(fromPipelineParam(pipelineParam)));
+
+    const pipeline = new PipelineBuilder(this, 'clone-build-push')
       .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
-      .withTask(myTask);
+      .withTask(myTask)
+      .withStringParam(pipelineParam);
     pipeline.buildPipeline({ includeDependencies: true });
 
     new PipelineRunBuilder(this, 'my-pipeline-run', pipeline)
@@ -34,21 +41,58 @@ class PipelineRunTest extends Chart {
   }
 }
 
+class PipelineRunTestCustom extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const pipelineParam = new ParameterBuilder('repo-url')
+      .withDefaultValue('');
+
+    const myTask = new TaskBuilder(this, 'git-clone')
+      .withName('fetch-source')
+      .withStringParam(new ParameterBuilder('url').withValue(fromPipelineParam(pipelineParam)));
+
+    const pipeline = new PipelineBuilder(this, 'clone-build-push')
+      .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
+      .withTask(myTask)
+      .withStringParam(pipelineParam);
+    pipeline.buildPipeline({ includeDependencies: true });
+
+    const CRB = createRoleBindingProps(
+      'pipeline-admin-default-crb',
+      'default',
+      'cluster-admin',
+      'pipeline',
+      'default');
+
+    const serviceAccount = 'default:pipeline';
+
+    new PipelineRunBuilder(this, 'my-pipeline-run', pipeline)
+      .withRunParam('repo-url', 'https://github.com/exmaple/my-repo')
+      .withClusterRoleBindingProps(CRB)
+      .withServiceAccount(serviceAccount)
+      .buildPipelineRun({ includeDependencies: true });
+  }
+}
+
 class PipelineRunTestWithUndefinedWorkspaceError extends Chart {
   constructor(scope: Construct, id: string, props?: ChartProps) {
     super(scope, id, props);
 
-    const myTask = new TaskBuilder(this, 'fetch-source')
-      .withName('git-clone')
-      .withWorkspace(new WorkspaceBuilder('output')
-        .withName('shared-data')
-        .withDescription('The files cloned by the task'))
-      .withStringParam(new ParameterBuilder('url').withPiplineParameter('repo-url', ''));
+    const pipelineParam = new ParameterBuilder('repo-url')
+      .withDefaultValue('');
 
-    const pipeline = new PipelineBuilder(this, 'my-pipeline')
-      .withName('clone-build-push')
+    const myTask = new TaskBuilder(this, 'git-clone')
+      .withName('fetch-source')
+      .withWorkspace(new WorkspaceBuilder('output')
+        .withBinding('shared-data')
+        .withDescription('The files cloned by the task'))
+      .withStringParam(new ParameterBuilder('url').withValue(fromPipelineParam(pipelineParam)));
+
+    const pipeline = new PipelineBuilder(this, 'clone-build-push')
       .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
-      .withTask(myTask);
+      .withTask(myTask)
+      .withStringParam(pipelineParam);
     pipeline.buildPipeline({ includeDependencies: true });
 
     new PipelineRunBuilder(this, 'my-pipeline-run', pipeline)
@@ -61,17 +105,20 @@ class PipelineRunTestWithUndefinedParamError extends Chart {
   constructor(scope: Construct, id: string, props?: ChartProps) {
     super(scope, id, props);
 
-    const myTask = new TaskBuilder(this, 'fetch-source')
-      .withName('git-clone')
-      .withWorkspace(new WorkspaceBuilder('output')
-        .withName('shared-data')
-        .withDescription('The files cloned by the task'))
-      .withStringParam(new ParameterBuilder('url').withPiplineParameter('repo-url', ''));
+    const pipelineParam = new ParameterBuilder('repo-url')
+      .withDefaultValue('');
 
-    const pipeline = new PipelineBuilder(this, 'my-pipeline')
-      .withName('clone-build-push')
+    const myTask = new TaskBuilder(this, 'git-clone')
+      .withName('fetch-source')
+      .withWorkspace(new WorkspaceBuilder('output')
+        .withBinding('shared-data')
+        .withDescription('The files cloned by the task'))
+      .withStringParam(new ParameterBuilder('url').withValue(fromPipelineParam(pipelineParam)));
+
+    const pipeline = new PipelineBuilder(this, 'clone-build-push')
       .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
-      .withTask(myTask);
+      .withTask(myTask)
+      .withStringParam(pipelineParam);
     pipeline.buildPipeline({ includeDependencies: true });
 
     new PipelineRunBuilder(this, 'my-pipeline-run', pipeline)
@@ -85,17 +132,20 @@ class PipelineRunTestWithError extends Chart {
   constructor(scope: Construct, id: string, props?: ChartProps) {
     super(scope, id, props);
 
-    const myTask = new TaskBuilder(this, 'fetch-source')
-      .withName('git-clone')
-      .withWorkspace(new WorkspaceBuilder('output')
-        .withName('shared-data')
-        .withDescription('The files cloned by the task'))
-      .withStringParam(new ParameterBuilder('url').withPiplineParameter('repo-url', ''));
+    const pipelineParam = new ParameterBuilder('repo-url')
+      .withDefaultValue('');
 
-    const pipeline = new PipelineBuilder(this, 'my-pipeline')
-      .withName('clone-build-push')
+    const myTask = new TaskBuilder(this, 'git-clone')
+      .withName('fetch-source')
+      .withWorkspace(new WorkspaceBuilder('output')
+        .withBinding('shared-data')
+        .withDescription('The files cloned by the task'))
+      .withStringParam(new ParameterBuilder('url').withValue(fromPipelineParam(pipelineParam)));
+
+    const pipeline = new PipelineBuilder(this, 'clone-build-push')
       .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
-      .withTask(myTask);
+      .withTask(myTask)
+      .withStringParam(pipelineParam);
     pipeline.buildPipeline({ includeDependencies: true });
 
     new PipelineRunBuilder(this, 'my-pipeline-run', pipeline)
@@ -109,26 +159,38 @@ class MySecondTestChart extends Chart {
   constructor(scope: Construct, id: string, props?: ChartProps) {
     super(scope, id, props);
 
-    const myTask = new TaskBuilder(this, 'git-clone')
-      .withName('fetch-source')
+    const repoParam = new ParameterBuilder('repo-url')
+      .withDefaultValue('');
+    const nameParam = new ParameterBuilder('your-name')
+      .withDefaultValue('');
+    const colorParam = new ParameterBuilder('your-color')
+      .withDefaultValue('');
+    const questParam = new ParameterBuilder('your-quest')
+      .withDefaultValue('');
+
+    const myTask = new TaskBuilder(this, 'fetch-source')
+      .withName('git-clone')
       .withWorkspace(new WorkspaceBuilder('output')
-        .withName('shared-data')
+        .withBinding('shared-data')
         .withDescription('The files cloned by the task'))
       .withWorkspace(new WorkspaceBuilder('ssh-credentials')
-        .withName('ssh-creds')
+        .withBinding('ssh-creds')
         .withDescription('The SSH files for credentials'))
       .withWorkspace(new WorkspaceBuilder('config')
-        .withName('config-data')
+        .withBinding('config-data')
         .withDescription('The files for configuration for stuff'))
-      .withStringParam(new ParameterBuilder('url').withPiplineParameter('repo-url', ''))
-      .withStringParam(new ParameterBuilder('name').withPiplineParameter('your-name', ''))
-      .withStringParam(new ParameterBuilder('color').withPiplineParameter('your-color', ''))
-      .withStringParam(new ParameterBuilder('quest').withPiplineParameter('your-quest', ''));
+      .withStringParam(new ParameterBuilder('url').withValue(fromPipelineParam(repoParam)))
+      .withStringParam(new ParameterBuilder('name').withValue(fromPipelineParam(nameParam)))
+      .withStringParam(new ParameterBuilder('color').withValue(fromPipelineParam(colorParam)))
+      .withStringParam(new ParameterBuilder('quest').withValue(fromPipelineParam(questParam)));
 
-    new PipelineBuilder(this, 'my-test-pipeline-2')
-      .withName('clone-build-push')
+    new PipelineBuilder(this, 'clone-build-push')
       .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
       .withTask(myTask)
+      .withStringParam(repoParam)
+      .withStringParam(nameParam)
+      .withStringParam(colorParam)
+      .withStringParam(questParam)
       .buildPipeline();
   }
 }
@@ -139,28 +201,86 @@ class MyTestChartWithDuplicateParams extends Chart {
 
     const myWorkspace = new WorkspaceBuilder('output')
       .withDescription('The files cloned by the task')
-      .withName('shared-data');
+      .withBinding('shared-data');
+
+    const pipelineParam = new ParameterBuilder('repo-url')
+      .withDefaultValue('');
 
     const urlParam = new ParameterBuilder('url')
-      .withPiplineParameter('repo-url', '');
+      .withValue(fromPipelineParam(pipelineParam));
 
-    const myTask = new TaskBuilder(this, 'git-clone')
-      .withName('fetch-source')
+    const myTask = new TaskBuilder(this, 'fetch-source')
+      .withName('git-clone')
       .withWorkspace(myWorkspace)
       .withStringParam(urlParam)
     ;
 
-    const myTask2 = new TaskBuilder(this, 'cat-readme')
-      .withName('print-readme')
+    const myTask2 = new TaskBuilder(this, 'print-readme')
+      .withName('cat-readme')
       .withWorkspace(myWorkspace)
       .withStringParam(urlParam)
     ;
 
-    new PipelineBuilder(this, 'my-pipeline')
-      .withName('clone-build-push')
+    new PipelineBuilder(this, 'clone-build-push')
       .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
       .withTask(myTask)
       .withTask(myTask2)
+      .withStringParam(pipelineParam)
+      .buildPipeline();
+  }
+}
+
+class MyTestChartWithPipelineParamError extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const pipelineParam = new ParameterBuilder('repo-url')
+      .withDefaultValue('');
+
+    const urlParam = new ParameterBuilder('url')
+      .withValue(fromPipelineParam(pipelineParam));
+
+    const myTask = new TaskBuilder(this, 'fetch-source')
+      .withName('git-clone')
+      .withStringParam(urlParam);
+
+    new PipelineBuilder(this, 'clone-build-push')
+      .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
+      .withTask(myTask)
+      .buildPipeline();
+  }
+}
+
+class MyTestChartWithDuplicateResultError extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const myTask = new TaskBuilder(this, 'fetch-source')
+      .withName('git-clone')
+      .withResult('result', 'The original result')
+      .withResult('result', 'The duplicate result');
+
+    new PipelineBuilder(this, 'clone-build-push')
+      .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
+      .withTask(myTask)
+      .buildPipeline();
+  }
+}
+
+class MyTestChartWithWorkspaceError extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const myWorkspace = new WorkspaceBuilder('output')
+      .withDescription('The files cloned by the task');
+
+    const myTask = new TaskBuilder(this, 'fetch-source')
+      .withName('git-clone')
+      .withWorkspace(myWorkspace);
+
+    new PipelineBuilder(this, 'clone-build-push')
+      .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
+      .withTask(myTask)
       .buildPipeline();
   }
 }
@@ -170,48 +290,226 @@ class MyTestChartWithStaticOverride extends Chart {
   constructor(scope: Construct, id: string, props?: ChartProps) {
     super(scope, id, props);
 
-    const urlParam = new ParameterBuilder('url')
-      .withPiplineParameter('repo-url', '');
+    const pipelineParam = new ParameterBuilder('repo-url')
+      .withDefaultValue('');
 
-    const myTask2 = new TaskBuilder(this, 'cat-readme')
-      .withName('print-readme')
+    const urlParam = new ParameterBuilder('url')
+      .withValue(fromPipelineParam(pipelineParam));
+
+    const myTask2 = new TaskBuilder(this, 'print-readme')
+      .withName('cat-readme')
       .withStringParam(urlParam)
     ;
 
     // This should override the parameter with a static value.
     myTask2.withStringParam(new ParameterBuilder('url').withValue('https://api.example.io'));
 
-    new PipelineBuilder(this, 'my-pipeline')
-      .withName('clone-build-push')
+    new PipelineBuilder(this, 'clone-build-push')
       .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
       .withTask(myTask2)
+      // pipelineParam not added because myTask2 doesn't reference it anymore
       .buildPipeline();
   }
 }
 
-class MyTestChartWithDuplicateTasks extends Chart {
+class MyTestChartWithDuplicateTasksError extends Chart {
   constructor(scope: Construct, id: string, props?: ChartProps) {
     super(scope, id, props);
 
     const myWorkspace = new WorkspaceBuilder('output')
       .withDescription('The files cloned by the task')
-      .withName('shared-data');
+      .withBinding('shared-data');
+
+    const pipelineParam = new ParameterBuilder('repo-url')
+      .withDefaultValue('');
 
     const urlParam = new ParameterBuilder('url')
-      .withPiplineParameter('repo-url', '');
+      .withValue(fromPipelineParam(pipelineParam));
 
-    const myTask = new TaskBuilder(this, 'git-clone')
-      .withName('fetch-source')
+    const myTask = new TaskBuilder(this, 'fetch-source')
+      .withName('git-clone')
       .withWorkspace(myWorkspace)
       .withStringParam(urlParam)
     ;
 
-    new PipelineBuilder(this, 'my-pipeline')
-      .withName('clone-build-push')
+    new PipelineBuilder(this, 'clone-build-push')
       .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
       .withTask(myTask)
       .withTask(myTask)
+      .withStringParam(pipelineParam)
       .buildPipeline({ includeDependencies: true });
+  }
+}
+
+class PipelineLevelParamTest extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const pipelineParam = new ParameterBuilder('context')
+      .withDefaultValue('/some/where/or/other');
+
+    const taskParam = new ParameterBuilder('pathToDockerFile')
+      .withValue(constant('Dockerfile'));
+
+    const taskParam2 = new ParameterBuilder('pathToContext')
+      .withValue(fromPipelineParam(pipelineParam));
+
+    const myTask = new TaskBuilder(this, 'build-push')
+      .withName('build-skaffold-web')
+      .withStringParam(taskParam)
+      .withStringParam(taskParam2);
+
+    new PipelineBuilder(this, 'pipeline-with-parameters')
+      .withStringParam(pipelineParam)
+      .withTask(myTask)
+      .buildPipeline({ includeDependencies: true });
+  }
+}
+
+class MyTestChartWithSimilarTasks extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const myWorkspace = new WorkspaceBuilder('output')
+      .withDescription('The files cloned by the task')
+      .withBinding('shared-data');
+
+    const pipelineParam = new ParameterBuilder('repo-url')
+      .withDefaultValue('');
+
+    const urlParam = new ParameterBuilder('url')
+      .withValue(fromPipelineParam(pipelineParam));
+
+    const myTask = new TaskBuilder(this, 'fetch-source')
+      .referencingTask('fetch-source')
+      .withName('git-clone')
+      .withWorkspace(myWorkspace)
+      .withStringParam(urlParam)
+    ;
+
+    const myTask2 = new TaskBuilder(this, 'fetch-source-2')
+      .referencingTask('fetch-source')
+      .withName('git-clone-2')
+      .withWorkspace(myWorkspace)
+      .withStringParam(urlParam);
+
+    new PipelineBuilder(this, 'clone-build-push')
+      .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
+      .withTask(myTask)
+      .withTask(myTask2)
+      .withStringParam(pipelineParam)
+      .buildPipeline({ includeDependencies: true });
+  }
+}
+
+class MyTestChartWithRunAfter extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const firstTask = new TaskBuilder(this, 'git-clone')
+      .withName('fetch-source')
+      .specifyRunAfter([]);
+
+    const secondTask = new TaskBuilder(this, 'git-clone-2')
+      .referencingTask('git-clone')
+      .withName('fetch-again');
+
+    const thirdTask = new TaskBuilder(this, 'print-readme')
+      .withName('cat-readme')
+      .specifyRunAfter(['fetch-again']);
+
+    new PipelineBuilder(this, 'clone-read')
+      .withTask(thirdTask)
+      .withTask(firstTask)
+      .withTask(secondTask)
+      .buildPipeline({ includeDependencies: true });
+  }
+}
+
+class MyTestChartWithRunAfterError extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const myTask = new TaskBuilder(this, 'print-readme')
+      .withName('cat-readme')
+      .specifyRunAfter(['fetch-source']);
+
+    new PipelineBuilder(this, 'clone-read')
+      .withTask(myTask)
+      .buildPipeline({ includeDependencies: true });
+  }
+}
+
+class PipelineTestWithResolver extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const myWorkspace = new WorkspaceBuilder('output')
+      .withDescription('The files cloned by the task')
+      .withBinding('shared-data');
+
+    const pipelineParam = new ParameterBuilder('repo-url')
+      .withDefaultValue('');
+
+    const urlParam = new ParameterBuilder('url')
+      .withValue(fromPipelineParam(pipelineParam));
+
+    const resolver = new ClusterRemoteResolver('task', 'git-clone', 'default');
+
+    const myTask = new TaskBuilder(this, 'fetch-source')
+      .referencingTask(resolver)
+      .withWorkspace(myWorkspace)
+      .withStringParam(urlParam)
+    ;
+
+    new PipelineBuilder(this, 'clone-build-push')
+      .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
+      .withTask(myTask)
+      .withStringParam(pipelineParam)
+      .buildPipeline({ includeDependencies: true });
+  }
+}
+
+class PipelineTestWithResolverError extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const resolver = new ClusterRemoteResolver('pipeline', 'git-clone', 'default');
+
+    const myTask = new TaskBuilder(this, 'fetch-source')
+      .referencingTask(resolver);
+
+    new PipelineBuilder(this, 'clone-build-push')
+      .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
+      .withTask(myTask)
+      .buildPipeline({ includeDependencies: true });
+  }
+}
+
+
+class PipelineRunTestWithResolver extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const resolver = new ClusterRemoteResolver('pipeline', 'clone-build-push', 'default');
+
+    new PipelineRunBuilder(this, 'my-pipeline-run', resolver)
+      .withRunParam('repo-url', 'https://github.com/exmaple/my-repo')
+      .withWorkspace('shared-data', 'dataPVC', 'my-shared-data')
+      .buildPipelineRun({ includeDependencies: true });
+  }
+}
+
+class PipelineRunTestWithResolverError extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const resolver = new ClusterRemoteResolver('task', 'clone-build-push', 'default');
+
+    new PipelineRunBuilder(this, 'my-pipeline-run', resolver)
+      .withRunParam('repo-url', 'https://github.com/exmaple/my-repo')
+      .withWorkspace('shared-data', 'dataPVC', 'my-shared-data')
+      .buildPipelineRun({ includeDependencies: true });
   }
 }
 
@@ -219,6 +517,13 @@ describe('PipelineBuilderTest', () => {
   test('PipelineRunBuilder', () => {
     const app = Testing.app();
     const chart = new PipelineRunTest(app, 'test-chart');
+    const results = Testing.synth(chart);
+    expect(results).toMatchSnapshot();
+  });
+
+  test('PipelineRunBuilderCustom', () => {
+    const app = Testing.app();
+    const chart = new PipelineRunTestCustom(app, 'test-chart');
     const results = Testing.synth(chart);
     expect(results).toMatchSnapshot();
   });
@@ -261,6 +566,30 @@ describe('PipelineBuilderTest', () => {
     expect(results).toMatchSnapshot();
   });
 
+  test('PipelineBuilderWithPipelineParamError', () => {
+    const app = Testing.app();
+    const f = () => {
+      new MyTestChartWithPipelineParamError(app, 'test-chart');
+    };
+    expect(f).toThrowError('Parameter \'url\' in Task \'git-clone\' expects Pipeline value from parameter \'repo-url\', which is not defined.');
+  });
+
+  test('PipelineBuilderWithDuplicateResults', () => {
+    const app = Testing.app();
+    const f = () => {
+      new MyTestChartWithDuplicateResultError(app, 'test-chart');
+    };
+    expect(f).toThrowError('Cannot add result \'result\', as it already exists.');
+  });
+
+  test('PipelineBuilderWithWorkspaceError', () => {
+    const app = Testing.app();
+    const f = () => {
+      new MyTestChartWithWorkspaceError(app, 'test-chart');
+    };
+    expect(f).toThrowError('Workspace \'output\' in Task \'git-clone\' has no binding to a workspace in Pipeline \'clone-build-push\'.');
+  });
+
   test('PipelineBuilderWithStaticOverride', () => {
     const app = Testing.app();
     const chart = new MyTestChartWithStaticOverride(app, 'test-chart');
@@ -268,10 +597,70 @@ describe('PipelineBuilderTest', () => {
     expect(results).toMatchSnapshot();
   });
 
-  test('PipelineBuilderWithDuplicateTasks', () => {
+  test('PipelineBuilderWithDuplicateTasksError', () => {
     const app = Testing.app();
-    const chart = new MyTestChartWithDuplicateTasks(app, 'test-chart');
+    const f = () => {
+      new MyTestChartWithDuplicateTasksError(app, 'test-chart');
+    };
+    expect(f).toThrowError('Multiple tasks found with name \'git-clone\' in Pipeline \'clone-build-push\', but task names must be unique.');
+  });
+
+  test('PipelineBuilderWithParameters', () => {
+    const app = Testing.app();
+    const chart = new PipelineLevelParamTest(app, 'test-chart');
     const results = Testing.synth(chart);
     expect(results).toMatchSnapshot();
+  });
+
+  test('PipelineBuilderWithSimilarTasks', () => {
+    const app = Testing.app();
+    const chart = new MyTestChartWithSimilarTasks(app, 'test-chart');
+    const results = Testing.synth(chart);
+    expect(results).toMatchSnapshot();
+  });
+
+  test('PipelineBuilderWithRunAfter', () => {
+    const app = Testing.app();
+    const chart = new MyTestChartWithRunAfter(app, 'test-chart');
+    const results = Testing.synth(chart);
+    expect(results).toMatchSnapshot();
+  });
+
+  test('PipelineBuilderWithRunAfterError', () => {
+    const app = Testing.app();
+    const f = () => {
+      new MyTestChartWithRunAfterError(app, 'test-chart');
+    };
+    expect(f).toThrowError('\'fetch-source\' supplied as value for runAfter but no such task found in pipeline.');
+  });
+
+  test('PipelineBuilderWithResolver', () => {
+    const app = Testing.app();
+    const chart = new PipelineTestWithResolver(app, 'test-chart');
+    const results = Testing.synth(chart);
+    expect(results).toMatchSnapshot();
+  });
+
+  test('PipelineBuilderWithResolverError', () => {
+    const app = Testing.app();
+    const f = () => {
+      new PipelineTestWithResolverError(app, 'test-chart');
+    };
+    expect(f).toThrowError('Remote resource must be of kind \'task\' in taskRef of Task \'fetch-source\'.');
+  });
+
+  test('PipelineRunBuilderWithResolver', () => {
+    const app = Testing.app();
+    const chart = new PipelineRunTestWithResolver(app, 'test-chart');
+    const results = Testing.synth(chart);
+    expect(results).toMatchSnapshot();
+  });
+
+  test('PipelineRunBuilderWithResolverError', () => {
+    const app = Testing.app();
+    const f = () => {
+      new PipelineRunTestWithResolverError(app, 'test-chart');
+    };
+    expect(f).toThrowError('Remote resource must be of kind \'pipeline\' in pipelineRef of PipelineRun \'my-pipeline-run\'.');
   });
 });

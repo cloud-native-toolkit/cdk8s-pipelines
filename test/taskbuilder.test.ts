@@ -2,7 +2,7 @@ import * as path from 'path';
 import { Chart, Testing } from 'cdk8s';
 import { ChartProps } from 'cdk8s/lib/chart';
 import { Construct } from 'constructs';
-import { usingBuildParameter, usingWorkspacePath, secretKeyRef, TaskBuilder, TaskStepBuilder, valueFrom, WorkspaceBuilder, ParameterBuilder } from '../src';
+import { usingBuildParameter, usingWorkspacePath, secretKeyRef, TaskBuilder, TaskStepBuilder, valueFrom, WorkspaceBuilder, ParameterBuilder, fromPipelineParam, TaskRunBuilder, createRoleBindingProps, ClusterRemoteResolver } from '../src';
 
 /**
  * Using "ansible-runner" as the reference task that I want this test builder to
@@ -17,12 +17,13 @@ class TestBasicTaskBuild extends Chart {
     const runnerDir = new WorkspaceBuilder('runner-dir')
       .withDescription('The Ansibler runner directory');
 
+    const pipelineParam = new ParameterBuilder('project-dir');
+
     const projectDirName = new ParameterBuilder('project-dir')
       .ofType('string')
-      .withPiplineParameter('project-dir');
+      .withValue(fromPipelineParam(pipelineParam));
 
-    new TaskBuilder(this, 'my-task')
-      .withName('ansible-runner')
+    new TaskBuilder(this, 'ansible-runner')
       .withDescription('Task to run Ansible playbooks using Ansible Runner')
       .withWorkspace(runnerDir)
       .withStringParam(projectDirName)
@@ -79,12 +80,13 @@ class TestBasicTaskBuildFromObject extends Chart {
     const runnerDir = new WorkspaceBuilder('runner-dir')
       .withDescription('The Ansibler runner directory');
 
+    const pipelineParam = new ParameterBuilder('project-dir');
+
     const projectDirName = new ParameterBuilder('project-dir')
       .ofType('string')
-      .withPiplineParameter('project-dir');
+      .withValue(fromPipelineParam(pipelineParam));
 
-    new TaskBuilder(this, 'my-task')
-      .withName('ansible-runner')
+    new TaskBuilder(this, 'ansible-runner')
       .withDescription('Task to run Ansible playbooks using Ansible Runner')
       .withWorkspace(runnerDir)
       .withStringParam(projectDirName)
@@ -105,8 +107,7 @@ class TestBasicTaskBuildFromScriptData extends Chart {
   constructor(scope: Construct, id: string, props?: ChartProps) {
     super(scope, id, props);
 
-    new TaskBuilder(this, 'my-task')
-      .withName('ansible-runner')
+    new TaskBuilder(this, 'ansible-runner')
       .withDescription('Task to run Ansible playbooks using Ansible Runner')
       .withStep(new TaskStepBuilder()
         .withName('requirements')
@@ -125,7 +126,6 @@ class TestIBMCloudSecretsManagerGet extends Chart {
     super(scope, id, props);
 
     new TaskBuilder(this, 'ibmcloud-secrets-manager-get')
-      .withName('ibmcloud-secrets-manager-get')
       .withLabel('app.kubernetes.io/version', '0.1')
       .withAnnotation('tekton.dev/categories', 'IBM Cloud')
       .withAnnotation('tekton.dev/pipelines.minVersion', '0.17.0')
@@ -156,19 +156,18 @@ class TestPullRequestTaskBuild extends Chart {
     // be nice to compare the snapshots with each other just to make sure that the
     // builder does build the exact same object as the longer, non-builder method.
     new TaskBuilder(this, 'pull-request')
-      .withName('pull-request')
       .withDescription('This Task allows a user to interact with an SCM (source control management)\nsystem through an abstracted interface\n\nThis Task works with both public SCM instances and self-hosted/enterprise GitHub/GitLab\ninstances. In download mode, this Task will look at the state of an existing pull\nrequest and populate the pr workspace with the state of the pull request, including the\n.MANIFEST file. In upload mode, this Task will look at the contents of the pr workspace\n and compare it to the .MANIFEST file (if it exists).')
       .withStringParam(new ParameterBuilder('mode')
-        .withPiplineParameter('mode')
+        .withValue(fromPipelineParam(new ParameterBuilder('mode')))
         .withDescription('If "download", the state of the pull request at `url` will be fetched. If "upload" then the pull request at `url` will be updated.'))
       .withStringParam(new ParameterBuilder('url')
-        .withPiplineParameter('repo-url')
+        .withValue(fromPipelineParam(new ParameterBuilder('repo-url')))
         .withDescription('The URL of the Pull Reuqest, e.g. `https://github.com/bobcatfish/catservice/pull/16`'))
       .withStringParam(new ParameterBuilder('provider')
-        .withPiplineParameter('provider')
+        .withValue(fromPipelineParam(new ParameterBuilder('provider')))
         .withDescription('The type of SCM system, currently `github` or `gitlab`'))
       .withStringParam(new ParameterBuilder('secret-key-ref')
-        .withPiplineParameter('secret-key-ref')
+        .withValue(fromPipelineParam(new ParameterBuilder('secret-key-ref')))
         .withDescription('The name of an opaque secret containing a key called "token" with a base64 encoded SCM token'))
       .withStringParam(new ParameterBuilder('insecure-skip-tls-verify')
         .withDefaultValue('false')
@@ -194,6 +193,135 @@ class TestPullRequestTaskBuild extends Chart {
       .buildTask();
   }
 
+}
+
+class TestTaskRunBuilder extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const myTask = new TaskBuilder(this, 'echo-input')
+      .withWorkspace(new WorkspaceBuilder('output')
+        .withDescription('The files cloned by the task'))
+      .withStringParam(new ParameterBuilder('input'))
+      .withStep(new TaskStepBuilder()
+        .withName('step')
+        .withImage('ubuntu')
+        .fromScriptData('#!/usr/bin/env bash\necho $(params.input)'));
+    myTask.buildTask();
+
+    new TaskRunBuilder(this, 'echo-input-run', myTask)
+      .withRunParam('input', 'Hello World!')
+      .withWorkspace('output', 'myPVC', '')
+      .buildTaskRun();
+  }
+}
+
+class TestCustomTaskRunBuilder extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const myTask = new TaskBuilder(this, 'echo-input')
+      .withWorkspace(new WorkspaceBuilder('output')
+        .withDescription('The files cloned by the task'))
+      .withStringParam(new ParameterBuilder('input'))
+      .withStep(new TaskStepBuilder()
+        .withName('step')
+        .withImage('ubuntu')
+        .fromScriptData('#!/usr/bin/env bash\necho $(params.input)'));
+    myTask.buildTask();
+
+    const CRB = createRoleBindingProps(
+      'task-admin-default-crb',
+      'default',
+      'cluster-admin',
+      'default',
+      'default');
+
+    const serviceAccount = 'default';
+
+    new TaskRunBuilder(this, 'echo-input-run', myTask)
+      .withRunParam('input', 'Hello World!')
+      .withWorkspace('output', 'myPVC', '')
+      .withClusterRoleBindingProps(CRB)
+      .withServiceAccount(serviceAccount)
+      .buildTaskRun({ includeDependencies: true });
+  }
+}
+
+class TestTaskRunBuilderParamError extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const myTask = new TaskBuilder(this, 'echo-hello')
+      .withStep(new TaskStepBuilder()
+        .withName('step')
+        .withImage('ubuntu')
+        .fromScriptData('#!/usr/bin/env bash\necho Hello'));
+    myTask.buildTask();
+
+    new TaskRunBuilder(this, 'echo-input-run', myTask)
+      .withRunParam('input', 'Hello World!')
+      .buildTaskRun();
+  }
+}
+
+class TestTaskRunBuilderParamError2 extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const myTask = new TaskBuilder(this, 'echo-input')
+      .withStringParam(new ParameterBuilder('input'))
+      .withStep(new TaskStepBuilder()
+        .withName('step')
+        .withImage('ubuntu')
+        .fromScriptData('#!/usr/bin/env bash\necho $(params.input)'));
+    myTask.buildTask();
+
+    new TaskRunBuilder(this, 'echo-input-run', myTask)
+      .buildTaskRun();
+  }
+}
+
+class TestTaskRunBuilderWorkspaceError extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const myTask = new TaskBuilder(this, 'echo-input')
+      .withWorkspace(new WorkspaceBuilder('output')
+        .withDescription('The files cloned by the task'))
+      .withStep(new TaskStepBuilder()
+        .withName('step')
+        .withImage('ubuntu')
+        .fromScriptData('#!/usr/bin/env bash\necho $(params.input)'));
+    myTask.buildTask();
+
+    new TaskRunBuilder(this, 'echo-input-run', myTask)
+      .buildTaskRun();
+  }
+}
+
+class TestTaskRunBuilderResolver extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const resolver = new ClusterRemoteResolver('task', 'git-clone', 'default');
+
+    new TaskRunBuilder(this, 'git-clone-run', resolver)
+      .withWorkspace('output', 'myPVC', '')
+      .buildTaskRun();
+  }
+}
+
+class TestTaskRunBuilderResolverError extends Chart {
+  constructor(scope: Construct, id: string, props?: ChartProps) {
+    super(scope, id, props);
+
+    const resolver = new ClusterRemoteResolver('pipeline', 'git-clone', 'default');
+
+    new TaskRunBuilder(this, 'git-clone-run', resolver)
+      .withWorkspace('output', 'myPVC', '')
+      .buildTaskRun();
+  }
 }
 
 describe('TaskBuilderTest', () => {
@@ -226,5 +354,51 @@ describe('TaskBuilderTest', () => {
     const chart = new TestBasicTaskBuildFromScriptData(app, 'apply-object');
     const results = Testing.synth(chart);
     expect(results).toMatchSnapshot();
+  });
+  test('TaskRunBuilder', () => {
+    const app = Testing.app();
+    const chart = new TestTaskRunBuilder(app, 'taskrun');
+    const results = Testing.synth(chart);
+    expect(results).toMatchSnapshot();
+  });
+  test('CustomTaskRunBuilder', () => {
+    const app = Testing.app();
+    const chart = new TestCustomTaskRunBuilder(app, 'custom-taskrun');
+    const results = Testing.synth(chart);
+    expect(results).toMatchSnapshot();
+  });
+  test('TaskRunExtraParamError', () => {
+    const app = Testing.app();
+    const f = () => {
+      new TestTaskRunBuilderParamError(app, 'extra-param');
+    };
+    expect(f).toThrowError('TaskRun parameter \'input\' does not exist in task \'echo-hello\'');
+  });
+  test('TaskRunMissingParamError', () => {
+    const app = Testing.app();
+    const f = () => {
+      new TestTaskRunBuilderParamError2(app, 'missing-param');
+    };
+    expect(f).toThrowError('Task parameter \'input\' is not defined in TaskRun \'echo-input-run\'');
+  });
+  test('TaskRunMissingWorkspaceError', () => {
+    const app = Testing.app();
+    const f = () => {
+      new TestTaskRunBuilderWorkspaceError(app, 'missing-workspace');
+    };
+    expect(f).toThrowError('Task workspace \'output\' is not defined in TaskRun \'echo-input-run\'');
+  });
+  test('TaskRunResolver', () => {
+    const app = Testing.app();
+    const chart = new TestTaskRunBuilderResolver(app, 'resolver');
+    const results = Testing.synth(chart);
+    expect(results).toMatchSnapshot();
+  });
+  test('TaskRunResolverError', () => {
+    const app = Testing.app();
+    const f = () => {
+      new TestTaskRunBuilderResolverError(app, 'resolver-error');
+    };
+    expect(f).toThrowError('Remote resource must be of kind \'task\' in taskRef of TaskRun \'git-clone-run\'');
   });
 });

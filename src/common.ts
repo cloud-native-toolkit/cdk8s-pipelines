@@ -21,6 +21,29 @@ export interface NameKeyPair extends NamedResource {
   readonly key?: string;
 }
 
+/**
+ * A Resolver parameter value.
+ */
+export interface ResolverParam extends NamedResource {
+  /**
+   * The value of the resolver parameter.
+   */
+  readonly value?: string;
+}
+
+/**
+ * A remote `Task` or `Pipeline` reference. Generated as `taskRef` or `pipelineRef`, respectively.
+ */
+export class RemoteRef {
+  resolver?: string;
+  params?: ResolverParam[];
+
+  constructor(resolver: string, params: ResolverParam[]) {
+    this.resolver = resolver;
+    this.params = params;
+  }
+}
+
 export function secretKeyRef(name: string, key: string): NameKeyPair {
   return {
     name: name,
@@ -45,6 +68,17 @@ export function usingWorkspacePath(workspace: string): string {
  */
 export function usingBuildParameter(name: string): string {
   return `$(params.${name})`;
+}
+
+/**
+ * Retrieves the parameter referenced by 'name' from the string outputted by
+ * usingBuildParameter(name).
+ *
+ * For example, if the input string is $(params.foo)`, the result will be `foo`.
+ * @param buildParam The reference string for the parameter.
+ */
+export function invertBuildParameter(buildParam: string): string {
+  return buildParam.substring(9, buildParam.length - 1);
 }
 
 /**

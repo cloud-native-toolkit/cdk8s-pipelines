@@ -6,7 +6,7 @@ const project = new cdk8s.ConstructLibraryCdk8s({
   author: 'Nathan Good',
   authorAddress: 'nathan.good@ibm.com',
   cdk8sVersion: '2.68.30',
-  jsiiVersion: '~5.2.0',
+  jsiiVersion: '~5.4.0',
   workflowNodeVersion: '18.x',
   projenrcTs: true,
   peerDeps: [
@@ -26,6 +26,7 @@ const project = new cdk8s.ConstructLibraryCdk8s({
   gitignore: [
     '.idea/',
   ],
+  minMajorVersion: 2,
   // deps: [],                /* Runtime dependencies of this module. */
   // description: undefined,  /* The description is just a string that helps people understand the purpose of the package. */
   // devDeps: [],             /* Build dependencies for this module. */

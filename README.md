@@ -3,13 +3,143 @@
 This is a construct for creating [Pipelines](https://tekton.dev/docs/getting-started/pipelines/)
 using [cdk8s](https://cdk8s.io/docs/latest/).
 
+In Cloud Development Kit (CDK) terminology, a _construct_ is a code object (class
+or application) that can be _synthesized_ to output. In AWS's CDK, that output
+is CloudFormation. Here, in a cdk8s construct, that output is YAML that can be
+applied on a Kubernetes or OpenShift cluster. Constructs can be used in other
+constructs, just like how code classes can by used by other classes.
+
+This library allows you to create your own Tekton pipeline constructs, which can
+then in turn be synthesized into Task, Pipeline, and PipelineRun YAML.
+
+## Installing prerequisites
+
+The commands here will use `npx`, using Node 18.x and NPM 9.x. You will also 
+need `yarn` 1.x (1.22.21 was used here) installed.
+
+## Using the library to create your own pipeline constructs
+
+The `projen` command was used to create this construct library and is the easiest
+way to create a new construct. The documentation here will show how to use `projen`
+to generate your pipeline construct.
+
+### Creating your project
+
+To create your pipeline project, run the following command, where `my-pipeline-project`
+is the name you want to give your project's directory:
+
+```bash
+$ mkdir my-pipeline-project
+$ cd my-pipeline-project
+$ npx projen new cdk8s-app-ts
+```
+
+This will generate a TypeScript project with the cdk8s `constructs` libraries
+with the correct structure. 
+
+> ***Why TypeScript and not some other language (e.g., Python)? Because TypeScript can be used to generate all the others.***
+
+The command will also initialize a git repository and make an initial commit.
+
+
+### Adding this library to your project
+
+When using `projen`, modify the _.projenrc.ts_ file to add the libraries
+and then run the `npx projen` command--with no additional arguments--to
+re-generate the _package.json_ and _yarn.lock_ files and any other files
+in the project. When using `projen`, only modify the _.projenrc.ts_ file
+and the files in the _src_ folder.
+
+Modify the _.projenrc.ts_ file and add the following lines to `deps` JSON
+element:
+
+```typescript
+const project = new cdk8s.Cdk8sTypeScriptApp({
+  // snipped, leave content as-is...
+  deps: [
+    'cdk8s-pipelines',
+    'cdk8s-pipelines-lib',
+  ],
+  // snipped, leave content as-is...
+});
+```
+
+Save the file after you have made the additions and then run the `npx projen`
+command to re-generate the project files.
+
+### Modifying the main Chart
+
+The _src/main.ts_ file contains the main code that you will modify for your 
+Pipeline construct. Like any other TypeScript project, you can create classes
+and functions in other files and import them for use.
+
+By default, the template includes a class called `MyChart` that extends from
+the cdk8s core `Chart` class. You can rename this class to something a bit
+more meaningful, such as `InstallXYZPipelineChart`.
+
+The `constructor` function contains the code that will create the chart. Here,
+replace the sample code with something that looks like this:
+
+```typescript
+export class MyChart extends Chart {
+  constructor(scope: Construct, id: string, props: ChartProps = { }) {
+    super(scope, id, props);
+
+    const pipelineParam = new ParameterBuilder('repo-url');
+
+    new PipelineBuilder(this, 'clone-build-push')
+      .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
+      .withStringParam(pipelineParam)
+      .withTask(new TaskBuilder(this, 'git-clone')
+        .withName('fetch-source')
+        .withWorkspace(new WorkspaceBuilder('output').withBinding('task-output'))
+        .withStringParam(new ParameterBuilder('url')
+          .withValue(fromPipelineParam(pipelineParam))
+          .withDescription('the URL for the thing')))
+      .buildPipeline();
+  }
+}
+```
+
+Start with the imports shown here and add as needed:
+
+```typescript
+import { App, Chart, ChartProps } from 'cdk8s';
+import { ParameterBuilder, PipelineBuilder, TaskBuilder, WorkspaceBuilder } from 'cdk8s-pipelines';
+import { Construct } from 'constructs';
+```
+
+## Testing your pipeline locally
+
+Once you have added code to create the pipeline, use the `npx projen build`
+command to compile the TypeScript code and run the `cdk8s synth` command to
+create the YAML output. The file will be written to the _dist_ folder and named
+_chart-id.yml_, where _chart-id_ the string value passed to your class 
+that extends `Chart`. For example, in this code:
+
+```typescript
+const app = new App();
+new MyChart(app, 'my-install-pipeline');
+app.synth();
+```
+
+The output file after running `npx projen build` will be _dist/my-install-pipeline.yml_. 
+
+Apply this file to a Kubernetes or OpenShift cluster using `oc apply -f dist/my-install-pipeline.yml`,
+substituting the name of your output file in the command. If using OpenShift 
+Container Platform (OCP), you must have the OpenShift Pipelines operator installed.
+If using Kubernetes, make sure you have [Tekton installed](https://tekton.dev/docs/installation/).
+
 ## Examples
+
+Shown here is an example of using one of the primitive Tekton objects--a 
+[Pipeline](https://tekton.dev/docs/pipelines/) using cdk8s-pipelines. 
 
 ```typescript
 const pipeline = new Pipeline(this, 'my-pipeline');
 ```
 
-## Pipeline objects and builders
+### Pipeline objects and builders
 
 Tekton [Pipelines](https://tekton.dev/docs/pipelines/),
 [Tasks](https://tekton.dev/docs/pipelines/tasks/),
@@ -31,7 +161,7 @@ resources to create a Pipeline that closely matches the
 [example here](https://tekton.dev/docs/how-to-guides/kaniko-build-push/):
 
 ```typescript
-new Pipeline(this, 'test-pipeline', {
+new Pipeline(this, 'clone-build-push', {
   metadata: {
     name: 'clone-build-push',
   },
@@ -78,14 +208,16 @@ made for you automatically. Here is the same construct, but defined using the
 `PipelineBuilder`.
 
 ```typescript
-new PipelineBuilder(this, 'my-pipeline')
-    .withName('clone-build-push')
+const param = new ParameterBuilder('repo-url');
+
+new PipelineBuilder(this, 'clone-build-push')
     .withDescription('This pipeline closes a repository, builds a Docker image, etc.')
-    .withTask(new PipelineTaskBuilder()
-            .withName('fetch-source')
-            .withTaskReference('git-clone')
-            .withWorkspace('output', 'shared-data', 'The files cloned by the task')
-            .withStringParam('url', 'repo-url', '$(params.repo-url)'))
+    .withStringParam(param)
+    .withTask(new TaskBuilder(this, 'task-id')
+        .withName('fetch-source')
+        .referencingTask('git-clone')
+        .withWorkspace(new WorkspaceBuilder('output').withBinding('shared-data'))
+        .withStringParam(new ParameterBuilder('url').withValue(fromPipelineParam(param))))
     .buildPipeline();
 ```
 
@@ -93,7 +225,7 @@ The `build` method on the builders will validate the parameters and, if the
 object is valid, will create the construct, making sure to add `workspace`
 and `param` resources to the Task as well as the 
 
-Any resources that the `task` requires that needs to be defined at the `pipeline`
+Any resources that the `task` requires that needs to be defined at the `pipeline` level.
 
 ## Related projects
 
