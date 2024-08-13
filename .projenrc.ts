@@ -26,6 +26,7 @@ const project = new cdk8s.ConstructLibraryCdk8s({
   gitignore: [
     '.idea/',
   ],
+  minMajorVersion: 2,
   // deps: [],                /* Runtime dependencies of this module. */
   // description: undefined,  /* The description is just a string that helps people understand the purpose of the package. */
   // devDeps: [],             /* Build dependencies for this module. */
